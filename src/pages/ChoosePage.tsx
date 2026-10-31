@@ -32,14 +32,12 @@ export function ChoosePage() {
           <span className="series-card__mark" aria-hidden="true">
             WEC
           </span>
-          <h2 className="series-card__title">
-            World Endurance Championship <span className="badge badge--upcoming">Скоро</span>
-          </h2>
+          <h2 className="series-card__title">World Endurance Championship</h2>
           <p className="series-card__text">
-            Чемпионат мира по гонкам на выносливость: «24 часа Ле-Мана», несколько классов машин, экипажи из
-            нескольких пилотов. Раздел в разработке.
+            Гонки на выносливость с «24 часами Ле-Мана»: календарь, протоколы по классам, квалификация,
+            тренировки и все зачёты. Сезоны с 2012 года.
           </p>
-          <span className="series-card__cta">Что будет →</span>
+          <span className="series-card__cta">Открыть →</span>
         </Link>
       </div>
     </section>

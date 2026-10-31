@@ -85,7 +85,10 @@ test('mobile layout has no horizontal scroll', async ({ page }) => {
   await mockApi(page);
   for (const path of [
     './',
-    './#/wec',
+    './#/wec/2026',
+    './#/wec/2026/calendar',
+    './#/wec/2026/race/3',
+    './#/wec/2026/standings',
     './#/2026',
     './#/2026/calendar',
     './#/2026/race/1',
@@ -220,16 +223,16 @@ test('favourite from profile shows on home and highlights rows', async ({ page }
   await expect(page.locator('tr.row--fav')).toHaveCount(1);
 });
 
-test('WEC section is a placeholder without made-up data', async ({ page }) => {
+test('WEC has its own menu and season list, without F1 items', async ({ page }) => {
   await mockApi(page);
-  await page.goto('./');
-  await page.getByRole('link', { name: /World Endurance Championship/ }).click();
-  await expect(page).toHaveURL(/#\/wec$/);
-  await expect(page.getByRole('heading', { level: 1, name: /WEC/ })).toBeVisible();
-  await expect(page.getByText('Раздел в разработке.')).toBeVisible();
-  // No F1 season picker or tables in the WEC section.
-  await expect(page.getByLabel('Сезон')).toHaveCount(0);
-  await expect(page.locator('table')).toHaveCount(0);
+  await page.goto('./#/wec/2026');
+  const nav = page.getByRole('navigation', { name: 'Основная навигация' });
+  await expect(nav.getByRole('link')).toHaveText(['Обзор', 'Календарь', 'Зачёты']);
+  // The WEC season list has the two super seasons and no 2020.
+  const options = await page.getByLabel('Сезон').locator('option').allInnerTexts();
+  expect(options).toContain('2019–20');
+  expect(options).not.toContain('2020');
+  expect(options[options.length - 1]).toBe('2012');
 });
 
 test('header switch moves between F1 and WEC', async ({ page }) => {
@@ -237,12 +240,18 @@ test('header switch moves between F1 and WEC', async ({ page }) => {
   await page.goto('./#/2026/drivers');
   const sw = page.getByRole('navigation', { name: 'Чемпионат' });
   await expect(sw.getByRole('link', { name: 'F1' })).toHaveAttribute('aria-current', 'page');
+  const accent = () =>
+    page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--accent').trim());
+  expect(await accent()).toBe('#e10600'); // F1: black and red
   await sw.getByRole('link', { name: 'WEC' }).click();
-  await expect(page).toHaveURL(/#\/wec$/);
+  await expect(page).toHaveURL(/#\/wec\/2026$/);
   await expect(sw.getByRole('link', { name: 'WEC' })).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('html')).toHaveAttribute('data-series', 'wec');
+  expect(await accent()).toBe('#1e6bff'); // WEC: black and blue
   // Back to F1 keeps the season the user was looking at.
   await sw.getByRole('link', { name: 'F1' }).click();
   await expect(page).toHaveURL(/#\/2026$/);
+  await expect(page.locator('html')).toHaveAttribute('data-series', 'f1');
 });
 
 test('driver comparison shows careers and seasons side by side', async ({ page }) => {

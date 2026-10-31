@@ -66,17 +66,17 @@
 }
 
 .race-card--next {
-  border-color: rgba(225, 6, 0, 0.45);
+  border-color: rgba(var(--accent-rgb), 0.45);
   border-left: 3px solid var(--accent);
   background:
-    radial-gradient(320px 160px at 100% 0%, rgba(225, 6, 0, 0.22), transparent 70%), var(--sheen),
+    radial-gradient(320px 160px at 100% 0%, rgba(var(--accent-rgb), 0.22), transparent 70%), var(--sheen),
     var(--surface);
   box-shadow: none;
 }
 
 .race-card--next:hover {
   border-left-color: var(--accent);
-  box-shadow: 0 0 0 1px rgba(225, 6, 0, 0.3);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.3);
 }
 
 .race-card__next {

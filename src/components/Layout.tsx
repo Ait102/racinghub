@@ -3,6 +3,8 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 
 import { localTimeZone, utcOffsetLabel } from '../lib/format';
 import { rememberedSeason, rememberSeason, useSeasonParam, useSeasons } from '../series/f1/hooks/data';
+import { WecSeasonSelect } from '../series/wec/components/WecSeasonSelect';
+import { defaultWecSeason, wecSeasonFromPath } from '../series/wec/hooks/data';
 
 function SeasonSelect({ season }: { season: number | null }) {
   const seasons = useSeasons();
@@ -84,6 +86,12 @@ export function Layout() {
     if (season !== null) rememberSeason(season);
   }, [season]);
 
+  // Section colors: F1 is black and red, WEC black and blue (see 14-wec.css).
+  useEffect(() => {
+    document.documentElement.dataset.series = series ?? 'none';
+  }, [series]);
+
+  const wecSeason = wecSeasonFromPath(pathname) ?? (series === 'wec' ? defaultWecSeason() : null);
   const tz = localTimeZone();
   const links: Array<[string, string]> =
     series === 'f1' && navSeason
@@ -97,8 +105,12 @@ export function Layout() {
         ]
       : series === 'f1'
         ? [['/about', 'Источники']]
-        : series === 'wec'
-          ? [['/wec', 'Обзор']]
+        : series === 'wec' && wecSeason
+          ? [
+              [`/wec/${wecSeason}`, 'Обзор'],
+              [`/wec/${wecSeason}/calendar`, 'Календарь'],
+              [`/wec/${wecSeason}/standings`, 'Зачёты'],
+            ]
           : [];
 
   return (
@@ -131,6 +143,7 @@ export function Layout() {
           </nav>
           <SeriesSwitch series={series} f1Home={navSeason ? `/${navSeason}` : '/f1'} />
           {series === 'f1' && <SeasonSelect season={season} />}
+          {series === 'wec' && <WecSeasonSelect />}
         </div>
       </header>
       <main id="main" className="container main" tabIndex={-1}>

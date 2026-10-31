@@ -118,7 +118,7 @@
 }
 
 .series-switch__item.is-active[href='#/wec'] {
-  background: #1f6fc4;
+  background: var(--wec-blue);
 }
 
 /* WEC placeholder */

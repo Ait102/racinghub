@@ -16,7 +16,11 @@ import { DriverPage } from './series/f1/pages/DriverPage';
 import { DriversPage } from './series/f1/pages/DriversPage';
 import { HomePage } from './series/f1/pages/HomePage';
 import { RacePage } from './series/f1/pages/RacePage';
+import { defaultWecSeason } from './series/wec/hooks/data';
+import { WecCalendarPage } from './series/wec/pages/WecCalendarPage';
 import { WecHomePage } from './series/wec/pages/WecHomePage';
+import { WecRacePage } from './series/wec/pages/WecRacePage';
+import { WecStandingsPage } from './series/wec/pages/WecStandingsPage';
 
 /** /f1 → the remembered or latest F1 season. */
 function F1Entry() {
@@ -76,7 +80,15 @@ export function App() {
         <Route element={<Layout />}>
           <Route index element={<ChoosePage />} />
           <Route path="f1" element={<F1Entry />} />
-          <Route path="wec" element={<WecHomePage />} />
+          <Route path="wec">
+            <Route index element={<Navigate to={`/wec/${defaultWecSeason()}`} replace />} />
+            <Route path=":season">
+              <Route index element={<WecHomePage />} />
+              <Route path="calendar" element={<WecCalendarPage />} />
+              <Route path="race/:round" element={<WecRacePage />} />
+              <Route path="standings" element={<WecStandingsPage />} />
+            </Route>
+          </Route>
           <Route path="about" element={<AboutPage />} />
           <Route path=":season">
             <Route index element={<HomePage />} />

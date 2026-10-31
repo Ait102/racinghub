@@ -1,0 +1,269 @@
+/* WEC section: classes of cars, crews, winners, standings colors. */
+
+/* WEC theme: black and blue (F1 is black and red). Layout sets data-series on <html>. */
+:root[data-series='wec'] {
+  --accent: #1e6bff;
+  --accent-rgb: 30, 107, 255;
+  --accent-strong: #4a8bff;
+  --accent-deep: #0b3a9e;
+  --accent-text: #7fb0ff;
+}
+
+/* Class badge: one color per family of classes */
+.class-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: #fff;
+  background: #4b5263;
+}
+.class-badge--hypercar {
+  background: #c8102e;
+}
+.class-badge--lmp1 {
+  background: #b8172f;
+}
+.class-badge--lmp2 {
+  background: #1f5fbf;
+}
+.class-badge--gt3,
+.class-badge--gte-am {
+  background: #e07b00;
+}
+.class-badge--gte-pro {
+  background: #198754;
+}
+
+.car-no {
+  display: inline-block;
+  min-width: 2.2em;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.crew {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.crew__driver {
+  white-space: nowrap;
+}
+
+.wec-car {
+  display: flex;
+  flex-direction: column;
+}
+.wec-car__engine {
+  display: block;
+}
+
+/* Class winners */
+.winners {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--s3);
+}
+.winners--cards {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  margin-bottom: var(--s5);
+}
+.winners__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+.winners--cards .winners__item {
+  padding: var(--s4);
+}
+.winners__team {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Championship leaders on the overview */
+.wec-leaders {
+  display: grid;
+  gap: var(--s4);
+}
+.wec-leaders__title {
+  font-weight: 700;
+}
+.wec-leaders__list {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+  display: grid;
+  gap: 4px;
+}
+.wec-leaders__list li {
+  display: grid;
+  grid-template-columns: 2.4em minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+.wec-leaders__pos {
+  color: var(--muted);
+  font-weight: 700;
+}
+.wec-leaders__pts {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Calendar */
+.race-card--lemans {
+  border-color: rgba(224, 123, 0, 0.55);
+}
+.lemans-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #1a1206;
+  background: #f5b942;
+}
+.race-card__winners {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 0.82rem;
+}
+.race-card__winner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.cancelled {
+  padding-left: 1.2em;
+  margin: 0 0 var(--s4);
+}
+
+/* Standings */
+.standings-picker {
+  display: grid;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+}
+.standings-picker__label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.wec-standings__round a {
+  color: inherit;
+}
+.wec-standings__cell {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.res {
+  display: block;
+  min-width: 2.2em;
+  padding: 1px 4px;
+  margin: 1px auto;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.res--gold {
+  background: #f5d76e;
+  color: #241c00;
+  font-weight: 800;
+}
+.res--silver {
+  background: #c9ced6;
+  color: #15181e;
+  font-weight: 700;
+}
+.res--bronze {
+  background: #e3a96b;
+  color: #261405;
+  font-weight: 700;
+}
+.res--points {
+  background: rgba(64, 192, 112, 0.22);
+  color: var(--text);
+}
+.res--nopoints {
+  background: rgba(110, 130, 230, 0.2);
+  color: var(--text);
+}
+.res--retired {
+  background: rgba(190, 120, 230, 0.22);
+  color: var(--text);
+}
+.res--excluded {
+  background: #000;
+  color: #fff;
+  outline: 1px solid var(--border-strong);
+}
+.res--dns,
+.res--withdrawn {
+  background: rgba(255, 255, 255, 0.06);
+}
+.wec-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: var(--s3);
+  color: var(--muted);
+}
+.wec-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.wec-legend .res {
+  display: inline-block;
+  min-width: 1.6em;
+  margin: 0;
+}
+
+/* Race classification */
+.row--class-winner td {
+  background: rgba(245, 185, 66, 0.07);
+}
+
+/* Practice: best lap per class */
+.practice {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.practice__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+.practice__time {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 560px) {
+  .crew__driver {
+    white-space: normal;
+  }
+  .winners--cards {
+    grid-template-columns: 1fr;
+  }
+}

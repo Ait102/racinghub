@@ -69,6 +69,16 @@ interface ClientOptions {
   baseUrl: string;
   /** Source name shown next to the data, e.g. "Jolpica-F1". */
   provider: string;
+  /**
+   * Checks that a parsed response has the expected shape; return a message to reject it.
+   * Defaults to the Jolpica/Ergast envelope (`MRData`).
+   */
+  validate?: (json: unknown) => string | null;
+}
+
+function validateMrData(json: unknown): string | null {
+  const mr = (json as { MRData?: unknown } | null)?.MRData;
+  return mr && typeof mr === 'object' ? null : 'Missing MRData';
 }
 
 export interface GetOptions {
@@ -104,6 +114,7 @@ export function createClient(options: ClientOptions) {
   const retryBaseMs = options.retryBaseMs ?? 1000;
   const maxRetryWaitMs = options.maxRetryWaitMs ?? 20_000;
   const { baseUrl, provider } = options;
+  const validate = options.validate ?? validateMrData;
 
   const memory = new Map<string, CacheEntry>();
   const inflight = new Map<string, Promise<Fetched<unknown>>>();
@@ -217,8 +228,8 @@ export function createClient(options: ClientOptions) {
       } catch {
         throw new ApiError('parse', 'Invalid JSON');
       }
-      const mr = (json as { MRData?: unknown } | null)?.MRData;
-      if (!mr || typeof mr !== 'object') throw new ApiError('parse', 'Missing MRData');
+      const problem = validate(json);
+      if (problem) throw new ApiError('parse', problem);
       return json;
     } finally {
       clearTimeout(timer);

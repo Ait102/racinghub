@@ -122,7 +122,7 @@
 }
 
 .progress__bar {
-  background: linear-gradient(90deg, rgba(225, 6, 0, 0.55), var(--accent));
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.55), var(--accent));
 }
 
 /* ---------- Герой: следующий этап ---------- */
@@ -136,7 +136,7 @@
   padding: var(--s6) var(--s6) var(--s5);
   margin-bottom: var(--s4);
   background:
-    radial-gradient(680px 300px at 90% -30%, rgba(225, 6, 0, 0.3), transparent 68%),
+    radial-gradient(680px 300px at 90% -30%, rgba(var(--accent-rgb), 0.3), transparent 68%),
     linear-gradient(180deg, #14161d 0%, #0e1015 100%);
 }
 
@@ -145,7 +145,7 @@
   position: absolute;
   inset: 0 0 auto 0;
   height: 1px;
-  background: linear-gradient(90deg, var(--accent), rgba(225, 6, 0, 0.12) 42%, transparent 74%);
+  background: linear-gradient(90deg, var(--accent), rgba(var(--accent-rgb), 0.12) 42%, transparent 74%);
 }
 
 .hero::after {

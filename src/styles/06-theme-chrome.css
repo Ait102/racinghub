@@ -11,7 +11,7 @@
 
 .header::before {
   height: 2px;
-  background: linear-gradient(90deg, var(--accent) 0%, rgba(225, 6, 0, 0.35) 34%, transparent 72%);
+  background: linear-gradient(90deg, var(--accent) 0%, rgba(var(--accent-rgb), 0.35) 34%, transparent 72%);
 }
 
 .header__inner {
@@ -34,7 +34,7 @@
   padding: 3px 8px;
   border-radius: 8px;
   transform: none;
-  box-shadow: 0 6px 18px -10px rgba(225, 6, 0, 0.95);
+  box-shadow: 0 6px 18px -10px rgba(var(--accent-rgb), 0.95);
 }
 
 .logo__text {
@@ -156,7 +156,7 @@ select {
   font-size: 0.9rem;
   letter-spacing: 0.01em;
   background: var(--accent);
-  box-shadow: 0 10px 24px -16px rgba(225, 6, 0, 0.95);
+  box-shadow: 0 10px 24px -16px rgba(var(--accent-rgb), 0.95);
   transition:
     background-color var(--t-fast) var(--ease),
     transform var(--t-fast) var(--ease),
@@ -164,7 +164,7 @@ select {
 }
 
 .btn:hover {
-  background: #ff1a12;
+  background: var(--accent-strong);
 }
 
 .btn:active {

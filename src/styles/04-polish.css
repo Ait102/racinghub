@@ -39,7 +39,7 @@
   top: -40px;
   width: 260px;
   height: 140%;
-  background: linear-gradient(90deg, transparent, rgba(225, 6, 0, 0.35));
+  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.35));
   transform: skewX(-20deg);
   pointer-events: none;
 }
@@ -142,7 +142,7 @@
 .pts__fill {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, #a00400, var(--accent));
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent));
 }
 
 /* Table polish */
@@ -166,7 +166,7 @@
 
 /* Header logo glow */
 .logo:hover .logo__mark {
-  box-shadow: 0 0 18px rgba(225, 6, 0, 0.6);
+  box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.6);
 }
 
 @media (prefers-reduced-motion: reduce) {

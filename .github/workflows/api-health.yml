@@ -1,6 +1,7 @@
 name: API health check
 
-# Weekly check that the Jolpica-F1 API still works and still matches our parsers.
+# Weekly check that the data sources (Jolpica-F1 for F1, Wikipedia for WEC) still work
+# and still match our parsers.
 on:
   schedule:
     - cron: '0 6 * * 1' # Mondays 06:00 UTC
@@ -29,9 +30,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          title="API Jolpica: проверка не прошла"
+          title="Источники данных: проверка не прошла"
           existing=$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number')
-          body=$(printf 'Еженедельная проверка API упала.\n\nЛог: %s\n\nЧто делать — см. docs/MAINTENANCE.md.' "$RUN_URL")
+          body=$(printf 'Еженедельная проверка источников данных (Jolpica-F1, Википедия) упала.\n\nЛог: %s\n\nЧто делать — см. docs/MAINTENANCE.md.' "$RUN_URL")
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --body "$body"
           else

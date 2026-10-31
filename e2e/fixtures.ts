@@ -1,4 +1,6 @@
 // Small Ergast-shaped fixtures so E2E tests don't depend on the live API or today's date.
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import type { Page, Route } from '@playwright/test';
 
 /** Frozen "now": after round 1, before round 2 of 2026. */
@@ -299,7 +301,6 @@ function respond(path: string): object | null {
 
 type Override = (path: string) => { status: number; headers?: Record<string, string>; body?: string } | null;
 
-/** Serves fixtures for every Jolpica request; `override` can inject failures. */
 // Wikimedia: Russell's article has a photo, the Mercedes car photo exists; nothing else does.
 const PHOTO_SVG = (w: number, h: number, color: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="${color}"/></svg>`;
@@ -309,10 +310,57 @@ const PHOTOS: Record<string, [string, number, number]> = {
   'File:FIA F1 Austria 2026 Nr. 12 Antonelli (1).jpg': ['car.svg', 900, 450],
 };
 
-async function mockWikimedia(page: Page): Promise<void> {
+// WEC: Wikipedia articles served from the same trimmed fixtures the unit tests use.
+const WEC_FIXTURES = fileURLToPath(new URL('../src/series/wec/__fixtures__/', import.meta.url));
+const wecFile = (name: string) => readFileSync(WEC_FIXTURES + name, 'utf8');
+const WEC_SEASONS: Record<string, string> = {
+  '2026 FIA World Endurance Championship': '2026',
+  '2012 FIA World Endurance Championship': '2012',
+  '2019–20 FIA World Endurance Championship': '2019-20',
+};
+const WEC_RACES: Record<string, string> = {
+  '2026 24 Hours of Le Mans': 'race-2026-lemans.html',
+  '2026 6 Hours of Fuji': 'race-2026-fuji.html',
+  '2012 6 Hours of Silverstone': 'race-2012-silverstone.html',
+};
+
+/** A MediaWiki parse response for WEC pages; `fail` makes every article request fail. */
+function wecParse(params: URLSearchParams, fail: boolean) {
+  const cors = { 'Access-Control-Allow-Origin': '*' };
+  const json = (body: object) => ({
+    contentType: 'application/json',
+    headers: cors,
+    body: JSON.stringify(body),
+  });
+  if (fail) return { status: 503, headers: cors, body: '' };
+  const page = params.get('page') ?? '';
+  const season = WEC_SEASONS[page];
+  if (season && params.get('prop') === 'sections') {
+    return json({
+      parse: {
+        title: page,
+        sections: [
+          { index: '1', line: season === '2019-20' ? 'Schedule' : 'Calendar', toclevel: 1 },
+          { index: '2', line: 'Entries', toclevel: 1 },
+          { index: '5', line: 'Results and standings', toclevel: 1 },
+        ],
+      },
+    });
+  }
+  if (season) {
+    const part = params.get('section') === '1' ? 'calendar' : 'results';
+    return json({ parse: { title: page, text: wecFile(`season-${season}-${part}.html`) } });
+  }
+  if (WEC_RACES[page]) return json({ parse: { title: page, text: wecFile(WEC_RACES[page]) } });
+  return json({ error: { code: 'missingtitle', info: "The page you specified doesn't exist." } });
+}
+
+async function mockWikimedia(page: Page, wecFail: () => boolean): Promise<void> {
   const cors = { 'Access-Control-Allow-Origin': '*' };
   await page.route('https://en.wikipedia.org/w/api.php**', (route) => {
-    const title = new URL(route.request().url()).searchParams.get('titles') ?? '';
+    const params = new URL(route.request().url()).searchParams;
+    if (params.get('action') === 'parse') return route.fulfill(wecParse(params, wecFail()));
+    const title = params.get('titles') ?? '';
     const pageimage = title.startsWith('George Russell') ? 'Russell test.jpg' : undefined;
     return route.fulfill({
       contentType: 'application/json',
@@ -358,10 +406,18 @@ async function mockWikimedia(page: Page): Promise<void> {
   );
 }
 
-export async function mockApi(page: Page, override?: Override): Promise<string[]> {
+/**
+ * Serves fixtures for every Jolpica and Wikipedia request; `override` can inject Jolpica
+ * failures and `wecFail` makes WEC (Wikipedia article) requests fail while it returns true.
+ */
+export async function mockApi(
+  page: Page,
+  override?: Override,
+  opts: { wecFail?: () => boolean } = {},
+): Promise<string[]> {
   const calls: string[] = [];
   await page.clock.setFixedTime(NOW);
-  await mockWikimedia(page);
+  await mockWikimedia(page, opts.wecFail ?? (() => false));
   await page.route('https://api.jolpi.ca/ergast/f1/**', async (route: Route) => {
     const url = new URL(route.request().url());
     const path = url.pathname.replace('/ergast/f1', '');
