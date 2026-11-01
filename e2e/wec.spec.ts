@@ -168,13 +168,10 @@ test('WEC profiles handle a missing article and recover after Wikipedia failure'
   await expect(page.getByRole('alert')).toContainText('Статья не найдена');
   down = true;
   await page.goto('./#/wec/2026/driver/Kamui%20Kobayashi');
-  await expect(page.getByRole('alert').first()).toBeVisible({ timeout: 30_000 });
+  const profileError = page.locator('.wec-profile-history').getByRole('alert');
+  await expect(profileError).toBeVisible({ timeout: 30_000 });
   down = false;
-  await page
-    .locator('.wec-profile-history')
-    .getByRole('alert')
-    .getByRole('button', { name: 'Повторить' })
-    .click();
+  await profileError.getByRole('button', { name: 'Повторить' }).click();
   await expect(page.getByRole('heading', { name: 'Результаты WEC', exact: true })).toBeVisible();
 });
 

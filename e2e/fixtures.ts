@@ -359,6 +359,8 @@ function wecParse(params: URLSearchParams, fail: boolean) {
     return json({ parse: { title: page, text: wecFile(`season-${season}-${part}.html`) } });
   }
   if (WEC_RACES[page]) return json({ parse: { title: page, text: wecFile(WEC_RACES[page]) } });
+  if (page === 'Sébastien_Buemi')
+    return json({ parse: { title: 'Sébastien Buemi', text: wecFile('driver-buemi.html') } });
   if (page === 'Toyota' || page === 'Tom Gamble (racing driver)')
     return json({ parse: { title: page, text: '<p>No WEC results table.</p>' } });
   return json({ error: { code: 'missingtitle', info: "The page you specified doesn't exist." } });

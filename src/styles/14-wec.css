@@ -237,6 +237,67 @@
 }
 
 /* Race classification */
+.wec-compare-pickers {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: var(--s3);
+}
+.wec-compare-picker {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.wec-compare-picker select {
+  width: 100%;
+  min-width: 0;
+}
+.wec-compare-drivers {
+  margin-top: var(--s5);
+}
+.wec-compare-driver {
+  min-width: 0;
+}
+.wec-compare-metrics {
+  margin: 0;
+}
+.wec-compare-metrics > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.wec-compare-metrics dt {
+  color: var(--muted);
+}
+.wec-compare-metrics dd {
+  margin: 0;
+  font-weight: 800;
+}
+.wec-compare-results {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+.wec-compare-result {
+  display: block;
+  margin-top: 4px;
+}
+.wec-compare-seasons td {
+  white-space: normal;
+}
+@media (max-width: 560px) {
+  .wec-compare-pickers {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wec-compare-pickers > button {
+    justify-self: center;
+  }
+}
+
 .wec-calendar-profiles {
   display: flex;
   flex-wrap: wrap;

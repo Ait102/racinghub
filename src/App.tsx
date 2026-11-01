@@ -18,6 +18,7 @@ import { HomePage } from './series/f1/pages/HomePage';
 import { RacePage } from './series/f1/pages/RacePage';
 import { defaultWecSeason } from './series/wec/hooks/data';
 import { WecCalendarPage } from './series/wec/pages/WecCalendarPage';
+import { WecComparePage } from './series/wec/pages/WecComparePage';
 import { WecHomePage } from './series/wec/pages/WecHomePage';
 import { WecParticipantsPage } from './series/wec/pages/WecParticipantsPage';
 import { WecProfilePage } from './series/wec/pages/WecProfilePage';
@@ -91,6 +92,7 @@ export function App() {
               <Route path="standings" element={<WecStandingsPage />} />
               <Route path="drivers" element={<WecParticipantsPage drivers />} />
               <Route path="teams" element={<WecParticipantsPage drivers={false} />} />
+              <Route path="compare" element={<WecComparePage />} />
               <Route path="driver/:article" element={<WecProfilePage kind="driver" />} />
               <Route path="team/:article" element={<WecProfilePage kind="team" />} />
               <Route path="circuit/:article" element={<WecProfilePage kind="circuit" />} />

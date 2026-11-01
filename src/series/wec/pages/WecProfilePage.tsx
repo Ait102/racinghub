@@ -73,6 +73,13 @@ function Profile({ season, article, kind }: { season: string; article: string; k
         title={canonical.replace(/_/g, ' ')}
         aside={<ProfilePhoto article={photoArticle} kind={kind} />}
       />
+      {kind === 'driver' && (
+        <p>
+          <Link to={`/wec/${season}/compare?${new URLSearchParams({ a: canonical })}`}>
+            Сравнить с другим пилотом
+          </Link>
+        </p>
+      )}
       {kind !== 'circuit' && (
         <SeasonProfile season={season} article={article} canonical={canonical} kind={kind} />
       )}

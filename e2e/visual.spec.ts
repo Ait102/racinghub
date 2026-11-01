@@ -26,6 +26,7 @@ const ROUTES = [
   './#/wec/2026/driver/S%C3%A9bastien%20Buemi',
   './#/wec/2026/team/Toyota%20Racing%20GmbH',
   './#/wec/2026/circuit/6%20Hours%20of%20Spa-Francorchamps?circuit=Circuit%20de%20Spa-Francorchamps',
+  './#/wec/2026/compare?a=S%C3%A9bastien+Buemi&b=Kamui+Kobayashi',
 ];
 
 test('pages match the baselines', async ({ page }) => {

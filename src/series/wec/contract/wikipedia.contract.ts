@@ -8,6 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { createClient } from '../../../api/client';
 import { createWikipedia, WIKI_API, WIKI_PROVIDER } from '../api/wikipedia';
 import { wecSeasons } from '../data/seasons';
+import { compareSeasons } from '../domain/compare';
 
 const client = createClient({
   baseUrl: WIKI_API,
@@ -73,6 +74,18 @@ describe('Википедия: статья о гонке', () => {
 });
 
 describe('Википедия: профили и заявочные списки', () => {
+  it('сравнение пилотов: две карьеры дают места, очки и общие сезоны', async () => {
+    const a = (await wiki.getProfile('Sébastien Buemi', 'driver')).data;
+    const b = (await wiki.getProfile('Kamui Kobayashi', 'driver')).data;
+    const pairs = compareSeasons(a, b);
+    expect(pairs.length, 'не разобраны сезоны сравнения').toBeGreaterThan(10);
+    const common = pairs.find((p) => p.a.length && p.b.length);
+    expect(common, 'нет общих сезонов — изменились колонки карьеры').toBeDefined();
+    expect(common!.a[0].position).toBeTruthy();
+    expect(common!.a[0].points).toBeTruthy();
+    expect(common!.b[0].position).toBeTruthy();
+    expect(common!.b[0].points).toBeTruthy();
+  });
   it('заявки текущего сезона содержат пилотов до появления результатов', async () => {
     const drivers = (await wiki.getParticipants(wecSeasons()[0], true)).data;
     expect(drivers.length, 'не разобран раздел Entries').toBeGreaterThan(40);

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
@@ -35,6 +36,11 @@ function Participants({ season, drivers }: { season: string; drivers: boolean })
       <PageHeader eyebrow={`WEC ${seasonLabel(season)}`} title={title}>
         <p className="lead">Заявочный список сезона из Википедии, включая приглашённых и запасных пилотов.</p>
       </PageHeader>
+      {drivers && (
+        <p>
+          <Link to={`/wec/${season}/compare`}>Сравнить пилотов</Link>
+        </p>
+      )}
       <DataState
         state={res}
         isEmpty={(data) => data.length === 0}
