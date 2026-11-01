@@ -67,7 +67,7 @@ export function Crew({ drivers }: { drivers: Named[] }) {
 }
 
 /** CSS-friendly family of a class name: colors are shared by related classes. */
-export function classSlug(cls: string): string {
+function classSlug(cls: string): string {
   const c = cls.toLowerCase();
   if (c.includes('hypercar')) return 'hypercar';
   if (c.includes('lmp1')) return 'lmp1';

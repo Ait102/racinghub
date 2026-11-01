@@ -1,4 +1,4 @@
-/* Series: start page (F1 / WEC), header switch, WEC placeholder. */
+/* Series: start page (F1 / WEC), header switch. */
 
 .choose__grid {
   display: grid;
@@ -119,21 +119,6 @@
 
 .series-switch__item.is-active[href='#/wec'] {
   background: var(--wec-blue);
-}
-
-/* WEC placeholder */
-.wec-plan {
-  margin-top: 16px;
-}
-
-.wec-plan__list {
-  margin: 0;
-  padding-left: 1.2em;
-  color: var(--muted);
-}
-
-.wec-plan__list li {
-  margin-bottom: 6px;
 }
 
 /* Up to mid-size screens: make room for the series switch (menu not hidden in a scroll, one header row on phones). */

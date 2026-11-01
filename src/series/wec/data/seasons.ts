@@ -1,7 +1,7 @@
 // WEC seasons since the championship started in 2012. Two seasons spanned two years
 // ("super seasons"): 2018–19 and 2019–20; there was no separate 2020 or 2018 season.
 
-export const FIRST_WEC_YEAR = 2012;
+const FIRST_WEC_YEAR = 2012;
 
 /** Season ids as used in URLs: "2012" … "2017", "2018-19", "2019-20", "2021" … */
 export function wecSeasons(now: Date = new Date()): string[] {
@@ -12,7 +12,7 @@ export function wecSeasons(now: Date = new Date()): string[] {
   return ids.reverse();
 }
 
-export const SEASON_ID_RE = /^\d{4}(?:-\d{2})?$/;
+const SEASON_ID_RE = /^\d{4}(?:-\d{2})?$/;
 
 export function isSeasonId(id: string | undefined, now: Date = new Date()): id is string {
   return !!id && SEASON_ID_RE.test(id) && wecSeasons(now).includes(id);

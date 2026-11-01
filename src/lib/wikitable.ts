@@ -174,7 +174,7 @@ export function tableGrid(table: HTMLTableElement): WikiCell[][] {
 }
 
 /** Text of the closest heading before the element (h2…h5, also inside .mw-heading wrappers). */
-export function headingOf(el: Element): string | null {
+function headingOf(el: Element): string | null {
   let node: Element | null = el;
   while (node) {
     let prev = node.previousElementSibling;

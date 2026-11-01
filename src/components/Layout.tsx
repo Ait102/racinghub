@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { localTimeZone, utcOffsetLabel } from '../lib/format';
 import { rememberedSeason, rememberSeason, useSeasonParam, useSeasons } from '../series/f1/hooks/data';
 import { WecSeasonSelect } from '../series/wec/components/WecSeasonSelect';
 import { defaultWecSeason, wecSeasonFromPath } from '../series/wec/hooks/data';
+import { Loading } from './DataState';
 
 function SeasonSelect({ season }: { season: number | null }) {
   const seasons = useSeasons();
@@ -150,7 +151,9 @@ export function Layout() {
         </div>
       </header>
       <main id="main" className="container main" tabIndex={-1}>
-        <Outlet />
+        <Suspense fallback={<Loading rows={3} label="Загружаем раздел…" />}>
+          <Outlet />
+        </Suspense>
       </main>
       <footer className="footer">
         <div className="container footer__inner">

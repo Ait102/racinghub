@@ -13,7 +13,7 @@ export const WEC_STATUS_LABELS: Record<WecStatus, string> = {
 };
 
 /** Local calendar date as YYYY-MM-DD. */
-export function localDay(now: Date): string {
+function localDay(now: Date): string {
   const p = (n: number) => String(n).padStart(2, '0');
   return `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}`;
 }

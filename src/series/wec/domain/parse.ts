@@ -124,7 +124,7 @@ function isCalendar(t: WikiTable): boolean {
   );
 }
 
-export function parseCalendar(
+function parseCalendar(
   doc: Document,
   seasonId: string,
 ): { rounds: Omit<WecRound, 'report' | 'winners'>[]; cancelled: CancelledRace[] } {
@@ -174,7 +174,7 @@ function isWinnersTable(t: WikiTable): boolean {
   return columnIndex(t, /^(Rnd|Round)/i) === 0 && t.columns.some((c) => WINNER_COL.test(c));
 }
 
-export function parseWinners(doc: Document): {
+function parseWinners(doc: Document): {
   classes: string[];
   byRound: Map<number, { report: string | null; winners: ClassWinner[] }>;
 } {
@@ -343,7 +343,7 @@ function isClassification(t: WikiTable): boolean {
   );
 }
 
-export function parseClassification(tables: WikiTable[]): RaceEntry[] {
+function parseClassification(tables: WikiTable[]): RaceEntry[] {
   const table = tables.find(isClassification);
   if (!table) return [];
   const col = (re: RegExp) => columnIndex(table, re);
@@ -394,7 +394,7 @@ function isQualifying(t: WikiTable): boolean {
   );
 }
 
-export function parseQualifying(tables: WikiTable[]): QualifyingTable | null {
+function parseQualifying(tables: WikiTable[]): QualifyingTable | null {
   const found = tables.filter(isQualifying);
   if (found.length === 0) return null;
   const first = found[0];
@@ -437,7 +437,7 @@ function isPractice(t: WikiTable): boolean {
   );
 }
 
-export function parsePractice(tables: WikiTable[]): PracticeSession[] {
+function parsePractice(tables: WikiTable[]): PracticeSession[] {
   return tables.filter(isPractice).map((table) => {
     const col = (re: RegExp) => columnIndex(table, re);
     const [no, team, driver, time] = [col(/^No/i), col(/Team|Entrant/i), col(/Driver/i), col(/Time/i)];

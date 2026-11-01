@@ -1,29 +1,33 @@
-import { useEffect, useRef } from 'react';
+import { lazy, useEffect, useRef } from 'react';
 import { HashRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { ErrorBox, Loading } from './components/DataState';
 import { Layout } from './components/Layout';
 import { ChoosePage } from './pages/ChoosePage';
 import { rememberedSeason, useSeasons } from './series/f1/hooks/data';
-import { AboutPage } from './series/f1/pages/AboutPage';
-import { CalendarPage } from './series/f1/pages/CalendarPage';
-import { ChartPage } from './series/f1/pages/ChartPage';
-import { CircuitPage } from './series/f1/pages/CircuitPage';
-import { ComparePage } from './series/f1/pages/ComparePage';
-import { ConstructorPage } from './series/f1/pages/ConstructorPage';
-import { ConstructorsPage } from './series/f1/pages/ConstructorsPage';
-import { DriverPage } from './series/f1/pages/DriverPage';
-import { DriversPage } from './series/f1/pages/DriversPage';
-import { HomePage } from './series/f1/pages/HomePage';
-import { RacePage } from './series/f1/pages/RacePage';
 import { defaultWecSeason } from './series/wec/hooks/data';
-import { WecCalendarPage } from './series/wec/pages/WecCalendarPage';
-import { WecComparePage } from './series/wec/pages/WecComparePage';
-import { WecHomePage } from './series/wec/pages/WecHomePage';
-import { WecParticipantsPage } from './series/wec/pages/WecParticipantsPage';
-import { WecProfilePage } from './series/wec/pages/WecProfilePage';
-import { WecRacePage } from './series/wec/pages/WecRacePage';
-import { WecStandingsPage } from './series/wec/pages/WecStandingsPage';
+
+// Each series is its own chunk: a visitor of one series does not download the other.
+const f1 = () => import('./series/f1/pages');
+const wec = () => import('./series/wec/pages');
+const AboutPage = lazy(() => f1().then((m) => ({ default: m.AboutPage })));
+const CalendarPage = lazy(() => f1().then((m) => ({ default: m.CalendarPage })));
+const ChartPage = lazy(() => f1().then((m) => ({ default: m.ChartPage })));
+const CircuitPage = lazy(() => f1().then((m) => ({ default: m.CircuitPage })));
+const ComparePage = lazy(() => f1().then((m) => ({ default: m.ComparePage })));
+const ConstructorPage = lazy(() => f1().then((m) => ({ default: m.ConstructorPage })));
+const ConstructorsPage = lazy(() => f1().then((m) => ({ default: m.ConstructorsPage })));
+const DriverPage = lazy(() => f1().then((m) => ({ default: m.DriverPage })));
+const DriversPage = lazy(() => f1().then((m) => ({ default: m.DriversPage })));
+const HomePage = lazy(() => f1().then((m) => ({ default: m.HomePage })));
+const RacePage = lazy(() => f1().then((m) => ({ default: m.RacePage })));
+const WecCalendarPage = lazy(() => wec().then((m) => ({ default: m.WecCalendarPage })));
+const WecComparePage = lazy(() => wec().then((m) => ({ default: m.WecComparePage })));
+const WecHomePage = lazy(() => wec().then((m) => ({ default: m.WecHomePage })));
+const WecParticipantsPage = lazy(() => wec().then((m) => ({ default: m.WecParticipantsPage })));
+const WecProfilePage = lazy(() => wec().then((m) => ({ default: m.WecProfilePage })));
+const WecRacePage = lazy(() => wec().then((m) => ({ default: m.WecRacePage })));
+const WecStandingsPage = lazy(() => wec().then((m) => ({ default: m.WecStandingsPage })));
 
 /** /f1 → the remembered or latest F1 season. */
 function F1Entry() {
