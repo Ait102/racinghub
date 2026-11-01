@@ -4,24 +4,10 @@
 // shown in a circle in the team color. Every file needs a row here with its source and licence.
 // Without a row (or if the file fails to load) the team gets a badge in its color.
 
-interface LogoEntry {
-  /** File name in public/logos/, e.g. "ferrari.svg". */
-  file: string;
-  /** Where the file came from (link). */
-  source: string;
-  /** Licence or permission that allows using it on this site. */
-  license: string;
-  /** Owner of the trademark. */
-  holder: string;
-  /**
-   * How the emblem sits on the team-colored circle: 'white' turns it into a white
-   * silhouette, 'invert' keeps inner details, 'color' leaves it as is.
-   */
-  tone: 'white' | 'invert' | 'color';
-}
+import type { EmblemEntry } from '../../../components/Emblem';
 
 /** Keyed by Jolpica constructorId. */
-export const TEAM_LOGOS: Readonly<Record<string, LogoEntry>> = {
+export const TEAM_LOGOS: Readonly<Record<string, EmblemEntry>> = {
   mercedes: {
     file: 'mercedes.svg',
     source: 'https://commons.wikimedia.org/wiki/File:Mercedes-AMG_Petronas_F1_Team_logo_(2026).svg',

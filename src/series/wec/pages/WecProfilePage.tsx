@@ -3,12 +3,13 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 
 import { getArticlePhoto } from '../../../api/wikimedia';
 import { DataState } from '../../../components/DataState';
+import { FavToggle } from '../../../components/FavButton';
 import { PageHeader } from '../../../components/PageHeader';
 import { PhotoFigure, usePhoto } from '../../../components/PhotoFigure';
 import { SortableTable, type Column } from '../../../components/SortableTable';
 import { Stat } from '../../../components/ui';
 import { articleUrl } from '../api/wikipedia';
-import { NameFlag, WikiSourceNote } from '../components/bits';
+import { NameFlag, WecEmblem, WikiSourceNote } from '../components/bits';
 import { seasonLabel } from '../data/seasons';
 import {
   profileStats,
@@ -18,7 +19,9 @@ import {
   type ProfileRow,
   type ProfileTable,
 } from '../domain/profiles';
+import type { Named } from '../domain/types';
 import { useWecParticipants, useWecProfile, useWecSeason } from '../hooks/data';
+import { useWecFavorites, type WecFavKind } from '../hooks/favorites';
 import { WecGuard } from './common';
 
 export function WecProfilePage({ kind }: { kind: ProfileKind }) {
@@ -72,17 +75,30 @@ function Profile({ season, article, kind }: { season: string; article: string; k
         eyebrow={`WEC ${seasonLabel(season)} · ${kind === 'driver' ? 'Пилот' : kind === 'team' ? 'Команда / производитель' : 'Трасса и гонка'}`}
         title={canonical.replace(/_/g, ' ')}
         aside={<ProfilePhoto article={photoArticle} kind={kind} />}
-      />
-      {kind === 'driver' && (
-        <p>
-          <Link to={`/wec/${season}/compare?${new URLSearchParams({ a: canonical })}`}>
-            Сравнить с другим пилотом
-          </Link>
-        </p>
-      )}
+      >
+        {kind === 'team' && <WecEmblem name={canonical} size="lg" />}
+        {kind !== 'circuit' && (
+          <div className="profile-actions">
+            <ProfileFav
+              kind={kind === 'driver' ? 'drivers' : 'teams'}
+              article={article}
+              canonical={canonical}
+            />
+            {kind === 'driver' && (
+              <Link
+                className="btn btn--ghost btn--small"
+                to={`/wec/${season}/compare?${new URLSearchParams({ a: canonical })}`}
+              >
+                Сравнить с другим пилотом
+              </Link>
+            )}
+          </div>
+        )}
+      </PageHeader>
       {kind !== 'circuit' && (
         <SeasonProfile season={season} article={article} canonical={canonical} kind={kind} />
       )}
+      {kind === 'team' && <TeamCars season={season} article={article} canonical={canonical} />}
       <div className="wec-profile-history">
         <DataState state={res}>
           {(data) => {
@@ -148,6 +164,49 @@ function Profile({ season, article, kind }: { season: string; article: string; k
       </div>
       <WikiSourceNote />
     </section>
+  );
+}
+
+/** Stores the article from the address, so lists that link the same title highlight it. */
+function ProfileFav({ kind, article, canonical }: { kind: WecFavKind; article: string; canonical: string }) {
+  const { isFav, toggle } = useWecFavorites();
+  const saved = [article, canonical].find((a) => isFav(kind, a));
+  return (
+    <FavToggle on={saved !== undefined} name={canonical} onToggle={() => toggle(kind, saved ?? article)} />
+  );
+}
+
+/** Cars of the team in the season's entry list, with the photo from each car's article. */
+function TeamCars({ season, article, canonical }: { season: string; article: string; canonical: string }) {
+  const entries = useWecParticipants(season, false);
+  if (entries.status !== 'success') return null;
+  const cars = entries.data.find((p) => p.who.article === article || p.who.article === canonical)?.cars ?? [];
+  if (cars.length === 0) return null;
+  return (
+    <div className="wec-cars">
+      <h2 className="section-title">Машины сезона {seasonLabel(season)}</h2>
+      <p className="muted small">
+        Модели из заявки сезона. Фото — из статьи о модели и может показывать машину другой команды.
+      </p>
+      <div className="wec-cars__grid">
+        {cars.map((car) => (
+          <CarPhoto key={car.name} car={car} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CarPhoto({ car }: { car: Named }) {
+  const valid = car.article !== null && validArticle(car.article);
+  const state = usePhoto(valid ? `wec:car:${car.article}` : null, () =>
+    getArticlePhoto(car.article!, { width: 900, photosOnly: true }),
+  );
+  return (
+    <div className="wec-cars__item">
+      <PhotoFigure state={state} alt={car.name} caption={car.name} shape="wide" />
+      {state.status === 'done' && !state.photo && <p className="muted">{car.name} — фото нет у источника</p>}
+    </div>
   );
 }
 

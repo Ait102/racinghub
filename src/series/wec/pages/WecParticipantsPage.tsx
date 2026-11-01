@@ -8,6 +8,7 @@ import { NameFlag, WikiSourceNote } from '../components/bits';
 import { seasonLabel } from '../data/seasons';
 import type { Participant } from '../domain/participants';
 import { useWecParticipants } from '../hooks/data';
+import { useWecFavorites } from '../hooks/favorites';
 import { WecGuard } from './common';
 
 export function WecParticipantsPage({ drivers }: { drivers: boolean }) {
@@ -21,12 +22,13 @@ export function WecParticipantsPage({ drivers }: { drivers: boolean }) {
 function Participants({ season, drivers }: { season: string; drivers: boolean }) {
   const res = useWecParticipants(season, drivers);
   const [search, setSearch] = useState('');
+  const { isFav } = useWecFavorites();
   const title = drivers ? 'Пилоты' : 'Команды';
   const columns: Column<Participant>[] = [
     {
       key: 'name',
       header: drivers ? 'Пилот' : 'Команда',
-      render: (row) => <NameFlag who={row.who} kind={drivers ? 'driver' : 'team'} />,
+      render: (row) => <NameFlag who={row.who} kind={drivers ? 'driver' : 'team'} emblem={!drivers} />,
       sortValue: (row) => row.who.name,
     },
     { key: 'category', header: 'Классы и зачёты', render: (row) => row.categories.join(' · ') },
@@ -62,6 +64,11 @@ function Participants({ season, drivers }: { season: string; drivers: boolean })
                   rows={rows}
                   rowKey={(row) => row.who.article ?? row.who.name}
                   caption={title}
+                  rowClassName={(row) =>
+                    row.who.article && isFav(drivers ? 'drivers' : 'teams', row.who.article)
+                      ? 'row--fav'
+                      : undefined
+                  }
                 />
               ) : (
                 <p>Ничего не найдено.</p>

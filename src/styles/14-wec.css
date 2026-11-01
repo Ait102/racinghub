@@ -372,3 +372,10 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Cars of a team in the season (photos from the car articles) */
+.wec-cars__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}

@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 
+import { Emblem } from '../../../components/Emblem';
 import type { WikiFlag } from '../../../lib/wikitable';
+import { emblemOf } from '../data/emblems';
 import { validArticle, type ProfileKind } from '../domain/profiles';
 import { WEC_STATUS_LABELS, type WecStatus } from '../domain/status';
 import type { Named } from '../domain/types';
@@ -19,17 +21,21 @@ export function NameFlag({
   strong,
   kind = 'team',
   link = true,
+  emblem = false,
 }: {
   who: Named | null | undefined;
   strong?: boolean;
   kind?: ProfileKind;
   link?: boolean;
+  /** Show the manufacturer emblem before the name (teams and manufacturers). */
+  emblem?: boolean;
 }) {
   const season = useWecSeasonParam();
   if (!who) return <span className="muted">—</span>;
   const text = strong ? <strong>{who.name}</strong> : who.name;
   return (
     <span className="with-flag">
+      {emblem && <WecEmblem name={who.name} />}
       <WikiFlagImg flag={who.flag} />
       {link && season && who.article && validArticle(who.article) ? (
         <Link to={`/wec/${season}/${kind}/${encodeURIComponent(who.article)}`}>{text}</Link>
@@ -38,6 +44,12 @@ export function NameFlag({
       )}
     </span>
   );
+}
+
+/** Manufacturer emblem when the name starts with a known manufacturer; nothing otherwise. */
+export function WecEmblem({ name, size = 'sm' }: { name: string; size?: 'sm' | 'lg' }) {
+  const entry = emblemOf(name);
+  return entry ? <Emblem entry={entry} color={entry.color} size={size} /> : null;
 }
 
 /** Drivers of one car, one per line. */

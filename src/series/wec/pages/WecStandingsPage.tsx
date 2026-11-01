@@ -1,11 +1,15 @@
+import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
 import { NameFlag, WikiSourceNote } from '../components/bits';
+import { PlacesChart, seriesStyle } from '../components/PlacesChart';
 import { seasonLabel } from '../data/seasons';
+import { placeSeries } from '../domain/places';
 import type { StandingKind, StandingTable, WecRound } from '../domain/types';
 import { useWecSeason } from '../hooks/data';
+import { useWecFavorites } from '../hooks/favorites';
 import { WecGuard } from './common';
 
 const KIND_LABELS: Record<StandingKind, string> = {
@@ -62,6 +66,7 @@ function Standings({ season }: { season: string }) {
               </div>
               <StandingsTable table={current} season={season} rounds={data.rounds} />
               <Legend />
+              <PlacesSection key={current.id} table={current} />
               <WikiSourceNote />
             </>
           );
@@ -81,6 +86,8 @@ function StandingsTable({
   rounds: WecRound[];
 }) {
   const roundOf = (report: string | null) => rounds.find((r) => r.report && r.report === report)?.round;
+  const { isFav } = useWecFavorites();
+  const favKind = table.kind === 'drivers' ? 'drivers' : 'teams';
   return (
     <>
       <h2 className="section-title">{table.title}</h2>
@@ -127,13 +134,24 @@ function StandingsTable({
             {table.rows.map((row, i) => (
               <tr
                 key={`${row.name.name}-${i}`}
-                className={row.pos !== null && row.pos <= 3 ? `row--p${row.pos}` : undefined}
+                className={
+                  [
+                    row.pos !== null && row.pos <= 3 ? `row--p${row.pos}` : '',
+                    row.name.article && isFav(favKind, row.name.article) ? 'row--fav' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ') || undefined
+                }
               >
                 <td className="align-center">
                   <strong>{row.posText}</strong>
                 </td>
                 <td>
-                  <NameFlag who={row.name} kind={table.kind === 'drivers' ? 'driver' : 'team'} />
+                  <NameFlag
+                    who={row.name}
+                    kind={table.kind === 'drivers' ? 'driver' : 'team'}
+                    emblem={table.kind !== 'drivers'}
+                  />
                 </td>
                 {table.extraHeader && <td className="col-optional muted">{row.extra ?? '—'}</td>}
                 {table.rounds.map((_, j) => (
@@ -155,6 +173,51 @@ function StandingsTable({
             ))}
           </tbody>
         </table>
+      </div>
+    </>
+  );
+}
+
+const TOP = [5, 10] as const;
+
+function PlacesSection({ table }: { table: StandingTable }) {
+  const [top, setTop] = useState<(typeof TOP)[number]>(5);
+  const series = placeSeries(table, top);
+  if (series.length === 0) return null;
+  return (
+    <>
+      <h2 className="section-title">Места по этапам</h2>
+      <p className="muted small">
+        Место в каждой гонке — как в таблице источника. Это не положение в зачёте после этапа: его источник не
+        публикует. Сход и неклассифицированный финиш — разрыв линии, значения смотрите в таблице.
+      </p>
+      <div className="chips" role="group" aria-label="Сколько строк зачёта показать">
+        {TOP.map((t) => (
+          <button key={t} type="button" className="chip" aria-pressed={top === t} onClick={() => setTop(t)}>
+            {`Топ-${t}`}
+          </button>
+        ))}
+      </div>
+      <div className="card chart-card">
+        <PlacesChart rounds={table.rounds.map((r) => r.abbr)} series={series} />
+        <ul className="legend">
+          {series.map((s, i) => (
+            <li key={s.id}>
+              <svg width="26" height="10" aria-hidden="true">
+                <line
+                  x1="1"
+                  x2="25"
+                  y1="5"
+                  y2="5"
+                  stroke={seriesStyle(i).color}
+                  strokeWidth="3"
+                  strokeDasharray={seriesStyle(i).dash}
+                />
+              </svg>
+              {s.label}
+            </li>
+          ))}
+        </ul>
       </div>
     </>
   );

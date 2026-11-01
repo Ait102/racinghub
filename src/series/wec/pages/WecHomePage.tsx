@@ -8,6 +8,7 @@ import { seasonLabel } from '../data/seasons';
 import { daysUntil, lastCompleted, nextRound, roundStatus } from '../domain/status';
 import type { StandingTable, WecRound, WecSeasonData } from '../domain/types';
 import { useWecSeason } from '../hooks/data';
+import { useWecFavorites } from '../hooks/favorites';
 import { WecGuard } from './common';
 
 /** Season overview: next race, last winners by class, championship leaders. */
@@ -39,11 +40,64 @@ function Overview({ season }: { season: string }) {
               <LastRace data={data} />
               <Leaders season={season} tables={data.standings} />
             </div>
+            <Favorites season={season} tables={data.standings} />
             <WikiSourceNote />
           </>
         )}
       </DataState>
     </section>
+  );
+}
+
+/** Favourites with their first standings row of the season, as the source publishes it. */
+function Favorites({ season, tables }: { season: string; tables: StandingTable[] }) {
+  const { favs } = useWecFavorites();
+  const all = [
+    ...favs.drivers.map((article) => ({ article, kind: 'driver' as const })),
+    ...favs.teams.map((article) => ({ article, kind: 'team' as const })),
+  ];
+  if (all.length === 0) {
+    return (
+      <p className="muted small fav-hint">
+        Совет: отметьте пилотов и команды звёздочкой ☆ в их профилях — они появятся здесь и будут выделены в
+        списках и зачётах.
+      </p>
+    );
+  }
+  return (
+    <article className="card">
+      <h2 className="card__title">★ Избранное · сезон {seasonLabel(season)}</h2>
+      <ul className="wec-leaders__list">
+        {all.map(({ article, kind }) => {
+          const found = tables
+            .filter((t) => (t.kind === 'drivers') === (kind === 'driver'))
+            .flatMap((table) => table.rows.map((row) => ({ table, row })))
+            .find(({ row }) => row.name.article === article);
+          return (
+            <li key={`${kind}:${article}`}>
+              <span className="wec-leaders__pos">{found?.row.posText || '—'}</span>
+              {found ? (
+                <NameFlag who={found.row.name} kind={kind} emblem={kind === 'team'} />
+              ) : (
+                <Link to={`/wec/${season}/${kind}/${encodeURIComponent(article)}`}>{article}</Link>
+              )}
+              <span className="wec-leaders__pts">
+                {found ? (
+                  <>
+                    {found.row.points || '—'}{' '}
+                    <span className="muted small">
+                      <Link to={`/wec/${season}/standings?t=${found.table.id}`}>{found.table.title}</Link>
+                    </span>
+                  </>
+                ) : (
+                  <span className="muted small">не в зачётах сезона</span>
+                )}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </article>
   );
 }
 
@@ -158,7 +212,11 @@ function Leaders({ season, tables }: { season: string; tables: StandingTable[] }
                 {t.rows.slice(0, 3).map((r, i) => (
                   <li key={`${r.name.name}-${i}`}>
                     <span className="wec-leaders__pos">{r.posText}</span>
-                    <NameFlag who={r.name} kind={t.kind === 'drivers' ? 'driver' : 'team'} />
+                    <NameFlag
+                      who={r.name}
+                      kind={t.kind === 'drivers' ? 'driver' : 'team'}
+                      emblem={t.kind !== 'drivers'}
+                    />
                     <span className="wec-leaders__pts">{r.points}</span>
                   </li>
                 ))}

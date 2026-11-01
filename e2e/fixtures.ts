@@ -309,6 +309,7 @@ const PHOTOS: Record<string, [string, number, number]> = {
   'File:Buemi test.jpg': ['portrait.svg', 480, 640],
   'File:Russell test.jpg': ['portrait.svg', 480, 640],
   'File:FIA F1 Austria 2026 Nr. 12 Antonelli (1).jpg': ['car.svg', 900, 450],
+  'File:GR010 test.jpg': ['car.svg', 900, 450],
 };
 
 // WEC: Wikipedia articles served from the same trimmed fixtures the unit tests use.
@@ -377,7 +378,9 @@ async function mockWikimedia(page: Page, wecFail: () => boolean): Promise<void> 
         ? 'Buemi test.jpg'
         : title.startsWith('George Russell')
           ? 'Russell test.jpg'
-          : undefined;
+          : title === 'Toyota GR010 Hybrid'
+            ? 'GR010 test.jpg'
+            : undefined;
     return route.fulfill({
       contentType: 'application/json',
       headers: cors,

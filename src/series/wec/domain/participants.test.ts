@@ -18,4 +18,15 @@ describe('season entry lists', () => {
     },
     20_000,
   );
+
+  it('keeps the car of each team with its article', () => {
+    const toyota = parseParticipants(entries2026, false).find((p) => p.who.name.startsWith('Toyota'));
+    expect(toyota?.cars).toContainEqual({
+      name: 'Toyota TR010 Hybrid',
+      article: 'Toyota GR010 Hybrid',
+      flag: null,
+    });
+    const buemi = parseParticipants(entries2026, true).find((p) => p.who.article === 'Sébastien Buemi');
+    expect(buemi?.cars.map((c) => c.name)).toEqual(['Toyota TR010 Hybrid']);
+  });
 });

@@ -1,5 +1,4 @@
-import { useState, type CSSProperties } from 'react';
-
+import { Emblem } from '../../../components/Emblem';
 import { TEAM_ABBR, TEAM_LOGOS } from '../data/logos';
 import type { Constructor } from '../domain/types';
 import { teamColor } from './bits';
@@ -27,30 +26,15 @@ export function badgeInk(hex: string): string {
  */
 export function TeamLogo({ team, size = 'sm' }: { team: Constructor; size?: 'sm' | 'lg' }) {
   const entry = TEAM_LOGOS[team.id];
-  const [broken, setBroken] = useState(false);
-  const cls = `team-logo team-logo--${size}`;
   const bg = teamColor(team);
-  if (entry && !broken) {
-    return (
-      <span
-        className={`${cls} team-logo--emblem`}
-        style={{ '--team': bg } as CSSProperties}
-        title={`© ${entry.holder}`}
-        aria-hidden="true"
-      >
-        <img
-          className={`team-logo__img team-logo__img--${entry.tone}`}
-          src={`${import.meta.env.BASE_URL}logos/${entry.file}`}
-          alt=""
-          loading="lazy"
-          onError={() => setBroken(true)}
-        />
-      </span>
-    );
-  }
-  return (
-    <span className={cls} style={{ background: bg, color: badgeInk(bg) }} aria-hidden="true">
+  const badge = (
+    <span
+      className={`team-logo team-logo--${size}`}
+      style={{ background: bg, color: badgeInk(bg) }}
+      aria-hidden="true"
+    >
       {teamAbbr(team)}
     </span>
   );
+  return entry ? <Emblem entry={entry} color={bg} size={size} fallback={badge} /> : badge;
 }

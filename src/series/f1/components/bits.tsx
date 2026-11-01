@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 
+import { FavToggle } from '../../../components/FavButton';
 import { preloadCircuit } from '../data/circuits';
 import { STATUS_LABELS, type RaceStatus } from '../domain/status';
 import type { Constructor, Driver } from '../domain/types';
@@ -103,18 +104,7 @@ export function CircuitLink({
 
 export function FavButton({ kind, id, name }: { kind: FavKind; id: string; name: string }) {
   const { isFav, toggle } = useFavorites();
-  const on = isFav(kind, id);
-  return (
-    <button
-      type="button"
-      className={`fav-btn${on ? ' fav-btn--on' : ''}`}
-      aria-pressed={on}
-      aria-label={on ? `Убрать ${name} из избранного` : `Добавить ${name} в избранное`}
-      onClick={() => toggle(kind, id)}
-    >
-      <span aria-hidden="true">{on ? '★' : '☆'}</span> {on ? 'В избранном' : 'В избранное'}
-    </button>
-  );
+  return <FavToggle on={isFav(kind, id)} name={name} onToggle={() => toggle(kind, id)} />;
 }
 
 /** Marks a sprint weekend: an extra short race for points on Saturday. */
