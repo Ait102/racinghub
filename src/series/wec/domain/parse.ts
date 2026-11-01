@@ -155,6 +155,7 @@ export function parseCalendar(
     rounds.push({
       round,
       name,
+      eventArticle: cellAt(row, race)?.links[0]?.title ?? null,
       circuit: namedCell(cellAt(row, circuit)),
       location: loc ? orNull(loc.text) : null,
       country: loc?.flags[0] ?? cellAt(row, race)?.flags[0] ?? null,
@@ -244,10 +245,10 @@ function isStandings(t: WikiTable): boolean {
   return /^Pos/i.test(t.columns[0] ?? '') && /points/i.test(t.columns[t.columns.length - 1] ?? '');
 }
 
-export function parseStandings(doc: Document): StandingTable[] {
+export function parseStandings(doc: Document, tables = wikiTables(doc)): StandingTable[] {
   const out: StandingTable[] = [];
   const used = new Set<string>();
-  for (const table of wikiTables(doc).filter(isStandings)) {
+  for (const table of tables.filter(isStandings)) {
     const last = table.columns.length - 1;
     const roundCols = table.columns
       .map((_, i) => i)

@@ -10,3 +10,4 @@ e2e/visual.spec.ts-snapshots
 .env
 .env.*
 !.env.example
+HANDOFF.md

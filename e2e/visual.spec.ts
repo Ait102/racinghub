@@ -21,10 +21,15 @@ const ROUTES = [
   './#/2026/circuit/c1',
   './#/2026/about',
   './#/2026/compare?a=russell&b=max_verstappen',
+  './#/wec/2026/drivers',
+  './#/wec/2026/teams',
+  './#/wec/2026/driver/S%C3%A9bastien%20Buemi',
+  './#/wec/2026/team/Toyota%20Racing%20GmbH',
+  './#/wec/2026/circuit/6%20Hours%20of%20Spa-Francorchamps?circuit=Circuit%20de%20Spa-Francorchamps',
 ];
 
 test('pages match the baselines', async ({ page }) => {
-  test.setTimeout(300_000);
+  test.setTimeout(600_000);
   // The site drops its entrance animations for reduced motion: screenshots stay stable.
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await mockApi(page);
@@ -59,8 +64,11 @@ test('pages match the baselines', async ({ page }) => {
       });
       await page.waitForTimeout(1200);
       await expect(page).toHaveScreenshot(`w${width}${route.replace(/[^a-z0-9]+/gi, '-')}.png`, {
-        fullPage: true,
+        // Long career tables exceed reliable full-page capture on Windows Chromium.
+        // Their rows are covered by parser/E2E checks; capture the profile's first screen.
+        fullPage: !/\/wec\/[^/]+\/(driver|team|circuit)\//.test(route),
         animations: 'disabled',
+        timeout: 20_000,
         // Chromium sometimes lays out the narrow pages 1–2 px apart (sub-pixel rounding), which
         // shifts a few thin lines by ~50 pixels in total; a real layout change differs by far more.
         maxDiffPixels: 100,

@@ -21,6 +21,8 @@ export interface ClassWinner {
 export interface WecRound {
   round: number;
   name: string;
+  /** Article about the event across years, for its winners history. */
+  eventArticle: string | null;
   circuit: Named | null;
   location: string | null;
   country: WikiFlag | null;

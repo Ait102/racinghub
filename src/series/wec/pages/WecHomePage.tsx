@@ -158,7 +158,7 @@ function Leaders({ season, tables }: { season: string; tables: StandingTable[] }
                 {t.rows.slice(0, 3).map((r, i) => (
                   <li key={`${r.name.name}-${i}`}>
                     <span className="wec-leaders__pos">{r.posText}</span>
-                    <NameFlag who={r.name} />
+                    <NameFlag who={r.name} kind={t.kind === 'drivers' ? 'driver' : 'team'} />
                     <span className="wec-leaders__pts">{r.points}</span>
                   </li>
                 ))}

@@ -237,6 +237,50 @@
 }
 
 /* Race classification */
+.wec-calendar-profiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding: 10px 4px 18px;
+  font-size: 0.8rem;
+}
+.wec-calendar-item {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.wec-calendar-item .race-card {
+  height: auto;
+  flex: 1;
+}
+.wec-search {
+  display: grid;
+  gap: 6px;
+  max-width: 30rem;
+  margin-bottom: var(--s4);
+}
+.wec-search input {
+  width: 100%;
+  min-width: 0;
+}
+.wec-profile-history .table {
+  font-size: 0.82rem;
+}
+.wec-profile-history .table td {
+  max-width: 22rem;
+}
+.wec-profile-history a {
+  overflow-wrap: anywhere;
+}
+.wec-profile-history .res--gold a,
+.wec-profile-history .res--silver a,
+.wec-profile-history .res--bronze a {
+  color: inherit;
+}
+.wec-profile-current td {
+  background: rgba(var(--accent-rgb), 0.08);
+}
+
 .row--class-winner td {
   background: rgba(245, 185, 66, 0.07);
 }

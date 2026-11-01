@@ -8,6 +8,7 @@ const NOW = new Date(2026, 5, 13, 15); // 13 June 2026, during Le Mans
 const round = (n: number, start: string | null, end = start, won = false): WecRound => ({
   round: n,
   name: n === 3 ? '24 Hours of Le Mans' : `Round ${n}`,
+  eventArticle: null,
   circuit: null,
   location: null,
   country: null,

@@ -106,3 +106,98 @@ test('unknown WEC season and round get a clear message', async ({ page }) => {
   await page.goto('./#/wec/2026/race/42');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Этап не найден');
 });
+
+test('WEC drivers list links to career and Le Mans, keeps profile on season change', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/wec/2026');
+  await page.getByRole('link', { name: 'Пилоты', exact: true }).click();
+  await page.getByRole('link', { name: 'Sébastien Buemi', exact: true }).first().click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sébastien Buemi');
+  await expect(page.locator('figure.photo img')).toBeVisible();
+  await expect(page.locator('figure.photo')).toContainText('Test Photographer');
+  await expect(page.locator('figure.photo')).toContainText('CC BY-SA 4.0');
+  await expect(page.getByRole('heading', { name: 'Результаты WEC', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '24 часа Ле-Мана', exact: true })).toBeVisible();
+  await expect(page.locator('.wec-profile-history')).toContainText('106.25');
+  await page.getByRole('combobox', { name: 'Сезон' }).selectOption('2012');
+  await expect(page).toHaveURL(/#\/wec\/2012\/driver\//);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sébastien Buemi');
+  await expect(page.locator('.wec-profile-season')).toContainText('Сезон 2012');
+  await expect(page.locator('.wec-profile-season')).toContainText('участник не найден');
+});
+
+test('WEC race links drivers and teams, team keeps multiple cars and historical points', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/wec/2026/race/3');
+  await page.getByRole('link', { name: 'Toyota Racing', exact: true }).first().click();
+  await expect(page).toHaveURL(/\/team\//);
+  await expect(page.locator('.wec-profile-history')).toContainText('142.5');
+  await page.goto('./#/wec/2026/race/3');
+  await page.getByRole('link', { name: 'Kamui Kobayashi', exact: true }).first().click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Kamui Kobayashi');
+});
+
+test('WEC calendar links a circuit to event winners across years without nested links', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/wec/2026/calendar');
+  await expect(page.locator('a a')).toHaveCount(0);
+  await page.getByRole('link', { name: /История.*Spa/ }).click();
+  await expect(page.locator('.wec-profile-history')).toContainText('1953');
+  await expect(page.locator('.wec-profile-history')).toContainText('2025');
+  await expect(page.getByText(/общих победителей/i)).toBeVisible();
+});
+
+test('WEC teams list and empty article explain source limitations', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/wec/2026/teams');
+  await expect(page.getByRole('link', { name: 'Toyota Racing', exact: true }).first()).toBeVisible();
+  await page.goto('./#/wec/2026/team/Toyota');
+  await expect(page.getByText('В статье нет таблиц результатов WEC.')).toBeVisible();
+  await expect(page.locator('.wec-profile-season')).toContainText('Toyota');
+  await page.goto('./#/wec/2026/driver/Tom%20Gamble%20(racing%20driver)');
+  await expect(page.locator('.wec-profile-entry img.flag')).toBeVisible();
+  await expect(page.locator('.wec-profile-entry')).toContainText('Hypercar');
+  await page.goto('./#/wec/2026/driver/File%3AExample.jpg');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Недопустимый адрес профиля');
+});
+
+test('WEC profiles handle a missing article and recover after Wikipedia failure', async ({ page }) => {
+  let down = false;
+  await mockApi(page, undefined, { wecFail: () => down });
+  await page.goto('./#/wec/2026/driver/No_such_driver');
+  await expect(page.getByRole('alert')).toContainText('Статья не найдена');
+  down = true;
+  await page.goto('./#/wec/2026/driver/Kamui%20Kobayashi');
+  await expect(page.getByRole('alert').first()).toBeVisible({ timeout: 30_000 });
+  down = false;
+  await page
+    .locator('.wec-profile-history')
+    .getByRole('alert')
+    .getByRole('button', { name: 'Повторить' })
+    .click();
+  await expect(page.getByRole('heading', { name: 'Результаты WEC', exact: true })).toBeVisible();
+});
+
+test('WEC lists and profiles fit mobile and permit keyboard navigation', async ({ page }) => {
+  await mockApi(page);
+  await page.setViewportSize({ width: 375, height: 812 });
+  for (const path of [
+    'drivers',
+    'teams',
+    'driver/S%C3%A9bastien%20Buemi',
+    'team/Toyota%20Racing%20GmbH',
+    'circuit/6%20Hours%20of%20Spa-Francorchamps',
+  ]) {
+    await page.goto(`./#/wec/2026/${path}`);
+    await page.waitForLoadState('networkidle');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(
+      0,
+    );
+  }
+  await page.goto('./#/wec/2026/drivers');
+  await page.getByRole('searchbox', { name: 'Поиск по имени' }).fill('Buemi');
+  const driver = page.getByRole('link', { name: 'Sébastien Buemi', exact: true });
+  await driver.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sébastien Buemi');
+});

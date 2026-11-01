@@ -56,7 +56,7 @@ function Calendar({ season }: { season: string }) {
               </div>
               <ol className="race-grid">
                 {shown.map(({ r, status }) => (
-                  <li key={r.round}>
+                  <li key={r.round} className="wec-calendar-item">
                     <Link
                       to={`/wec/${season}/race/${r.round}`}
                       className={`race-card race-card--${status}${next?.round === r.round ? ' race-card--next' : ''}${isLeMans(r) ? ' race-card--lemans' : ''}`}
@@ -81,12 +81,24 @@ function Calendar({ season }: { season: string }) {
                         <span className="race-card__winners">
                           {r.winners.map((w) => (
                             <span key={w.cls} className="race-card__winner">
-                              <ClassBadge cls={w.cls} /> <NameFlag who={w.team} />
+                              <ClassBadge cls={w.cls} /> <NameFlag who={w.team} link={false} />
                             </span>
                           ))}
                         </span>
                       )}
                     </Link>
+                    <div className="wec-calendar-profiles">
+                      {(r.eventArticle ?? r.circuit?.article) && (
+                        <Link
+                          to={`/wec/${season}/circuit/${encodeURIComponent((r.eventArticle ?? r.circuit?.article)!)}${r.circuit?.article ? `?circuit=${encodeURIComponent(r.circuit.article)}` : ''}`}
+                        >
+                          История · {r.circuit?.name ?? r.name}
+                        </Link>
+                      )}
+                      {r.winners.map((w) => (
+                        <NameFlag key={w.cls} who={w.team} />
+                      ))}
+                    </div>
                   </li>
                 ))}
               </ol>

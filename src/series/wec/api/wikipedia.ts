@@ -5,6 +5,8 @@ import { createClient, type ApiClient, type GetOptions } from '../../../api/clie
 import type { DataMeta, Fetched } from '../../../api/types';
 import { isPastSeason, seasonArticle } from '../data/seasons';
 import { parseRace, parseSeason } from '../domain/parse';
+import { parseParticipants, type Participant } from '../domain/participants';
+import { parseProfile, validArticle, type ProfileKind, type WecProfile } from '../domain/profiles';
 import type { WecRaceData, WecSeasonData } from '../domain/types';
 
 export const WIKI_API = 'https://en.wikipedia.org/w/api.php';
@@ -56,6 +58,34 @@ const parsedRaces = new Map<string, WecRaceData>();
 
 export function createWikipedia(api: ApiClient = wikiClient) {
   return {
+    async getParticipants(
+      id: string,
+      drivers: boolean,
+      opts: GetOptions = {},
+    ): Promise<Fetched<Participant[]>> {
+      const title = seasonArticle(id);
+      const options = { ...opts, immutable: isPastSeason(id) };
+      const toc = await api.get(query({ page: title, prop: 'sections' }), options);
+      const sections = (toc.data as { parse: { sections?: Section[] } }).parse.sections ?? [];
+      const section = sections.find((s) => /^(Entries|Entry list|Teams and drivers)$/i.test(s.line));
+      const res = section
+        ? await api.get(query({ page: title, prop: 'text', section: section.index }), options)
+        : toc;
+      return {
+        data: section ? parseParticipants(textOf(res.data), drivers) : [],
+        meta: articleMeta(res.meta.stale ? res.meta : toc.meta.stale ? toc.meta : res.meta, title),
+      };
+    },
+    async getProfile(title: string, kind: ProfileKind, opts: GetOptions = {}): Promise<Fetched<WecProfile>> {
+      if (!validArticle(title)) throw new Error('Недопустимое название статьи');
+      // A career article keeps changing even when opened from a past season.
+      const res = await api.get(query({ page: title, prop: 'text' }), { ...opts, immutable: false });
+      const canonical = (res.data as { parse: { title?: string } }).parse.title ?? title;
+      return {
+        data: parseProfile(canonical, textOf(res.data), kind),
+        meta: articleMeta(res.meta, canonical),
+      };
+    },
     async getSeason(id: string, opts: GetOptions = {}): Promise<Fetched<WecSeasonData>> {
       const title = seasonArticle(id);
       const o: GetOptions = { ...opts, immutable: isPastSeason(id) };

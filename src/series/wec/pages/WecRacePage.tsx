@@ -59,6 +59,15 @@ function RaceView({ season }: { season: string }) {
           </p>
         )}
       </PageHeader>
+      {(r.eventArticle ?? r.circuit?.article) && (
+        <p>
+          <Link
+            to={`/wec/${season}/circuit/${encodeURIComponent((r.eventArticle ?? r.circuit?.article)!)}${r.circuit?.article ? `?circuit=${encodeURIComponent(r.circuit.article)}` : ''}`}
+          >
+            История трассы и победители
+          </Link>
+        </p>
+      )}
       <Winners r={r} />
       {r.report ? (
         <RaceData season={season} article={r.report} />
@@ -277,7 +286,9 @@ function Qualifying({ q, cls }: { q: QualifyingTable; cls: string | null }) {
     },
     { key: 'team', header: 'Команда', render: (r) => <NameFlag who={r.team} /> },
     ...(hasDriver
-      ? ([{ key: 'driver', header: 'Пилот', render: (r) => <NameFlag who={r.driver} /> }] as Column<QRow>[])
+      ? ([
+          { key: 'driver', header: 'Пилот', render: (r) => <NameFlag who={r.driver} kind="driver" /> },
+        ] as Column<QRow>[])
       : []),
     ...q.timeColumns.map<Column<QRow>>((name, i) => ({
       key: `t${i}`,
@@ -312,7 +323,8 @@ function Practice({ sessions }: { sessions: PracticeSession[] }) {
                 <li key={r.cls} className="practice__row">
                   <ClassBadge cls={r.cls} />
                   <span>
-                    {r.number && <span className="car-no">#{r.number}</span>} <NameFlag who={r.driver} />
+                    {r.number && <span className="car-no">#{r.number}</span>}{' '}
+                    <NameFlag who={r.driver} kind="driver" />
                     <span className="muted small"> · {r.team?.name ?? '—'}</span>
                   </span>
                   <strong className="practice__time">{r.time ?? '—'}</strong>

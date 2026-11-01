@@ -1,6 +1,10 @@
+import { Link } from 'react-router-dom';
+
 import type { WikiFlag } from '../../../lib/wikitable';
+import { validArticle, type ProfileKind } from '../domain/profiles';
 import { WEC_STATUS_LABELS, type WecStatus } from '../domain/status';
 import type { Named } from '../domain/types';
+import { useWecSeasonParam } from '../hooks/data';
 
 /** Flag picture straight from Wikipedia (flags there are public domain). */
 export function WikiFlagImg({ flag }: { flag: WikiFlag | null | undefined }) {
@@ -10,12 +14,28 @@ export function WikiFlagImg({ flag }: { flag: WikiFlag | null | undefined }) {
   );
 }
 
-export function NameFlag({ who, strong }: { who: Named | null | undefined; strong?: boolean }) {
+export function NameFlag({
+  who,
+  strong,
+  kind = 'team',
+  link = true,
+}: {
+  who: Named | null | undefined;
+  strong?: boolean;
+  kind?: ProfileKind;
+  link?: boolean;
+}) {
+  const season = useWecSeasonParam();
   if (!who) return <span className="muted">—</span>;
+  const text = strong ? <strong>{who.name}</strong> : who.name;
   return (
     <span className="with-flag">
       <WikiFlagImg flag={who.flag} />
-      {strong ? <strong>{who.name}</strong> : who.name}
+      {link && season && who.article && validArticle(who.article) ? (
+        <Link to={`/wec/${season}/${kind}/${encodeURIComponent(who.article)}`}>{text}</Link>
+      ) : (
+        text
+      )}
     </span>
   );
 }
@@ -27,7 +47,7 @@ export function Crew({ drivers }: { drivers: Named[] }) {
     <span className="crew">
       {drivers.map((d, i) => (
         <span key={`${d.name}-${i}`} className="crew__driver">
-          <NameFlag who={d} />
+          <NameFlag who={d} kind="driver" />
         </span>
       ))}
     </span>

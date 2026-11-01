@@ -110,6 +110,8 @@ export function Layout() {
               [`/wec/${wecSeason}`, 'Обзор'],
               [`/wec/${wecSeason}/calendar`, 'Календарь'],
               [`/wec/${wecSeason}/standings`, 'Зачёты'],
+              [`/wec/${wecSeason}/drivers`, 'Пилоты'],
+              [`/wec/${wecSeason}/teams`, 'Команды'],
             ]
           : [];
 

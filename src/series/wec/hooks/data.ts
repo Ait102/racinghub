@@ -3,6 +3,19 @@ import { useLocation } from 'react-router-dom';
 import { useResource } from '../../../hooks/useResource';
 import { wikipedia } from '../api/wikipedia';
 import { isSeasonId, wecSeasons } from '../data/seasons';
+import type { ProfileKind } from '../domain/profiles';
+
+export function useWecProfile(article: string, kind: ProfileKind) {
+  return useResource(`wec:profile:${kind}:${article}`, (force) =>
+    wikipedia.getProfile(article, kind, { force }),
+  );
+}
+
+export function useWecParticipants(id: string | null, drivers: boolean) {
+  return useResource(id === null ? null : `wec:participants:${id}:${drivers}`, (force) =>
+    wikipedia.getParticipants(id!, drivers, { force }),
+  );
+}
 
 export function useWecSeason(id: string | null) {
   return useResource(id === null ? null : `wec:season:${id}`, (force) => wikipedia.getSeason(id!, { force }));

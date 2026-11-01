@@ -71,3 +71,24 @@ describe('Википедия: статья о гонке', () => {
     ).toBeGreaterThan(1);
   });
 });
+
+describe('Википедия: профили и заявочные списки', () => {
+  it('заявки текущего сезона содержат пилотов до появления результатов', async () => {
+    const drivers = (await wiki.getParticipants(wecSeasons()[0], true)).data;
+    expect(drivers.length, 'не разобран раздел Entries').toBeGreaterThan(40);
+    expect(drivers.some((d) => d.who.article === 'Sébastien Buemi')).toBe(true);
+  });
+  it('профиль пилота: сезоны WEC и отдельные места в классе Ле-Мана', async () => {
+    const p = (await wiki.getProfile('Sébastien Buemi', 'driver')).data;
+    expect(p.tables.find((t) => t.kind === 'wec')?.rows.length).toBeGreaterThan(10);
+    expect(p.tables.find((t) => t.kind === 'lemans')?.columns).toContain('ClassPos.');
+  });
+  it('профиль команды: история WEC без суммирования очков машин', async () => {
+    const p = (await wiki.getProfile('Toyota Racing GmbH', 'team')).data;
+    expect(p.tables.find((t) => t.kind === 'wec')?.rows.length).toBeGreaterThan(10);
+  });
+  it('история Спа: победители по годам', async () => {
+    const p = (await wiki.getProfile('6 Hours of Spa-Francorchamps', 'circuit')).data;
+    expect(p.tables[0]?.rows.length).toBeGreaterThan(40);
+  });
+});

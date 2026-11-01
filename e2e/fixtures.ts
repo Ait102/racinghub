@@ -306,6 +306,7 @@ const PHOTO_SVG = (w: number, h: number, color: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="${color}"/></svg>`;
 
 const PHOTOS: Record<string, [string, number, number]> = {
+  'File:Buemi test.jpg': ['portrait.svg', 480, 640],
   'File:Russell test.jpg': ['portrait.svg', 480, 640],
   'File:FIA F1 Austria 2026 Nr. 12 Antonelli (1).jpg': ['car.svg', 900, 450],
 };
@@ -319,6 +320,11 @@ const WEC_SEASONS: Record<string, string> = {
   '2019–20 FIA World Endurance Championship': '2019-20',
 };
 const WEC_RACES: Record<string, string> = {
+  'Sébastien Buemi': 'driver-buemi.html',
+  'Kamui Kobayashi': 'driver-kobayashi.html',
+  'Toyota Racing GmbH': 'team-toyota.html',
+  'AF Corse': 'team-af-corse.html',
+  '6 Hours of Spa-Francorchamps': 'event-spa.html',
   '2026 24 Hours of Le Mans': 'race-2026-lemans.html',
   '2026 6 Hours of Fuji': 'race-2026-fuji.html',
   '2012 6 Hours of Silverstone': 'race-2012-silverstone.html',
@@ -348,10 +354,13 @@ function wecParse(params: URLSearchParams, fail: boolean) {
     });
   }
   if (season) {
-    const part = params.get('section') === '1' ? 'calendar' : 'results';
+    const part =
+      params.get('section') === '1' ? 'calendar' : params.get('section') === '2' ? 'entries' : 'results';
     return json({ parse: { title: page, text: wecFile(`season-${season}-${part}.html`) } });
   }
   if (WEC_RACES[page]) return json({ parse: { title: page, text: wecFile(WEC_RACES[page]) } });
+  if (page === 'Toyota' || page === 'Tom Gamble (racing driver)')
+    return json({ parse: { title: page, text: '<p>No WEC results table.</p>' } });
   return json({ error: { code: 'missingtitle', info: "The page you specified doesn't exist." } });
 }
 
@@ -361,7 +370,12 @@ async function mockWikimedia(page: Page, wecFail: () => boolean): Promise<void> 
     const params = new URL(route.request().url()).searchParams;
     if (params.get('action') === 'parse') return route.fulfill(wecParse(params, wecFail()));
     const title = params.get('titles') ?? '';
-    const pageimage = title.startsWith('George Russell') ? 'Russell test.jpg' : undefined;
+    const pageimage =
+      title === 'Sébastien Buemi'
+        ? 'Buemi test.jpg'
+        : title.startsWith('George Russell')
+          ? 'Russell test.jpg'
+          : undefined;
     return route.fulfill({
       contentType: 'application/json',
       headers: cors,

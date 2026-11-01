@@ -133,7 +133,7 @@ function StandingsTable({
                   <strong>{row.posText}</strong>
                 </td>
                 <td>
-                  <NameFlag who={row.name} />
+                  <NameFlag who={row.name} kind={table.kind === 'drivers' ? 'driver' : 'team'} />
                 </td>
                 {table.extraHeader && <td className="col-optional muted">{row.extra ?? '—'}</td>}
                 {table.rounds.map((_, j) => (
