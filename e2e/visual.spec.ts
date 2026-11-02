@@ -7,6 +7,8 @@ import { mockApi } from './fixtures';
 
 const ROUTES = [
   './',
+  './#/fe/2026-27',
+  './#/fe/2014-15/about',
   './#/wec/2026',
   './#/wec/2026/calendar',
   './#/wec/2026/race/3',
@@ -33,6 +35,7 @@ const ROUTES = [
 
 const DOC_SHOTS: Record<string, string> = {
   './': 'choose',
+  './#/fe/2026-27': 'fe-home',
   './#/2026': 'home',
   './#/2026/calendar': 'calendar',
   './#/2026/chart': 'chart',

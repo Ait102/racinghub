@@ -1,0 +1,33 @@
+:root[data-series='fe'] {
+  --accent: #8b3dff;
+  --accent-rgb: 139, 61, 255;
+  --accent-strong: #a66bff;
+  --accent-deep: #5a1fb8;
+  --accent-text: #c4a3ff;
+}
+
+.series-card--fe {
+  background: linear-gradient(135deg, rgba(139, 61, 255, 0.22), transparent 60%), var(--surface);
+}
+
+.series-card--fe:hover {
+  border-color: var(--fe-purple);
+}
+
+.series-card--fe .series-card__cta {
+  color: #c4a3ff;
+}
+
+.fe-stage {
+  border-top: 3px solid var(--fe-purple);
+}
+
+:root[data-series='fe'] a:hover {
+  color: #d6bfff;
+}
+
+@media (min-width: 1000px) {
+  .choose__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

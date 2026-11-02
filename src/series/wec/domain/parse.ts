@@ -1,3 +1,4 @@
+import { parseStandings } from '../../../lib/wikiStandings';
 // Reads WEC data out of Wikipedia articles. Columns are found by their header names,
 // classes and championship names are taken from the tables themselves, and nothing
 // is added that the source does not show.
@@ -17,14 +18,12 @@ import type {
   PracticeSession,
   QualifyingTable,
   RaceEntry,
-  ResultTone,
-  StandingKind,
-  StandingRow,
-  StandingTable,
   WecRaceData,
   WecRound,
   WecSeasonData,
 } from './types';
+
+export { parseStandings } from '../../../lib/wikiStandings';
 
 const MONTHS = [
   'january',
@@ -209,104 +208,6 @@ function parseWinners(doc: Document): {
 }
 
 // ---------- Season: standings ----------
-
-const TONES: Record<string, ResultTone> = {
-  '#ffffbf': 'gold',
-  '#dfdfdf': 'silver',
-  '#ffdf9f': 'bronze',
-  '#dfffdf': 'points',
-  '#cfcfff': 'nopoints',
-  '#efcfff': 'retired',
-  '#000000': 'excluded',
-  '#ffffff': 'dns',
-  '#ffcfcf': 'withdrawn',
-};
-
-function slug(s: string): string {
-  return (
-    s
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '') || 'table'
-  );
-}
-
-function kindOf(nameHeader: string, title: string): StandingKind {
-  if (/driver/i.test(nameHeader)) return 'drivers';
-  if (/manufacturer/i.test(nameHeader)) return 'manufacturers';
-  if (/driver/i.test(title)) return 'drivers';
-  if (/manufacturer/i.test(title)) return 'manufacturers';
-  return 'teams';
-}
-
-function isStandings(t: WikiTable): boolean {
-  return /^Pos/i.test(t.columns[0] ?? '') && /points/i.test(t.columns[t.columns.length - 1] ?? '');
-}
-
-export function parseStandings(doc: Document, tables = wikiTables(doc)): StandingTable[] {
-  const out: StandingTable[] = [];
-  const used = new Set<string>();
-  for (const table of tables.filter(isStandings)) {
-    const last = table.columns.length - 1;
-    const roundCols = table.columns
-      .map((_, i) => i)
-      .filter((i) => i > 1 && i < last && table.head.some((r) => (r[i]?.links.length ?? 0) > 0));
-    if (roundCols.length === 0) continue;
-    const extraCols = table.columns.map((_, i) => i).filter((i) => i > 1 && i < roundCols[0]);
-    const extra = extraCols[extraCols.length - 1] ?? -1;
-    const title = table.heading ?? 'Зачёт';
-    const carFirst = /^(Car|No)/i.test(table.columns[1] ?? '');
-    let id = slug(title);
-    for (let n = 2; used.has(id); n++) id = `${slug(title)}-${n}`;
-    used.add(id);
-
-    const rows: StandingRow[] = [];
-    for (const posGroup of groupRows(table.rows, 0)) {
-      const posText = textAt(posGroup[0], 0);
-      if (!posText || /source|note/i.test(posText)) continue;
-      // Co-drivers can share one position cell; each name is its own entry.
-      for (const group of groupRows(posGroup, 1)) {
-        // Team trophies list the car number first and the team next to it.
-        const byCar = carFirst && extra >= 0;
-        const name = namedCell(cellAt(group[0], byCar ? extra : 1));
-        if (!name) continue;
-        const points = textAt(group[0], last);
-        const extraText = extra >= 0 ? orNull(textAt(group[0], byCar ? 1 : extra)) : null;
-        rows.push({
-          pos: intOf(posText),
-          posText,
-          name,
-          extra: byCar && extraText ? `№ ${extraText}` : extraText,
-          lines: group.map((row) =>
-            roundCols.map((i) => {
-              const c = cellAt(row, i);
-              return { text: c?.text ?? '', tone: c?.bg ? (TONES[c.bg] ?? null) : null };
-            }),
-          ),
-          points,
-          pointsValue: /^-?\d+(?:\.\d+)?/.test(points) ? parseFloat(points) : null,
-        });
-      }
-    }
-    if (rows.length === 0) continue;
-    const nameHeader = (carFirst && extra >= 0 ? table.columns[extra] : table.columns[1]) ?? '';
-    out.push({
-      id,
-      title,
-      kind: kindOf(nameHeader, title),
-      nameHeader,
-      extraHeader: extra >= 0 ? (carFirst ? 'Машина' : table.columns[extra]) : null,
-      rounds: roundCols.map((i) => {
-        const head = table.head.map((r) => r[i]).find((c) => c && c.links.length > 0);
-        return { abbr: head?.text || table.columns[i], report: head?.links[0]?.title ?? null };
-      }),
-      rows,
-    });
-  }
-  return out;
-}
 
 /** The season from the HTML of its "Calendar/Schedule" and "Results and standings" sections. */
 export function parseSeason(

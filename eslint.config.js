@@ -27,28 +27,40 @@ export default tseslint.config(
     },
   },
   {
-    // Shared code and other series must not depend on F1: anything both need lives outside series/f1.
-    files: [
-      'src/series/wec/**/*.{ts,tsx}',
-      'src/{api,data,hooks,lib}/**/*.{ts,tsx}',
-      'src/components/{ui,DataState,SortableTable,CircuitMap}.tsx',
-    ],
-    ignores: ['**/*.test.{ts,tsx}'],
+    // Shared code must not depend on a championship.
+    files: ['src/{api,data,hooks,lib}/**/*.{ts,tsx}', 'src/components/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}', 'src/components/Layout.tsx'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
           patterns: [
             {
-              // Any relative path through an `f1` folder: '../series/f1/…' from shared code, '../../f1/…' from WEC.
-              regex: String.raw`^\.{1,2}/(.*/)?f1(/|$)`,
-              message: 'Общий код и WEC не импортируют F1.',
+              // Match relative paths through any series folder.
+              regex: String.raw`^\.{1,2}/(.*/)?(f1|wec|fe)(/|$)`,
+              message: 'Общий код не импортирует серии.',
             },
           ],
         },
       ],
     },
   },
+  ...['f1', 'wec', 'fe'].map((series) => ({
+    files: [`src/series/${series}/**/*.{ts,tsx}`],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: `^\\.{1,2}/(.*/)?(${['f1', 'wec', 'fe'].filter((id) => id !== series).join('|')})(/|$)`,
+              message: 'Серии не импортируют друг друга; общее находится в src/.',
+            },
+          ],
+        },
+      ],
+    },
+  })),
   {
     files: ['**/*.mjs', '*.config.{js,ts}'],
     languageOptions: { globals: globals.node },

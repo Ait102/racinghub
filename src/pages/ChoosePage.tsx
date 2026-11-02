@@ -39,6 +39,18 @@ export function ChoosePage() {
           </p>
           <span className="series-card__cta">Открыть →</span>
         </Link>
+
+        <Link to="/fe" className="series-card series-card--fe">
+          <span className="series-card__mark" aria-hidden="true">
+            FE
+          </span>
+          <h2 className="series-card__title">Formula E</h2>
+          <p className="series-card__text">
+            Электрические гонки. Основа раздела и выбор сезонов с 2014–15. Календарь, результаты и зачёты пока
+            в разработке.
+          </p>
+          <span className="series-card__cta">Открыть →</span>
+        </Link>
       </div>
     </section>
   );

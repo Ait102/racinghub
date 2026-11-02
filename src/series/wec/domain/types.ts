@@ -1,14 +1,17 @@
+import type { Named, StandingTable } from '../../../lib/wikiStandings';
 // WEC data model. Everything the source may leave out is nullable: missing data is
 // shown as "—", never guessed. Points and positions are kept exactly as published.
 import type { WikiFlag } from '../../../lib/wikitable';
 
-/** A person, team, manufacturer or place, with its Wikipedia article if linked. */
-export interface Named {
-  name: string;
-  /** Wikipedia article title; null when the source does not link one. */
-  article: string | null;
-  flag: WikiFlag | null;
-}
+export type {
+  Named,
+  ResultTone,
+  ResultCell,
+  StandingRound,
+  StandingRow,
+  StandingKind,
+  StandingTable,
+} from '../../../lib/wikiStandings';
 
 export interface ClassWinner {
   /** Class as the source names it, e.g. "Hypercar", "LMGTE Am". */
@@ -40,48 +43,6 @@ export interface CancelledRace {
   name: string;
   circuit: Named | null;
   dateText: string;
-}
-
-/** Color of a result cell in a standings table, as Wikipedia colors it. */
-export type ResultTone =
-  'gold' | 'silver' | 'bronze' | 'points' | 'nopoints' | 'retired' | 'excluded' | 'dns' | 'withdrawn' | null;
-
-export interface ResultCell {
-  text: string;
-  tone: ResultTone;
-}
-
-export interface StandingRound {
-  /** Short name used by the source, e.g. "LMS". */
-  abbr: string;
-  /** Race article the column links to. */
-  report: string | null;
-}
-
-export interface StandingRow {
-  pos: number | null;
-  posText: string;
-  name: Named;
-  /** Extra column such as the team (drivers) or the car number (teams). */
-  extra: string | null;
-  /** One line per car counted (manufacturers can score with two cars). */
-  lines: ResultCell[][];
-  points: string;
-  pointsValue: number | null;
-}
-
-export type StandingKind = 'drivers' | 'manufacturers' | 'teams';
-
-export interface StandingTable {
-  /** Stable id for URLs, from the title. */
-  id: string;
-  title: string;
-  kind: StandingKind;
-  /** First column header for the name, e.g. "Driver". */
-  nameHeader: string;
-  extraHeader: string | null;
-  rounds: StandingRound[];
-  rows: StandingRow[];
 }
 
 export interface WecSeasonData {

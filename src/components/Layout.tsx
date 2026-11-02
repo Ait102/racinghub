@@ -3,6 +3,8 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 
 import { localTimeZone, utcOffsetLabel } from '../lib/format';
 import { rememberedSeason, rememberSeason, useSeasonParam, useSeasons } from '../series/f1/hooks/data';
+import { FeSeasonSelect } from '../series/fe/components/FeSeasonSelect';
+import { defaultFeSeason, feSeasonFromPath } from '../series/fe/data/seasons';
 import { WecSeasonSelect } from '../series/wec/components/WecSeasonSelect';
 import { defaultWecSeason, wecSeasonFromPath } from '../series/wec/hooks/data';
 import { Loading } from './DataState';
@@ -48,10 +50,11 @@ function SeasonSelect({ season }: { season: number | null }) {
   );
 }
 
-type Series = 'f1' | 'wec' | null;
+type Series = 'f1' | 'wec' | 'fe' | null;
 
 function seriesOf(pathname: string): Series {
   if (pathname === '/') return null;
+  if (pathname === '/fe' || pathname.startsWith('/fe/')) return 'fe';
   if (pathname === '/wec' || pathname.startsWith('/wec/')) return 'wec';
   return 'f1';
 }
@@ -60,6 +63,7 @@ function SeriesSwitch({ series, f1Home }: { series: Series; f1Home: string }) {
   const items: Array<[Exclude<Series, null>, string, string]> = [
     ['f1', 'F1', f1Home],
     ['wec', 'WEC', '/wec'],
+    ['fe', 'FE', '/fe'],
   ];
   return (
     <nav className="series-switch" aria-label="Чемпионат">
@@ -87,12 +91,13 @@ export function Layout() {
     if (season !== null) rememberSeason(season);
   }, [season]);
 
-  // Section colors: F1 is black and red, WEC black and blue (see 14-wec.css).
+  // Each series sets its accent through the theme stylesheet.
   useEffect(() => {
     document.documentElement.dataset.series = series ?? 'none';
   }, [series]);
 
   const wecSeason = wecSeasonFromPath(pathname) ?? (series === 'wec' ? defaultWecSeason() : null);
+  const feSeason = feSeasonFromPath(pathname) ?? (series === 'fe' ? defaultFeSeason() : null);
   const tz = localTimeZone();
   const links: Array<[string, string]> =
     series === 'f1' && navSeason
@@ -116,7 +121,17 @@ export function Layout() {
               [`/wec/${wecSeason}/compare`, 'Сравнение'],
               [`/wec/${wecSeason}/about`, 'Источники'],
             ]
-          : [];
+          : series === 'fe' && feSeason
+            ? [
+                [`/fe/${feSeason}`, 'Главная'],
+                [`/fe/${feSeason}/calendar`, 'Календарь'],
+                [`/fe/${feSeason}/standings`, 'Зачёты'],
+                [`/fe/${feSeason}/drivers`, 'Пилоты'],
+                [`/fe/${feSeason}/teams`, 'Команды'],
+                [`/fe/${feSeason}/compare`, 'Сравнение'],
+                [`/fe/${feSeason}/about`, 'Источники'],
+              ]
+            : [];
 
   return (
     <div className="app">
@@ -149,6 +164,7 @@ export function Layout() {
           <SeriesSwitch series={series} f1Home={navSeason ? `/${navSeason}` : '/f1'} />
           {series === 'f1' && <SeasonSelect season={season} />}
           {series === 'wec' && <WecSeasonSelect />}
+          {series === 'fe' && <FeSeasonSelect />}
         </div>
       </header>
       <main id="main" className="container main" tabIndex={-1}>
@@ -160,10 +176,14 @@ export function Layout() {
         <div className="container footer__inner">
           <p>
             Данные:{' '}
-            {series === 'wec' ? (
+            {series === 'wec' || series === 'fe' ? (
               <>
                 <a
-                  href="https://en.wikipedia.org/wiki/FIA_World_Endurance_Championship"
+                  href={
+                    series === 'fe'
+                      ? 'https://en.wikipedia.org/wiki/Formula_E'
+                      : 'https://en.wikipedia.org/wiki/FIA_World_Endurance_Championship'
+                  }
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -193,7 +213,7 @@ export function Layout() {
                 </a>
               </>
             )}
-            . Некоммерческий неофициальный проект, не связан с Formula 1, FIA и WEC.
+            . Некоммерческий неофициальный проект, не связан с Formula 1, FIA, WEC и Formula E.
           </p>
           <p>
             Время показано в зоне <strong>{tz}</strong> ({utcOffsetLabel(tz)}). Наведите на время, чтобы

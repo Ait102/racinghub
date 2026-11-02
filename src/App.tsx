@@ -5,11 +5,14 @@ import { ErrorBox, Loading } from './components/DataState';
 import { Layout } from './components/Layout';
 import { ChoosePage } from './pages/ChoosePage';
 import { rememberedSeason, useSeasons } from './series/f1/hooks/data';
+import { defaultFeSeason } from './series/fe/data/seasons';
 import { defaultWecSeason } from './series/wec/hooks/data';
 
 // Each series is its own chunk: a visitor of one series does not download the other.
 const f1 = () => import('./series/f1/pages');
 const wec = () => import('./series/wec/pages');
+const fe = () => import('./series/fe/pages');
+const FePage = lazy(() => fe().then((m) => ({ default: m.FePage })));
 const AboutPage = lazy(() => f1().then((m) => ({ default: m.AboutPage })));
 const CalendarPage = lazy(() => f1().then((m) => ({ default: m.CalendarPage })));
 const ChartPage = lazy(() => f1().then((m) => ({ default: m.ChartPage })));
@@ -29,6 +32,10 @@ const WecProfilePage = lazy(() => wec().then((m) => ({ default: m.WecProfilePage
 const WecRacePage = lazy(() => wec().then((m) => ({ default: m.WecRacePage })));
 const WecStandingsPage = lazy(() => wec().then((m) => ({ default: m.WecStandingsPage })));
 const WecSourcesPage = lazy(() => wec().then((m) => ({ default: m.WecSourcesPage })));
+
+function FeEntry() {
+  return <Navigate to={`/fe/${defaultFeSeason()}`} replace />;
+}
 
 /** /f1 → the remembered or latest F1 season. */
 function F1Entry() {
@@ -88,6 +95,15 @@ export function App() {
         <Route element={<Layout />}>
           <Route index element={<ChoosePage />} />
           <Route path="f1" element={<F1Entry />} />
+          <Route path="fe">
+            <Route index element={<FeEntry />} />
+            <Route path=":season">
+              <Route index element={<FePage />} />
+              {['calendar', 'standings', 'drivers', 'teams', 'compare', 'about'].map((section) => (
+                <Route key={section} path={section} element={<FePage />} />
+              ))}
+            </Route>
+          </Route>
           <Route path="wec">
             <Route index element={<Navigate to={`/wec/${defaultWecSeason()}`} replace />} />
             <Route path=":season">
