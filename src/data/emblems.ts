@@ -1,10 +1,10 @@
-// Manufacturer emblems are registered trademarks of their owners. They are shown only to
-// identify the manufacturer, next to its name, on a non-commercial fan site.
+// Manufacturer emblems for WEC and Formula E. They are registered trademarks of their owners and are
+// shown only to identify the manufacturer, next to its name, on a non-commercial fan site.
 // Files live in public/logos/ (some are shared with F1): only the emblem, cropped and
 // shown in a circle of the manufacturer color. Every file needs a row here with its source and licence.
-import type { EmblemEntry } from '../../../components/Emblem';
+import type { EmblemEntry } from '../components/Emblem';
 
-interface WecEmblem extends EmblemEntry {
+export interface MakeEmblem extends EmblemEntry {
   /** Circle color (decorative, not data). */
   color: string;
 }
@@ -13,7 +13,7 @@ const PD = 'Public domain (PD-textlogo), товарный знак';
 const FAIR = 'Несвободный (fair use в Википедии)';
 
 /** Keyed by the manufacturer's name as the source writes it, lower case. */
-const EMBLEMS: Readonly<Record<string, WecEmblem>> = {
+const EMBLEMS: Readonly<Record<string, MakeEmblem>> = {
   toyota: {
     file: 'toyota.png',
     source: 'https://commons.wikimedia.org/wiki/File:Toyota_carlogo.svg',
@@ -158,25 +158,90 @@ const EMBLEMS: Readonly<Record<string, WecEmblem>> = {
     tone: 'white',
     color: '#bb0a30',
   },
+  // Formula E makes (powertrains). Cropped to the emblem, 128 px PNG.
+  jaguar: {
+    file: 'jaguar.png',
+    source: 'https://en.wikipedia.org/wiki/File:Jaguar_logo_2021.svg',
+    license: FAIR,
+    holder: 'Jaguar Land Rover',
+    tone: 'white',
+    color: '#0f5c3a',
+  },
+  mahindra: {
+    file: 'mahindra.png',
+    source: 'https://commons.wikimedia.org/wiki/File:Mahindra_Automotive_new_logo.png',
+    license: PD,
+    holder: 'Mahindra & Mahindra',
+    tone: 'white',
+    color: '#c8102e',
+  },
+  ds: {
+    file: 'ds.png',
+    source: 'https://en.wikipedia.org/wiki/File:DS_Automobiles_logo.svg',
+    license: FAIR,
+    holder: 'Stellantis',
+    tone: 'color',
+    color: '#2a2a2a',
+  },
+  citroën: {
+    file: 'citroen.png',
+    source: 'https://commons.wikimedia.org/wiki/File:Citro%C3%ABn_Logo.svg',
+    license: PD,
+    holder: 'Stellantis',
+    tone: 'color',
+    color: '#2a2a2a',
+  },
+  maserati: {
+    file: 'maserati.png',
+    source: 'https://commons.wikimedia.org/wiki/File:Maserati_logo_2.svg',
+    license: PD,
+    holder: 'Maserati S.p.A.',
+    tone: 'white',
+    color: '#0c2340',
+  },
+  lola: {
+    file: 'lola.png',
+    source: 'https://commons.wikimedia.org/wiki/File:Lola_Cars_logo.png',
+    license: PD,
+    holder: 'Lola Cars',
+    tone: 'color',
+    color: '#2a2a2a',
+  },
+  nio: {
+    file: 'nio.png',
+    source: 'https://commons.wikimedia.org/wiki/File:NIO_logo.svg',
+    license: PD,
+    holder: 'NIO Inc.',
+    tone: 'white',
+    color: '#1f6f8b',
+  },
+  renault: {
+    file: 'renault.png',
+    source: 'https://commons.wikimedia.org/wiki/File:Renault_2021.svg',
+    license: PD,
+    holder: 'Renault Group',
+    tone: 'color',
+    color: '#f2c200',
+  },
 };
 
-const ALIASES: Readonly<Record<string, string>> = { chevrolet: 'corvette' };
+const ALIASES: Readonly<Record<string, string>> = { chevrolet: 'corvette', citroen: 'citroën' };
 
 /**
  * Emblem of a team: by its own name ("Toyota Gazoo Racing"), else by the cars it entered when they
  * are all of one make — a customer team such as The Bend Manthey runs Porsches.
  */
-export function teamEmblem(name: string, cars: readonly string[] = []): WecEmblem | null {
+export function teamEmblem(name: string, cars: readonly string[] = []): MakeEmblem | null {
   const own = emblemOf(name);
   if (own) return own;
   const makes = cars.map(emblemOf);
   return makes.length > 0 && makes.every((make) => make && make === makes[0]) ? makes[0] : null;
 }
 
-/** Attribution directory shown on the WEC sources page. */
-export const wecEmblemSources = Object.entries(EMBLEMS).map(([name, entry]) => ({
+/** Attribution directory shown on the sources pages. */
+export const emblemSources = Object.entries(EMBLEMS).map(([name, entry]) => ({
   name:
-    ({ bmw: 'BMW', mclaren: 'McLaren' } as Record<string, string>)[name] ??
+    ({ bmw: 'BMW', mclaren: 'McLaren', ds: 'DS', nio: 'NIO' } as Record<string, string>)[name] ??
     name.replace(/\b\w/g, (c) => c.toUpperCase()),
   ...entry,
 }));
@@ -185,7 +250,7 @@ export const wecEmblemSources = Object.entries(EMBLEMS).map(([name, entry]) => (
  * Emblem of the manufacturer a name starts with: "Toyota", "Toyota Gazoo Racing",
  * "Mercedes-AMG Team …". Customer teams with their own name ("AF Corse") get none.
  */
-export function emblemOf(name: string): WecEmblem | null {
+export function emblemOf(name: string): MakeEmblem | null {
   const n = name.toLowerCase();
   for (const key of [...Object.keys(EMBLEMS), ...Object.keys(ALIASES)]) {
     if (n === key || n.startsWith(`${key} `) || n.startsWith(`${key}-`)) {

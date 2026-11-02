@@ -10,7 +10,12 @@ import { FeCalendarPage } from './FeCalendarPage';
 import { FeHomePage } from './FeHomePage';
 import { FeStandingsPage } from './FeStandingsPage';
 
-vi.mock('../hooks/data', () => ({ useFeRace: vi.fn(), useFeSeason: vi.fn() }));
+vi.mock('../hooks/data', () => ({
+  useFeRace: vi.fn(),
+  useFeSeason: vi.fn(),
+  // Emblems read the entry list; these page tests do not need it.
+  useFeTeamPowertrains: () => new Map(),
+}));
 
 const named = (name: string) => ({ name, article: name, flag: null });
 const meta = {

@@ -28,7 +28,7 @@ function Participants({ season, drivers }: { season: string; drivers: boolean })
     {
       key: 'name',
       header: drivers ? 'Пилот' : 'Команда',
-      render: (row) => <NameFlag who={row.who} kind={drivers ? 'driver' : 'team'} />,
+      render: (row) => <NameFlag who={row.who} kind={drivers ? 'driver' : 'team'} emblem={!drivers} />,
       sortValue: (row) => row.who.name,
     },
     {
@@ -46,7 +46,12 @@ function Participants({ season, drivers }: { season: string; drivers: boolean })
         row.partners.length ? (
           <span className="fe-partners">
             {row.partners.map((p) => (
-              <NameFlag key={p.article ?? p.name} who={p} kind={drivers ? 'team' : 'driver'} />
+              <NameFlag
+                key={p.article ?? p.name}
+                who={p}
+                kind={drivers ? 'team' : 'driver'}
+                emblem={drivers}
+              />
             ))}
           </span>
         ) : (

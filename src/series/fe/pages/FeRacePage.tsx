@@ -67,7 +67,7 @@ function RaceView({ season }: { season: string }) {
           <h2 className="card__title">Победитель</h2>
           <NameFlag who={r.winner} strong />
           <p className="muted">
-            <NameFlag who={r.winningTeam} kind="team" />
+            <NameFlag who={r.winningTeam} kind="team" emblem />
           </p>
         </article>
         <article className="card">
@@ -207,7 +207,7 @@ function Classification({ rows }: { rows: FeRaceEntry[] }) {
     {
       key: 'team',
       header: 'Команда',
-      render: (r) => <NameFlag who={r.team} kind="team" />,
+      render: (r) => <NameFlag who={r.team} kind="team" emblem />,
       sortValue: (r) => r.team?.name ?? null,
     },
     { key: 'laps', header: 'Круги', align: 'right', render: (r) => r.laps ?? '—' },

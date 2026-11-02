@@ -32,4 +32,19 @@ describe('emblemOf', () => {
     expect(teamEmblem('Inter Europol Competition', ['Oreca 07'])).toBeNull();
     expect(teamEmblem('Iron Lynx')).toBeNull();
   });
+
+  it('covers Formula E makes by team name or powertrain', () => {
+    expect(emblemOf('Jaguar TCS Racing')?.file).toBe('jaguar.png');
+    expect(emblemOf('DS Penske')?.file).toBe('ds.png');
+    expect(emblemOf('Citroën Racing')?.file).toBe('citroen.png');
+    expect(emblemOf('Lola-Yamaha T001')?.file).toBe('lola.png');
+    expect(teamEmblem('Andretti Formula E', ['Porsche 99X Electric'])?.file).toBe('porsche.png');
+    expect(teamEmblem('Envision Racing', ['Jaguar I-Type 7'])?.file).toBe('jaguar.png');
+    expect(teamEmblem('Cupra Kiro', ['Porsche 99X Electric WCG3'])?.file).toBe('porsche.png');
+    // "Dsomething" or a name merely containing a make is not that make.
+    expect(emblemOf('Dragon Racing')).toBeNull();
+    for (const name of ['Jaguar', 'Mahindra', 'DS', 'Citroën', 'Maserati', 'Lola', 'NIO', 'Renault']) {
+      expect(logoFiles).toContain(emblemOf(name)!.file);
+    }
+  });
 });

@@ -166,7 +166,7 @@ function LastRace({ data }: { data: FeSeasonData }) {
             <div>
               <dt>Команда</dt>
               <dd>
-                <NameFlag who={last.winningTeam} kind="team" />
+                <NameFlag who={last.winningTeam} kind="team" emblem />
               </dd>
             </div>
             <div>
@@ -215,7 +215,7 @@ function Podium({ season, round }: { season: string; round: FeRound }) {
                   </span>
                   <NameFlag who={row.driver} />
                   <span className="muted small">
-                    <NameFlag who={row.team} kind="team" />
+                    <NameFlag who={row.team} kind="team" emblem />
                   </span>
                 </li>
               ))}
@@ -245,7 +245,11 @@ function Leaders({ season, tables }: { season: string; tables: StandingTable[] }
                 }
               >
                 <span className={posClass('fe-leaders__pos', row.pos)}>{row.posText}</span>
-                <NameFlag who={row.name} kind={table.kind === 'drivers' ? 'driver' : 'team'} />
+                <NameFlag
+                  who={row.name}
+                  kind={table.kind === 'drivers' ? 'driver' : 'team'}
+                  emblem={table.kind !== 'drivers'}
+                />
                 <span className="fe-leaders__pts">{row.points || '—'}</span>
               </li>
             ))}

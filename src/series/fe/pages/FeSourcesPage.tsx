@@ -1,7 +1,27 @@
 import { articleUrl } from '../../../api/wikipedia';
+import { Emblem } from '../../../components/Emblem';
 import { PageHeader } from '../../../components/PageHeader';
+import { emblemSources } from '../../../data/emblems';
 import { seasonArticle, seasonLabel } from '../data/seasons';
 import { FeGuard } from './common';
+
+/** Makes that have run Formula E powertrains or teams. */
+const FE_MAKES = [
+  'Audi',
+  'BMW',
+  'Citroën',
+  'DS',
+  'Jaguar',
+  'Lola',
+  'Mahindra',
+  'Maserati',
+  'McLaren',
+  'Mercedes',
+  'NIO',
+  'Nissan',
+  'Porsche',
+  'Renault',
+];
 
 export function FeSourcesPage() {
   return (
@@ -80,10 +100,41 @@ export function FeSourcesPage() {
             . Схема показывается только при подтверждённом совпадении конфигурации Formula E выбранного года.
             Похожая трасса Formula 1 не подставляется. Описание трассы и его источник доступны и без схемы.
           </p>
+          <h2>Профили и фото</h2>
+          <p>
+            Профили пилотов, команд и E-Prix читаются из их статей: цифры карьеры (старты, победы, подиумы,
+            поулы, титулы) — из карточки статьи, как их публикует Википедия, без пересчёта. Фото — только
+            свободные файлы Wikimedia Commons с автором и лицензией. Фото машины команды показывается, только
+            если в подписи снимка указана модель этого сезона; иначе фото нет.
+          </p>
+          <h2>Эмблемы производителей</h2>
+          <p>
+            Эмблема стоит у команды, если её название начинается с марки, иначе — по марке силовой установки
+            из заявки сезона (Andretti — Porsche, Envision — Jaguar). Это товарные знаки владельцев; ссылка на
+            исходный файл, его статус и правообладатель — ниже.
+          </p>
+          <ul className="fe-source-emblems">
+            {emblemSources
+              .filter((entry) => FE_MAKES.includes(entry.name))
+              .map((entry) => (
+                <li key={entry.name}>
+                  <Emblem entry={entry} color={entry.color} />
+                  <div>
+                    <a href={entry.source} target="_blank" rel="noreferrer">
+                      {entry.name}
+                    </a>
+                    <span className="muted small">
+                      {' '}
+                      · {entry.license} · © {entry.holder}
+                    </span>
+                  </div>
+                </li>
+              ))}
+          </ul>
           <h2>Избранное</h2>
           <p>
             Пилоты и команды сохраняются только в браузере, отдельно от Formula 1 и WEC. Добавить участника
-            можно в зачётах; его опубликованные место и очки появятся на главной сезона.
+            можно в зачётах или в его профиле; опубликованные место и очки появятся на главной сезона.
           </p>
           <h2>Неофициальный проект</h2>
           <p>

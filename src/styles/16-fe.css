@@ -466,3 +466,33 @@
     justify-self: center;
   }
 }
+.fe-cars {
+  margin-bottom: var(--s5);
+}
+.fe-cars__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.fe-cars__item {
+  min-width: 0;
+}
+/* In the grid a photo fills its own column, not the header size. */
+.fe-cars__item .photo--wide {
+  width: 100%;
+}
+.fe-cars__name {
+  font-size: 1rem;
+  margin: 0 0 var(--s3);
+}
+.fe-source-emblems {
+  list-style: none;
+  padding: 0;
+}
+.fe-source-emblems li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}

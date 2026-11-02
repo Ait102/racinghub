@@ -187,6 +187,7 @@ function StandingsTable({
                           kind={
                             table.kind === 'drivers' ? 'driver' : table.kind === 'teams' ? 'team' : 'external'
                           }
+                          emblem={table.kind !== 'drivers'}
                         />
                       </td>
                     </>

@@ -139,7 +139,12 @@ test('FE entry lists lead to driver, team and E-Prix profiles', async ({ page })
   await page.getByRole('button', { name: /Добавить Pascal Wehrlein в избранное/ }).click();
 
   await page.goto('./#/fe/2025-26/teams');
+  // Customer teams get the make of their powertrain.
+  await expect(
+    page.locator('tbody tr', { hasText: 'Andretti' }).locator('.team-logo--emblem img').first(),
+  ).toHaveAttribute('src', /porsche\.png$/);
   await page.getByRole('link', { name: 'Jaguar TCS Racing', exact: true }).first().click();
+  await expect(page.locator('.page-header .team-logo--emblem img')).toHaveAttribute('src', /jaguar\.png$/);
   await expect(page.locator('.stats')).toContainText('Гонки');
   await expect(page.locator('tbody tr', { hasText: '2016–17' })).toHaveCount(1);
 

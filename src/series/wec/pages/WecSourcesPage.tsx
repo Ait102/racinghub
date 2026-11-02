@@ -1,6 +1,6 @@
 import { Emblem } from '../../../components/Emblem';
 import { PageHeader } from '../../../components/PageHeader';
-import { wecEmblemSources } from '../data/emblems';
+import { emblemSources } from '../../../data/emblems';
 import { seasonLabel } from '../data/seasons';
 import { WecGuard } from './common';
 
@@ -102,11 +102,11 @@ export function WecSourcesPage() {
           <h2>Эмблемы производителей</h2>
           <p>
             Эмблемы служат для обозначения производителей. Это товарные знаки владельцев; ссылка на исходный
-            файл, его статус и правообладатель приведены ниже. Значки классов — условные изображения
-            автомобилей Racing Hub.
+            файл, его статус и правообладатель приведены ниже. Знаки классов «HYPER CAR» и «LM GT3» —
+            текстовые обозначения Racing Hub.
           </p>
           <ul className="wec-source-emblems">
-            {wecEmblemSources.map((entry) => (
+            {emblemSources.map((entry) => (
               <li key={entry.name}>
                 <Emblem entry={entry} color={entry.color} />
                 <div>

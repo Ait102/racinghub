@@ -11,10 +11,10 @@ import { SortableTable, type Column } from '../../../components/SortableTable';
 import { Stat } from '../../../components/ui';
 import { validArticle } from '../../../lib/wikiArticle';
 import type { Fact, ProfileCell, ProfileRow } from '../../../lib/wikiProfile';
-import { NameFlag, WikiSourceNote } from '../components/bits';
+import { FeEmblem, NameFlag, WikiSourceNote } from '../components/bits';
 import { seasonLabel } from '../data/seasons';
 import { summaryColumns, summaryRows, type FeProfileKind, type FeProfileTable } from '../domain/profiles';
-import { useFeProfile, useFeSeason } from '../hooks/data';
+import { useFeParticipants, useFeProfile, useFeSeason } from '../hooks/data';
 import { useFeFavorites } from '../hooks/favorites';
 import { FeGuard } from './common';
 
@@ -85,6 +85,7 @@ function Profile({ season, article, kind }: { season: string; article: string; k
           ) : null
         }
       >
+        {kind === 'team' && <FeEmblem who={{ name: canonical, article }} size="lg" />}
         {kind !== 'eprix' && (
           <div className="profile-actions">
             <ProfileFav
@@ -104,6 +105,9 @@ function Profile({ season, article, kind }: { season: string; article: string; k
         )}
       </PageHeader>
       {kind !== 'eprix' && <SeasonStanding season={season} articles={[article, canonical]} kind={kind} />}
+      {kind === 'team' && res.status === 'success' && (
+        <TeamCars season={season} articles={[article, canonical]} teamArticle={canonical} />
+      )}
       <DataState state={res}>
         {(profile) => {
           const tiles = TILES[kind]
@@ -178,6 +182,53 @@ function ProfileFav({
   const saved = [article, canonical].find((a) => isFav(kind, a));
   return (
     <FavToggle on={saved !== undefined} name={canonical} onToggle={() => toggle(kind, saved ?? article)} />
+  );
+}
+
+/** The season's car(s): photos from the team's own article whose caption names that powertrain. */
+function TeamCars({
+  season,
+  articles,
+  teamArticle,
+}: {
+  season: string;
+  articles: string[];
+  teamArticle: string;
+}) {
+  const entries = useFeParticipants(season, false);
+  if (entries.status !== 'success') return null;
+  const models =
+    entries.data.find((p) => p.who.article && articles.includes(p.who.article))?.powertrains ?? [];
+  if (models.length === 0) return null;
+  return (
+    <section className="fe-cars" aria-labelledby="fe-cars-title">
+      <h2 className="section-title" id="fe-cars-title">
+        Машина сезона {seasonLabel(season)}
+      </h2>
+      <p className="muted small">
+        Силовая установка — из заявки сезона. Фото — из статьи о команде, только с этой моделью в подписи.
+      </p>
+      <div className="fe-cars__grid">
+        {models.map((model) => (
+          <CarPhoto key={model} model={model} teamArticle={teamArticle} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CarPhoto({ model, teamArticle }: { model: string; teamArticle: string }) {
+  const state = usePhoto(`fe:car:${teamArticle}:${model}`, () =>
+    getArticlePhoto(teamArticle, { width: 900, photosOnly: true, model }),
+  );
+  return (
+    <div className="fe-cars__item">
+      <h3 className="fe-cars__name">{model}</h3>
+      <PhotoFigure state={state} alt={model} shape="wide" />
+      {state.status === 'done' && !state.photo && (
+        <p className="muted">У источника нет подтверждённого свободного фото этой модели.</p>
+      )}
+    </div>
   );
 }
 

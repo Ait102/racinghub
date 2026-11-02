@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 
 import { Emblem } from '../../../components/Emblem';
+import { teamEmblem } from '../../../data/emblems';
 import type { WikiFlag } from '../../../lib/wikitable';
-import { teamEmblem } from '../data/emblems';
 import { validArticle, type ProfileKind } from '../domain/profiles';
 import { WEC_STATUS_LABELS, type WecStatus } from '../domain/status';
 import type { Named } from '../domain/types';
