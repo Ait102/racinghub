@@ -124,3 +124,38 @@ test('FE pages fit a phone and reject an invalid season', async ({ page }) => {
   await page.goto('./#/fe/2026-28');
   await expect(page.getByRole('heading', { name: 'Такого сезона Formula E нет' })).toBeVisible();
 });
+
+test('FE entry lists lead to driver, team and E-Prix profiles', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/fe/2025-26/drivers');
+  await page.getByRole('searchbox', { name: /Поиск/ }).fill('Wehrlein');
+  await expect(page.locator('tbody tr')).toHaveCount(1);
+  await page.getByRole('link', { name: 'Pascal Wehrlein', exact: true }).click();
+  await expect(page).toHaveURL(/#\/fe\/2025-26\/driver\/Pascal%20Wehrlein$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Pascal Wehrlein');
+  await expect(page.locator('.stats')).toContainText('Старты');
+  await expect(page.locator('.fe-profile-season')).toContainText('169');
+  await expect(page.getByRole('heading', { name: 'Результаты по сезонам' })).toBeVisible();
+  await page.getByRole('button', { name: /Добавить Pascal Wehrlein в избранное/ }).click();
+
+  await page.goto('./#/fe/2025-26/teams');
+  await page.getByRole('link', { name: 'Jaguar TCS Racing', exact: true }).first().click();
+  await expect(page.locator('.stats')).toContainText('Гонки');
+  await expect(page.locator('tbody tr', { hasText: '2016–17' })).toHaveCount(1);
+
+  await page.goto('./#/fe/2025-26/eprix/Monaco%20ePrix');
+  await expect(page.getByRole('heading', { name: 'Победители по годам' })).toBeVisible();
+  await expect(page.locator('tbody tr').first()).toContainText('Sébastien Buemi');
+  expect(await page.evaluate(() => localStorage.getItem('racinghub:wec:favorites'))).toBeNull();
+});
+
+test('FE compares two drivers by season, as each article publishes them', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/fe/2025-26/compare?a=Pascal+Wehrlein&b=Mitch+Evans');
+  await expect(page.locator('.fe-compare-metrics')).toHaveCount(2);
+  await expect(page.locator('.fe-compare-metrics').first()).toContainText('Победы');
+  const season = page.locator('.fe-compare-seasons tbody tr', { hasText: '2016–17' });
+  await expect(season).toContainText('нет у источника');
+  await page.getByRole('button', { name: 'Поменять пилотов местами' }).click();
+  await expect(page).toHaveURL(/a=Mitch\+Evans&b=Pascal\+Wehrlein/);
+});

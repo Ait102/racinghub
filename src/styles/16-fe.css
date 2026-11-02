@@ -18,10 +18,6 @@
   color: #c4a3ff;
 }
 
-.fe-stage {
-  border-top: 3px solid var(--fe-purple);
-}
-
 :root[data-series='fe'] a:hover {
   color: #d6bfff;
 }
@@ -358,5 +354,115 @@
 @media (min-width: 1000px) {
   .choose__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Stage 2: entry lists, profiles, comparison */
+.fe-search {
+  display: grid;
+  gap: 6px;
+  max-width: 30rem;
+  margin-bottom: var(--s4);
+}
+.fe-search input {
+  width: 100%;
+  min-width: 0;
+}
+.fe-partners {
+  display: grid;
+  gap: 4px;
+}
+.fe-race-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+.fe-profile-season {
+  margin-bottom: var(--s5);
+}
+.fe-profile-summary {
+  margin: var(--s5) 0;
+}
+.fe-profile-summary p {
+  max-width: 78ch;
+  line-height: 1.7;
+}
+.fe-profile-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--s4);
+  margin: var(--s4) 0;
+}
+.fe-profile-facts dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+.fe-profile-facts dd {
+  margin: 0;
+  font-weight: 650;
+}
+.fe-profile-current td {
+  background: rgba(var(--accent-rgb), 0.08);
+}
+.fe-compare-pickers {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: var(--s3);
+}
+.fe-compare-picker {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.fe-compare-picker select {
+  width: 100%;
+  min-width: 0;
+}
+.fe-compare-drivers {
+  margin-top: var(--s5);
+}
+.fe-compare-drivers > .card {
+  min-width: 0;
+}
+.fe-compare-metrics {
+  margin: 0;
+}
+.fe-compare-metrics > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.fe-compare-metrics dt {
+  color: var(--muted);
+}
+.fe-compare-metrics dd {
+  margin: 0;
+  font-weight: 800;
+  text-align: right;
+}
+.fe-compare-results {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+.fe-compare-result {
+  display: block;
+  margin-top: 4px;
+}
+.fe-compare-seasons td {
+  white-space: normal;
+}
+@media (max-width: 560px) {
+  .fe-compare-pickers {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .fe-compare-pickers > button {
+    justify-self: center;
   }
 }

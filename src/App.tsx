@@ -12,7 +12,9 @@ import { defaultWecSeason } from './series/wec/hooks/data';
 const f1 = () => import('./series/f1/pages');
 const wec = () => import('./series/wec/pages');
 const fe = () => import('./series/fe/pages');
-const FePage = lazy(() => fe().then((m) => ({ default: m.FePage })));
+const FeParticipantsPage = lazy(() => fe().then((m) => ({ default: m.FeParticipantsPage })));
+const FeProfilePage = lazy(() => fe().then((m) => ({ default: m.FeProfilePage })));
+const FeComparePage = lazy(() => fe().then((m) => ({ default: m.FeComparePage })));
 const FeHomePage = lazy(() => fe().then((m) => ({ default: m.FeHomePage })));
 const FeCalendarPage = lazy(() => fe().then((m) => ({ default: m.FeCalendarPage })));
 const FeStandingsPage = lazy(() => fe().then((m) => ({ default: m.FeStandingsPage })));
@@ -108,9 +110,12 @@ export function App() {
               <Route path="standings" element={<FeStandingsPage />} />
               <Route path="about" element={<FeSourcesPage />} />
               <Route path="race/:round" element={<FeRacePage />} />
-              {['drivers', 'teams', 'compare'].map((section) => (
-                <Route key={section} path={section} element={<FePage />} />
-              ))}
+              <Route path="drivers" element={<FeParticipantsPage drivers />} />
+              <Route path="teams" element={<FeParticipantsPage drivers={false} />} />
+              <Route path="compare" element={<FeComparePage />} />
+              <Route path="driver/:article" element={<FeProfilePage kind="driver" />} />
+              <Route path="team/:article" element={<FeProfilePage kind="team" />} />
+              <Route path="eprix/:article" element={<FeProfilePage kind="eprix" />} />
             </Route>
           </Route>
           <Route path="wec">

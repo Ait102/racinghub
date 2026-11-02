@@ -13,6 +13,10 @@ const ROUTES = [
   './#/fe/2025-26/standings',
   './#/fe/2025-26/race/9',
   './#/fe/2014-15/about',
+  './#/fe/2025-26/drivers',
+  './#/fe/2025-26/driver/Pascal%20Wehrlein',
+  './#/fe/2025-26/eprix/Monaco%20ePrix',
+  './#/fe/2025-26/compare?a=Pascal+Wehrlein&b=Mitch+Evans',
   './#/wec/2026',
   './#/wec/2026/calendar',
   './#/wec/2026/race/3',
@@ -123,6 +127,8 @@ for (const width of [1280, 375]) {
           !/\/wec\/[^/]+\/(driver|team|circuit)\//.test(route) &&
           !(width === 1280 && route === './#/fe/2025-26/standings'),
         animations: 'disabled',
+        // Native <select> text is anti-aliased differently on each run; the chosen values are checked by E2E.
+        mask: [page.locator('main select')],
         timeout: 20_000,
         // Chromium sometimes lays out the narrow pages 1–2 px apart (sub-pixel rounding), which
         // shifts a few thin lines by ~50 pixels in total; a real layout change differs by far more.

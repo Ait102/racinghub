@@ -328,6 +328,11 @@ const FE_RACES: Record<string, string> = {
   '2026 Monaco ePrix': 'race-2026-monaco.html',
   '2026 London ePrix': 'race-2026-london.html',
   '2025 São Paulo ePrix': 'race-2025-sao-paulo.html',
+  // Profiles (stage 2): real trimmed articles.
+  'Pascal Wehrlein': 'driver-wehrlein.html',
+  'Mitch Evans': 'driver-evans.html',
+  'Jaguar TCS Racing': 'team-jaguar.html',
+  'Monaco ePrix': 'eprix-monaco.html',
 };
 const WEC_SEASONS: Record<string, string> = {
   '2026 FIA World Endurance Championship': '2026',

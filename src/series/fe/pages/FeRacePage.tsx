@@ -6,6 +6,7 @@ import { DataState, ErrorBox, Loading, MetaLine } from '../../../components/Data
 import { PageHeader } from '../../../components/PageHeader';
 import { SortableTable, type Column } from '../../../components/SortableTable';
 import { useNow } from '../../../hooks/useNow';
+import { validArticle } from '../../../lib/wikiArticle';
 import { FeStatusBadge, NameFlag, WikiFlagImg, WikiSourceNote } from '../components/bits';
 import { FeCircuitPanel } from '../components/FeCircuitPanel';
 import { seasonLabel } from '../data/seasons';
@@ -34,6 +35,8 @@ function RaceView({ season }: { season: string }) {
       </section>
     );
   const status = roundStatus(r, now);
+  // "2026 Monaco ePrix" → the event's own article "Monaco ePrix" with winners across the years.
+  const eprix = r.report?.replace(/^\d{4} /, '') ?? (/ePrix$/.test(r.name) ? r.name : null);
   return (
     <section className="page fe-page">
       <nav className="crumbs" aria-label="Навигация">
@@ -48,18 +51,23 @@ function RaceView({ season }: { season: string }) {
           {r.dateText || 'Даты не указаны'} <FeStatusBadge status={status} />
         </p>
         {r.raceNumber !== null && <p className="muted">Сдвоенный этап · Race {r.raceNumber}</p>}
-        {r.report && (
-          <a href={articleUrl(r.report)} target="_blank" rel="noreferrer">
-            Статья о гонке ↗
-          </a>
-        )}
+        <p className="fe-race-links">
+          {eprix && validArticle(eprix) && (
+            <Link to={`/fe/${season}/eprix/${encodeURIComponent(eprix)}`}>История E-Prix →</Link>
+          )}
+          {r.report && (
+            <a href={articleUrl(r.report)} target="_blank" rel="noreferrer">
+              Статья о гонке ↗
+            </a>
+          )}
+        </p>
       </PageHeader>
       <div className="fe-race-summary grid-2">
         <article className="card">
           <h2 className="card__title">Победитель</h2>
           <NameFlag who={r.winner} strong />
           <p className="muted">
-            <NameFlag who={r.winningTeam} />
+            <NameFlag who={r.winningTeam} kind="team" />
           </p>
         </article>
         <article className="card">
@@ -199,7 +207,7 @@ function Classification({ rows }: { rows: FeRaceEntry[] }) {
     {
       key: 'team',
       header: 'Команда',
-      render: (r) => <NameFlag who={r.team} />,
+      render: (r) => <NameFlag who={r.team} kind="team" />,
       sortValue: (r) => r.team?.name ?? null,
     },
     { key: 'laps', header: 'Круги', align: 'right', render: (r) => r.laps ?? '—' },

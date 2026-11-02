@@ -1,6 +1,10 @@
+import { Link, useLocation } from 'react-router-dom';
+
 import { articleUrl } from '../../../api/wikipedia';
+import { validArticle } from '../../../lib/wikiArticle';
 import type { Named } from '../../../lib/wikiStandings';
 import type { WikiFlag } from '../../../lib/wikitable';
+import { feSeasonFromPath } from '../data/seasons';
 import { FE_STATUS_LABELS, type FeStatus } from '../domain/status';
 
 export function WikiFlagImg({ flag }: { flag: WikiFlag | null | undefined }) {
@@ -10,23 +14,31 @@ export function WikiFlagImg({ flag }: { flag: WikiFlag | null | undefined }) {
   );
 }
 
-/** Profile pages are a later stage; linked names open the actual source article. */
+/** Where a name leads: a driver or team profile on the site, or the source article. */
+export type FeLinkKind = 'driver' | 'team' | 'external';
+
 export function NameFlag({
   who,
   strong,
   link = true,
+  kind = 'driver',
 }: {
   who: Named | null | undefined;
   strong?: boolean;
   link?: boolean;
+  kind?: FeLinkKind;
 }) {
+  const season = feSeasonFromPath(useLocation().pathname);
   if (!who) return <span className="muted">—</span>;
   const text = strong ? <strong>{who.name}</strong> : who.name;
+  const article = link && who.article && validArticle(who.article) ? who.article : null;
   return (
     <span className="with-flag">
       <WikiFlagImg flag={who.flag} />
-      {link && who.article ? (
-        <a href={articleUrl(who.article)} target="_blank" rel="noreferrer">
+      {article && season && kind !== 'external' ? (
+        <Link to={`/fe/${season}/${kind}/${encodeURIComponent(article)}`}>{text}</Link>
+      ) : article ? (
+        <a href={articleUrl(article)} target="_blank" rel="noreferrer">
           {text}
         </a>
       ) : (

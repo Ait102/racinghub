@@ -14,7 +14,13 @@ const pages = [
   { page: '2026 Monaco ePrix', file: 'race-2026-monaco' },
   { page: '2025 São Paulo ePrix', file: 'race-2025-sao-paulo' },
   { page: '2026 London ePrix', file: 'race-2026-london' },
+  { page: 'Pascal Wehrlein', file: 'driver-wehrlein' },
+  { page: 'Mitch Evans', file: 'driver-evans' },
+  { page: 'Jaguar Racing (Formula E)', file: 'team-jaguar' },
+  { page: 'Monaco ePrix', file: 'eprix-monaco' },
 ];
+// Profile articles keep the infobox, the lead and only the Formula E results tables.
+const PROFILE_HEADING = /Formula E.*results|^Results$|^Winners$/i;
 
 async function request(page, prop, section) {
   const url = new URL('https://en.wikipedia.org/w/api.php');
@@ -54,7 +60,29 @@ function save(page, file, html) {
   const doc = new JSDOM(html).window.document;
   doc.querySelectorAll('style,script,sup.reference,.mw-editsection').forEach((el) => el.remove());
   const parts = [];
-  if (file.startsWith('race-')) {
+  if (/^(driver|team|eprix)-/.test(file)) {
+    const infobox = doc.querySelector('table.infobox');
+    if (infobox) parts.push(infobox.outerHTML);
+    const root = doc.querySelector('.mw-parser-output') ?? doc.body;
+    for (const element of root.children) {
+      if (/^H[2-6]$/.test(element.tagName) || element.classList.contains('mw-heading')) break;
+      if (element.tagName === 'P' && element.textContent.trim().length >= 50) {
+        parts.push(element.outerHTML);
+        break;
+      }
+    }
+    let level = 0;
+    for (const element of doc.querySelectorAll('h2,h3,h4,h5,table.wikitable')) {
+      if (/^H/.test(element.tagName)) {
+        const current = Number(element.tagName.slice(1));
+        if (level && current <= level) level = 0;
+        if (PROFILE_HEADING.test(element.textContent.trim())) {
+          level = current;
+          parts.push(`<h${current}>${element.textContent.trim()}</h${current}>`);
+        }
+      } else if (level && !element.parentElement?.closest('table.wikitable')) parts.push(element.outerHTML);
+    }
+  } else if (file.startsWith('race-')) {
     for (const infobox of doc.querySelectorAll('table.infobox')) parts.push(infobox.outerHTML);
     const root = doc.querySelector('.mw-parser-output') ?? doc.body;
     for (const element of root.children) {

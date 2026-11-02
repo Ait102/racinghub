@@ -166,7 +166,7 @@ function LastRace({ data }: { data: FeSeasonData }) {
             <div>
               <dt>Команда</dt>
               <dd>
-                <NameFlag who={last.winningTeam} />
+                <NameFlag who={last.winningTeam} kind="team" />
               </dd>
             </div>
             <div>
@@ -215,7 +215,7 @@ function Podium({ season, round }: { season: string; round: FeRound }) {
                   </span>
                   <NameFlag who={row.driver} />
                   <span className="muted small">
-                    <NameFlag who={row.team} />
+                    <NameFlag who={row.team} kind="team" />
                   </span>
                 </li>
               ))}
@@ -245,7 +245,7 @@ function Leaders({ season, tables }: { season: string; tables: StandingTable[] }
                 }
               >
                 <span className={posClass('fe-leaders__pos', row.pos)}>{row.posText}</span>
-                <NameFlag who={row.name} />
+                <NameFlag who={row.name} kind={table.kind === 'drivers' ? 'driver' : 'team'} />
                 <span className="fe-leaders__pts">{row.points || '—'}</span>
               </li>
             ))}
@@ -283,7 +283,17 @@ function Favorites({ tables, season }: { tables: StandingTable[]; season: string
             return (
               <li key={`${kind}:${article}`}>
                 <span className="fe-leaders__pos">{found?.row.posText || '—'}</span>
-                <span>{found ? <NameFlag who={found.row.name} /> : article}</span>
+                <span>
+                  {found ? (
+                    <NameFlag who={found.row.name} kind={kind === 'drivers' ? 'driver' : 'team'} />
+                  ) : (
+                    <Link
+                      to={`/fe/${season}/${kind === 'drivers' ? 'driver' : 'team'}/${encodeURIComponent(article)}`}
+                    >
+                      {article}
+                    </Link>
+                  )}
+                </span>
                 <span>
                   {found ? (
                     <>

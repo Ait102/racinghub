@@ -182,7 +182,12 @@ function StandingsTable({
                         <strong>{row.posText || '—'}</strong>
                       </td>
                       <td rowSpan={lines.length}>
-                        <NameFlag who={row.name} />
+                        <NameFlag
+                          who={row.name}
+                          kind={
+                            table.kind === 'drivers' ? 'driver' : table.kind === 'teams' ? 'team' : 'external'
+                          }
+                        />
                       </td>
                     </>
                   )}

@@ -1,0 +1,2 @@
+# Saved Wikipedia articles used as test fixtures: data, not code. Keeps them out of GitHub's language stats.
+src/series/*/__fixtures__/** linguist-vendored
