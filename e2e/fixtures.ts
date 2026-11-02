@@ -318,6 +318,17 @@ const PHOTOS: Record<string, [string, number, number]> = {
 // WEC: Wikipedia articles served from the same trimmed fixtures the unit tests use.
 const WEC_FIXTURES = fileURLToPath(new URL('../src/series/wec/__fixtures__/', import.meta.url));
 const wecFile = (name: string) => readFileSync(WEC_FIXTURES + name, 'utf8');
+const FE_FIXTURES = fileURLToPath(new URL('../src/series/fe/__fixtures__/', import.meta.url));
+const FE_SEASONS: Record<string, string> = {
+  '2014–15 Formula E Championship': '2014-15',
+  '2019–20 Formula E Championship': '2019-20',
+  '2025–26 Formula E World Championship': '2025-26',
+};
+const FE_RACES: Record<string, string> = {
+  '2026 Monaco ePrix': 'race-2026-monaco.html',
+  '2026 London ePrix': 'race-2026-london.html',
+  '2025 São Paulo ePrix': 'race-2025-sao-paulo.html',
+};
 const WEC_SEASONS: Record<string, string> = {
   '2026 FIA World Endurance Championship': '2026',
   '2012 FIA World Endurance Championship': '2012',
@@ -344,6 +355,28 @@ function wecParse(params: URLSearchParams, fail: boolean) {
   });
   if (fail) return { status: 503, headers: cors, body: '' };
   const page = params.get('page') ?? '';
+  const feSeason = FE_SEASONS[page];
+  if (feSeason && params.get('prop') === 'sections') {
+    return json({
+      parse: {
+        title: page,
+        sections: [
+          { index: '1', line: 'Calendar', toclevel: 1 },
+          { index: '2', line: 'Teams and drivers', toclevel: 1 },
+          { index: '5', line: 'Results and standings', toclevel: 1 },
+        ],
+      },
+    });
+  }
+  if (feSeason) {
+    const part =
+      params.get('section') === '1' ? 'calendar' : params.get('section') === '2' ? 'entries' : 'results';
+    return json({
+      parse: { title: page, text: readFileSync(FE_FIXTURES + `season-${feSeason}-${part}.html`, 'utf8') },
+    });
+  }
+  if (FE_RACES[page])
+    return json({ parse: { title: page, text: readFileSync(FE_FIXTURES + FE_RACES[page], 'utf8') } });
   // Deliberately small model-photo articles, not live data: exercise exact variant selection.
   const modelPhotos: Record<string, [string, string]> = {
     'Toyota GR010 Hybrid': ['GR010 test.jpg', 'Toyota TR010 Hybrid'],

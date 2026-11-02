@@ -8,6 +8,10 @@ import { mockApi } from './fixtures';
 const ROUTES = [
   './',
   './#/fe/2026-27',
+  './#/fe/2025-26',
+  './#/fe/2025-26/calendar',
+  './#/fe/2025-26/standings',
+  './#/fe/2025-26/race/9',
   './#/fe/2014-15/about',
   './#/wec/2026',
   './#/wec/2026/calendar',
@@ -35,7 +39,10 @@ const ROUTES = [
 
 const DOC_SHOTS: Record<string, string> = {
   './': 'choose',
-  './#/fe/2026-27': 'fe-home',
+  './#/fe/2025-26': 'fe-home',
+  './#/fe/2025-26/calendar': 'fe-calendar',
+  './#/fe/2025-26/standings': 'fe-standings',
+  './#/fe/2025-26/race/9': 'fe-race',
   './#/2026': 'home',
   './#/2026/calendar': 'calendar',
   './#/2026/chart': 'chart',
@@ -112,7 +119,9 @@ for (const width of [1280, 375]) {
       await expect(page).toHaveScreenshot(`w${width}${route.replace(/[^a-z0-9]+/gi, '-')}.png`, {
         // Long career tables exceed reliable full-page capture on Windows Chromium.
         // Their rows are covered by parser/E2E checks; capture the profile's first screen.
-        fullPage: !/\/wec\/[^/]+\/(driver|team|circuit)\//.test(route),
+        fullPage:
+          !/\/wec\/[^/]+\/(driver|team|circuit)\//.test(route) &&
+          !(width === 1280 && route === './#/fe/2025-26/standings'),
         animations: 'disabled',
         timeout: 20_000,
         // Chromium sometimes lays out the narrow pages 1–2 px apart (sub-pixel rounding), which
@@ -120,6 +129,13 @@ for (const width of [1280, 375]) {
         // The long WEC race table also varies at inline text/badge edges on Windows (measured: 1,755 px).
         maxDiffPixels: /\/wec\/[^/]+\/race\//.test(route) ? 2000 : 100,
       });
+      // Full-page FE standings capture stalls in Windows Chromium; cover its chart separately.
+      if (width === 1280 && route === './#/fe/2025-26/standings') {
+        await expect(page.locator('.fe-places-card')).toHaveScreenshot('w1280-fe-places-chart.png', {
+          animations: 'disabled',
+          maxDiffPixels: 100,
+        });
+      }
     });
   }
 }

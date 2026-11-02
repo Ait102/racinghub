@@ -46,8 +46,8 @@ export function ChoosePage() {
           </span>
           <h2 className="series-card__title">Formula E</h2>
           <p className="series-card__text">
-            Электрические гонки. Основа раздела и выбор сезонов с 2014–15. Календарь, результаты и зачёты пока
-            в разработке.
+            Электрические гонки: календарь, результаты, группы и дуэли квалификации, зачёты и график мест.
+            Сезоны с 2014–15.
           </p>
           <span className="series-card__cta">Открыть →</span>
         </Link>

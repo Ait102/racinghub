@@ -1,38 +1,126 @@
 import { expect, test } from '@playwright/test';
 
-test('Formula E shell has its theme, honest placeholders and remembered season', async ({ page }) => {
-  let wikiRequests = 0;
-  await page.route('https://en.wikipedia.org/**', (route) => {
-    wikiRequests++;
-    return route.abort();
-  });
-  await page.goto('./');
-  await page.getByRole('link', { name: /Formula E Электрические гонки/ }).click();
-  const currentYear = new Date().getFullYear();
-  await expect(page).toHaveURL(new RegExp(`#/fe/${currentYear}-`));
+import { mockApi } from './fixtures';
+
+test('FE navigation remembers selected season and keeps its licence', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/fe/2025-26');
   await expect(page.locator('html')).toHaveAttribute('data-series', 'fe');
-  await expect(page.locator('.fe-stage')).toContainText('пока не загружаются');
+  await expect(page.getByRole('progressbar')).toBeVisible();
+  await expect(page.locator('.fe-home-last')).toContainText('Последняя гонка');
   await page.getByRole('combobox', { name: 'Сезон' }).selectOption('2019-20');
   await page.getByRole('link', { name: 'Календарь', exact: true }).click();
-  await expect(page).toHaveURL(/#\/fe\/2019-20\/calendar$/);
-  await expect(page.getByRole('heading', { name: 'Календарь', exact: true })).toBeVisible();
+  await expect(page.locator('.fe-calendar-item').first()).toBeVisible();
   await page.getByRole('link', { name: 'Источники', exact: true }).click();
-  await expect(page.locator('main')).toContainText('2019–20 Formula E Championship');
   await expect(page.locator('footer')).toContainText('CC BY-SA 4.0');
-  await page.goto('./#/fe');
+  await page.getByRole('link', { name: 'FE', exact: true }).click();
   await expect(page).toHaveURL(/#\/fe\/2019-20$/);
   await page.reload();
   await expect(page.getByRole('combobox', { name: 'Сезон' })).toHaveValue('2019-20');
-  expect(wikiRequests).toBe(0);
 });
 
-test('Formula E works on a phone and rejects invalid seasons', async ({ page }) => {
+test('FE calendar keeps separate double-header rounds and qualifying', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/fe/2025-26/calendar');
+  await expect(page.locator('.fe-calendar-item')).toHaveCount(17);
+  await expect(page.locator('[data-round="9"]')).toContainText('гонка 1');
+  await expect(page.locator('[data-round="10"]')).toContainText('гонка 2');
+  await page.locator('[data-round="9"]').click();
+  await expect(page.locator('main')).toContainText('Nyck de Vries');
+  await expect(page.locator('main')).toContainText('Квалификация');
+  await page.getByRole('button', { name: 'Квалификация', exact: true }).click();
+  await expect(page.locator('main')).toContainText('Дуэли');
+  await expect(page.locator('main .meta').last()).toContainText('Википедия');
+  await page.getByRole('link', { name: 'Race 2', exact: true }).click();
+  await expect(page).toHaveURL(/#\/fe\/2025-26\/race\/10$/);
+  await expect(page.locator('.fe-race-summary')).toContainText('Oliver Rowland');
+  await expect(page.locator('main table tbody tr').first()).toContainText('Oliver Rowland');
+});
+
+test('FE single race includes classification and track details', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/fe/2025-26/race/1');
+  await expect(page.locator('main')).toContainText('São Paulo');
+  await expect(page.locator('main table').first()).toBeVisible();
+  await expect(page.locator('main')).toContainText('Квалификация');
+  await expect(page.locator('main')).toContainText('О трассе');
+});
+
+test('FE standings chart and favourites are independent of WEC', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/fe/2025-26/standings');
+  await expect(page.locator('.fe-places-chart svg')).toBeVisible();
+  await page.locator('.fe-places-chart svg').focus();
+  await page.keyboard.press('Home');
+  await expect(page.locator('.fe-places-chart [role="status"]')).toContainText('SAO');
+  const favorite = page.getByRole('button', { name: /^Добавить .* в избранное$/ }).first();
+  await favorite.click();
+  await expect(page.getByRole('button', { name: /^Убрать .* из избранного$/ }).first()).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await page.getByRole('link', { name: 'Главная', exact: true }).click();
+  await expect(page.locator('.fe-favorites-list li')).toHaveCount(1);
+  expect(await page.evaluate(() => localStorage.getItem('racinghub:wec:favorites'))).toBeNull();
+});
+
+test('FE first season and Berlin season keep historical calendars', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/fe/2014-15/calendar');
+  await expect(page.locator('.fe-calendar-item')).toHaveCount(11);
+  await page.getByRole('combobox', { name: 'Сезон' }).selectOption('2019-20');
+  await expect(page.locator('.fe-calendar-item')).toHaveCount(11);
+  await expect(page.locator('main')).toContainText('Berlin');
+});
+
+test('FE missing article stays friendly and source error can be retried', async ({ page }) => {
+  let fail = true;
+  await mockApi(page, undefined, { wecFail: () => fail });
+  await page.goto('./#/fe/2025-26/calendar');
+  await expect(page.getByRole('alert')).toBeVisible({ timeout: 20_000 });
+  fail = false;
+  await page.getByRole('button', { name: 'Повторить', exact: true }).click();
+  await expect(page.locator('.fe-calendar-item')).toHaveCount(17);
+  await page.goto('./#/fe/2026-27');
+  await expect(page.locator('main')).toContainText(/Статья сезона ещё не опубликована/i);
+  await expect(page.getByRole('alert')).toHaveCount(0);
+});
+
+test('FE pages fit a phone and reject an invalid season', async ({ page }) => {
+  await mockApi(page);
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto('./#/fe/2014-15/standings');
-  await expect(page.getByRole('heading', { level: 1, name: 'Зачёты' })).toBeVisible();
-  await page.getByRole('combobox', { name: 'Сезон' }).selectOption('2020-21');
-  await expect(page).toHaveURL(/#\/fe\/2020-21\/standings$/);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  for (const section of ['', '/calendar', '/standings', '/race/9', '/about']) {
+    await page.goto(`./#/fe/2025-26${section}`);
+    await expect(page.locator('main h1')).toBeVisible();
+    await expect(page.locator('.skeleton')).toHaveCount(0);
+    const overflow = await page.evaluate(() => ({
+      width: document.documentElement.scrollWidth,
+      viewport: innerWidth,
+      elements: [...document.querySelectorAll('main *')]
+        .filter((node) => node.getBoundingClientRect().right > innerWidth + 1 && !node.closest('table'))
+        .map((node) => ({
+          tag: node.tagName,
+          cls: node.className,
+          right: node.getBoundingClientRect().right,
+          width: node.getBoundingClientRect().width,
+          overflow: getComputedStyle(node).overflowX,
+        })),
+      wrappers: [
+        ...document.querySelectorAll(
+          'main, main > section, .fe-standings-scroll, .fe-places-card, .fe-places-chart, .fe-places-card .legend',
+        ),
+      ].map((node) => ({
+        tag: node.tagName,
+        cls: node.className,
+        right: node.getBoundingClientRect().right,
+        width: node.getBoundingClientRect().width,
+        scroll: node.scrollWidth,
+        overflow: getComputedStyle(node).overflowX,
+        display: getComputedStyle(node).display,
+      })),
+    }));
+    expect(overflow.width, `${section}: ${JSON.stringify(overflow)}`).toBeLessThanOrEqual(overflow.viewport);
+  }
   await page.goto('./#/fe/2026-28');
-  await expect(page.getByRole('heading', { name: 'Сезон не найден' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Такого сезона Formula E нет' })).toBeVisible();
 });

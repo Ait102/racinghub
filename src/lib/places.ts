@@ -32,7 +32,8 @@ export function placeSeries(table: StandingTable, limit: number): PlaceSeries[] 
           id: `${i}-${k}`,
           label,
           texts,
-          places: texts.map((t) => {
+          places: texts.map((t, j) => {
+            if (line[j]?.place !== undefined) return line[j].place!;
             const p = /^\d+$/.test(t) ? Number(t) : NaN;
             return Number.isSafeInteger(p) && p > 0 ? p : null;
           }),

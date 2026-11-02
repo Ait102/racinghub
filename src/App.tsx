@@ -13,6 +13,11 @@ const f1 = () => import('./series/f1/pages');
 const wec = () => import('./series/wec/pages');
 const fe = () => import('./series/fe/pages');
 const FePage = lazy(() => fe().then((m) => ({ default: m.FePage })));
+const FeHomePage = lazy(() => fe().then((m) => ({ default: m.FeHomePage })));
+const FeCalendarPage = lazy(() => fe().then((m) => ({ default: m.FeCalendarPage })));
+const FeStandingsPage = lazy(() => fe().then((m) => ({ default: m.FeStandingsPage })));
+const FeSourcesPage = lazy(() => fe().then((m) => ({ default: m.FeSourcesPage })));
+const FeRacePage = lazy(() => fe().then((m) => ({ default: m.FeRacePage })));
 const AboutPage = lazy(() => f1().then((m) => ({ default: m.AboutPage })));
 const CalendarPage = lazy(() => f1().then((m) => ({ default: m.CalendarPage })));
 const ChartPage = lazy(() => f1().then((m) => ({ default: m.ChartPage })));
@@ -98,8 +103,12 @@ export function App() {
           <Route path="fe">
             <Route index element={<FeEntry />} />
             <Route path=":season">
-              <Route index element={<FePage />} />
-              {['calendar', 'standings', 'drivers', 'teams', 'compare', 'about'].map((section) => (
+              <Route index element={<FeHomePage />} />
+              <Route path="calendar" element={<FeCalendarPage />} />
+              <Route path="standings" element={<FeStandingsPage />} />
+              <Route path="about" element={<FeSourcesPage />} />
+              <Route path="race/:round" element={<FeRacePage />} />
+              {['drivers', 'teams', 'compare'].map((section) => (
                 <Route key={section} path={section} element={<FePage />} />
               ))}
             </Route>

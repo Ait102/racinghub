@@ -1,4 +1,5 @@
 import {
+  cleanText,
   groupRows,
   wikiTables,
   type WikiCell,
@@ -22,6 +23,8 @@ export type ResultTone =
 export interface ResultCell {
   text: string;
   tone: ResultTone;
+  /** FE finishing position with superscript annotations removed; null for statuses. */
+  place?: number | null;
 }
 
 export interface StandingRound {
@@ -39,6 +42,8 @@ export interface StandingRow {
   extra: string | null;
   /** One line per car counted (manufacturers can score with two cars). */
   lines: ResultCell[][];
+  /** Published extra column for each car when the source shares a team cell. */
+  lineLabels?: string[];
   points: string;
   pointsValue: number | null;
 }
@@ -116,7 +121,9 @@ function kindOf(nameHeader: string, title: string): StandingKind {
 function isStandings(t: WikiTable, series: 'wec' | 'fe'): boolean {
   return (
     /^Pos/i.test(t.columns[0] ?? '') &&
-    (series === 'fe' ? /^(Points|Pts)\.?$/i : /points/i).test(t.columns[t.columns.length - 1] ?? '')
+    (series === 'fe'
+      ? t.columns.some((column) => /^(Points|Pts)\.?$/i.test(column))
+      : /points/i.test(t.columns[t.columns.length - 1] ?? ''))
   );
 }
 
@@ -128,7 +135,11 @@ export function parseStandings(
   const out: StandingTable[] = [];
   const used = new Set<string>();
   for (const table of tables.filter((table) => isStandings(table, series))) {
-    const last = table.columns.length - 1;
+    // Some FE source footers have an oversized colspan; the points header still locates the final data column.
+    const last =
+      series === 'fe'
+        ? table.columns.findIndex((column) => /^(Points|Pts)\.?$/i.test(column))
+        : table.columns.length - 1;
     const roundCols = table.columns
       .map((_, i) => i)
       .filter((i) => i > 1 && i < last && table.head.some((r) => (r[i]?.links.length ?? 0) > 0));
@@ -145,12 +156,14 @@ export function parseStandings(
     for (const posGroup of groupRows(table.rows, 0)) {
       const posText = textAt(posGroup[0], 0);
       if (!posText || /source|note/i.test(posText)) continue;
+      if (series === 'fe' && /^Pos(?:ition)?\.?$/i.test(posText)) continue;
       // Co-drivers can share one position cell; each name is its own entry.
       for (const group of groupRows(posGroup, 1)) {
         // Team trophies list the car number first and the team next to it.
         const byCar = carFirst && extra >= 0;
         const name = namedCell(cellAt(group[0], byCar ? extra : 1));
         if (!name) continue;
+        if (series === 'fe') name.name = textAt(group[0], byCar ? extra : 1);
         const points = textAt(group[0], last);
         const extraText = extra >= 0 ? orNull(textAt(group[0], byCar ? 1 : extra)) : null;
         rows.push({
@@ -161,9 +174,21 @@ export function parseStandings(
           lines: group.map((row) =>
             roundCols.map((i) => {
               const c = cellAt(row, i);
-              return { text: c?.text ?? '', tone: c?.bg ? (TONES[c.bg] ?? null) : null };
+              const result: ResultCell = { text: c?.text ?? '', tone: c?.bg ? (TONES[c.bg] ?? null) : null };
+              if (series === 'fe') {
+                const cell = c?.el.cloneNode(true) as Element | undefined;
+                cell?.querySelectorAll('sup').forEach((sup) => sup.remove());
+                const value = cell
+                  ? cleanText(cell)
+                      .replace(/[†‡*]+$/g, '')
+                      .trim()
+                  : '';
+                result.place = /^\d+$/.test(value) && Number(value) > 0 ? Number(value) : null;
+              }
+              return result;
             }),
           ),
+          ...(series === 'fe' && extra >= 0 ? { lineLabels: group.map((row) => textAt(row, extra)) } : {}),
           points,
           pointsValue: /^-?\d+(?:\.\d+)?/.test(points) ? parseFloat(points) : null,
         });
