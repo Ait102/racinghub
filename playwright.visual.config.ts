@@ -9,5 +9,6 @@ export default defineConfig({
   ...base,
   testMatch: 'visual.spec.ts',
   testIgnore: undefined,
-  fullyParallel: false,
+  // Every page/width is its own test: they run side by side.
+  fullyParallel: true,
 });

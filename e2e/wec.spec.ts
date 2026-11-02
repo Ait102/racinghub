@@ -155,11 +155,12 @@ test('WEC race links drivers and teams, team keeps multiple cars and historical 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Kamui Kobayashi');
 });
 
-test('WEC calendar links a circuit to event winners across years without nested links', async ({ page }) => {
+test('WEC race links its circuit to event winners across years without nested links', async ({ page }) => {
   await mockApi(page);
   await page.goto('./#/wec/2026/calendar');
   await expect(page.locator('a a')).toHaveCount(0);
-  await page.getByRole('link', { name: /История.*Spa/ }).click();
+  await page.locator('.race-card[data-round="2"]').click();
+  await page.getByRole('link', { name: 'О трассе и победители' }).click();
   await expect(page.locator('.wec-profile-history')).toContainText('1953');
   await expect(page.locator('.wec-profile-history')).toContainText('2025');
   await expect(page.getByText(/общих победителей/i)).toBeVisible();
@@ -183,9 +184,10 @@ test('WEC favorites, manufacturer emblems and the car photo of a team', async ({
   await mockApi(page);
   await page.goto('./#/wec/2026/team/Toyota%20Racing%20GmbH');
   await expect(page.locator('.page-header .team-logo--emblem img')).toHaveAttribute('src', /toyota\.png$/);
-  const car = page.locator('.wec-cars figure.photo');
-  await expect(car).toContainText('Toyota TR010 Hybrid');
-  await expect(car).toContainText('CC BY-SA 4.0');
+  const car = page.locator('.wec-cars__item');
+  await expect(car.getByRole('heading', { name: 'Toyota TR010 Hybrid', exact: true })).toBeVisible();
+  await expect(car.getByRole('img', { name: 'Toyota TR010 Hybrid', exact: true })).toBeVisible();
+  await expect(car.locator('figcaption')).toContainText('CC BY-SA 4.0');
 
   await page.goto('./#/wec/2026/driver/S%C3%A9bastien%20Buemi');
   await page.getByRole('button', { name: 'Добавить Sébastien Buemi в избранное' }).click();

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
 import { SortableTable, type Column } from '../../../components/SortableTable';
-import { NameFlag, WikiSourceNote } from '../components/bits';
+import { ClassList, NameFlag, WikiSourceNote } from '../components/bits';
 import { seasonLabel } from '../data/seasons';
 import type { Participant } from '../domain/participants';
 import { useWecParticipants } from '../hooks/data';
@@ -31,7 +31,12 @@ function Participants({ season, drivers }: { season: string; drivers: boolean })
       render: (row) => <NameFlag who={row.who} kind={drivers ? 'driver' : 'team'} emblem={!drivers} />,
       sortValue: (row) => row.who.name,
     },
-    { key: 'category', header: 'Классы и зачёты', render: (row) => row.categories.join(' · ') },
+    {
+      key: 'category',
+      header: 'Классы и зачёты',
+      render: (row) => <ClassList classes={row.categories} />,
+      sortValue: (row) => row.categories.join(' '),
+    },
   ];
   return (
     <section className="page">

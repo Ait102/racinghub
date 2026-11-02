@@ -307,9 +307,12 @@ const PHOTO_SVG = (w: number, h: number, color: string) =>
 
 const PHOTOS: Record<string, [string, number, number]> = {
   'File:Buemi test.jpg': ['portrait.svg', 480, 640],
+  'File:Kobayashi test.png': ['portrait.svg', 480, 640],
   'File:Russell test.jpg': ['portrait.svg', 480, 640],
   'File:FIA F1 Austria 2026 Nr. 12 Antonelli (1).jpg': ['car.svg', 900, 450],
   'File:GR010 test.jpg': ['car.svg', 900, 450],
+  'File:499P test.jpg': ['car.svg', 900, 450],
+  'File:296 GT3 test.jpg': ['car.svg', 900, 450],
 };
 
 // WEC: Wikipedia articles served from the same trimmed fixtures the unit tests use.
@@ -341,6 +344,20 @@ function wecParse(params: URLSearchParams, fail: boolean) {
   });
   if (fail) return { status: 503, headers: cors, body: '' };
   const page = params.get('page') ?? '';
+  // Deliberately small model-photo articles, not live data: exercise exact variant selection.
+  const modelPhotos: Record<string, [string, string]> = {
+    'Toyota GR010 Hybrid': ['GR010 test.jpg', 'Toyota TR010 Hybrid'],
+    'Ferrari 499P': ['499P test.jpg', 'Ferrari 499P'],
+    'Ferrari 296': ['296 GT3 test.jpg', 'Ferrari 296 GT3 Evo'],
+  };
+  const model = modelPhotos[page];
+  if (model)
+    return json({
+      parse: {
+        title: page,
+        text: `<figure><a href="/wiki/File:${model[0]}"><img width="900" height="450" alt=""></a><figcaption>${model[1]}</figcaption></figure>`,
+      },
+    });
   const season = WEC_SEASONS[page];
   if (season && params.get('prop') === 'sections') {
     return json({
@@ -359,7 +376,14 @@ function wecParse(params: URLSearchParams, fail: boolean) {
       params.get('section') === '1' ? 'calendar' : params.get('section') === '2' ? 'entries' : 'results';
     return json({ parse: { title: page, text: wecFile(`season-${season}-${part}.html`) } });
   }
-  if (WEC_RACES[page]) return json({ parse: { title: page, text: wecFile(WEC_RACES[page]) } });
+  if (WEC_RACES[page])
+    return json({
+      parse: {
+        title: page,
+        text:
+          (page === 'Sébastien Buemi' ? wecFile('driver-buemi-intro.html') : '') + wecFile(WEC_RACES[page]),
+      },
+    });
   if (page === 'Sébastien_Buemi')
     return json({ parse: { title: 'Sébastien Buemi', text: wecFile('driver-buemi.html') } });
   if (page === 'Toyota' || page === 'Tom Gamble (racing driver)')
@@ -367,7 +391,7 @@ function wecParse(params: URLSearchParams, fail: boolean) {
   return json({ error: { code: 'missingtitle', info: "The page you specified doesn't exist." } });
 }
 
-async function mockWikimedia(page: Page, wecFail: () => boolean): Promise<void> {
+async function mockWikimedia(page: Page, wecFail: () => boolean, localFlags: boolean): Promise<void> {
   const cors = { 'Access-Control-Allow-Origin': '*' };
   await page.route('https://en.wikipedia.org/w/api.php**', (route) => {
     const params = new URL(route.request().url()).searchParams;
@@ -376,11 +400,17 @@ async function mockWikimedia(page: Page, wecFail: () => boolean): Promise<void> 
     const pageimage =
       title === 'Sébastien Buemi'
         ? 'Buemi test.jpg'
-        : title.startsWith('George Russell')
-          ? 'Russell test.jpg'
-          : title === 'Toyota GR010 Hybrid'
-            ? 'GR010 test.jpg'
-            : undefined;
+        : title === 'Kamui Kobayashi'
+          ? 'Kobayashi test.png'
+          : title.startsWith('George Russell')
+            ? 'Russell test.jpg'
+            : title === 'Toyota GR010 Hybrid'
+              ? 'GR010 test.jpg'
+              : title === 'Ferrari 499P'
+                ? '499P test.jpg'
+                : title === 'Ferrari 296'
+                  ? '296 GT3 test.jpg'
+                  : undefined;
     return route.fulfill({
       contentType: 'application/json',
       headers: cors,
@@ -399,8 +429,11 @@ async function mockWikimedia(page: Page, wecFail: () => boolean): Promise<void> 
               thumburl: `https://upload.wikimedia.org/test/${k[0]}`,
               thumbwidth: k[1],
               thumbheight: k[2],
+              mime: title.endsWith('.png') ? 'image/png' : 'image/jpeg',
+              mediatype: 'BITMAP',
               descriptionurl: `https://commons.wikimedia.org/wiki/${title}`,
               extmetadata: {
+                ImageDescription: { value: 'Photograph for automated browser tests' },
                 Artist: { value: '<a href="https://example.org">Test Photographer</a>' },
                 LicenseShortName: { value: 'CC BY-SA 4.0' },
                 LicenseUrl: { value: 'https://creativecommons.org/licenses/by-sa/4.0' },
@@ -415,6 +448,38 @@ async function mockWikimedia(page: Page, wecFail: () => boolean): Promise<void> 
       body: JSON.stringify({ query: { pages: [info] } }),
     });
   });
+  // Visual checks must not depend on Wikimedia serving every remote flag on that run.
+  if (localFlags) {
+    const normalizeFlag = (name: string) =>
+      name
+        .replace(/^the_/i, '')
+        .replace(/\([^)]*\)/g, '')
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .replace(/[^\p{L}\p{N}]/gu, '')
+        .toLowerCase();
+    const countryNames = new Intl.DisplayNames(['en'], { type: 'region' });
+    const flags = Object.fromEntries(
+      'ae ao ar au at bh be br ca ci cn cz dk fi fr de hk in id ie it jp lu mx mc nl nz no pl pt qa ro ru za kr es se ch th gb us tr ve'
+        .split(' ')
+        .map((code) => [normalizeFlag(countryNames.of(code.toUpperCase()) ?? ''), code]),
+    );
+    Object.assign(flags, { peoplesrepublicofchina: 'cn', hongkong: 'hk', czechrepublic: 'cz', turkey: 'tr' });
+    await page.route(/^https:\/\/(?:upload|thumb)\.wikimedia\.org\//, (route) => {
+      const file = /Flag_of_(.+?)\.svg/i.exec(
+        decodeURIComponent(new URL(route.request().url()).pathname),
+      )?.[1];
+      const code = file && !/\d{4}/.test(file) ? flags[normalizeFlag(file)] : undefined;
+      if (!code) return route.continue();
+      return route.fulfill({
+        contentType: 'image/svg+xml',
+        body: readFileSync(
+          fileURLToPath(new URL(`../node_modules/flag-icons/flags/4x3/${code}.svg`, import.meta.url)),
+          'utf8',
+        ),
+      });
+    });
+  }
   await page.route('https://upload.wikimedia.org/test/**', (route) =>
     route.fulfill({
       contentType: 'image/svg+xml',
@@ -432,11 +497,11 @@ async function mockWikimedia(page: Page, wecFail: () => boolean): Promise<void> 
 export async function mockApi(
   page: Page,
   override?: Override,
-  opts: { wecFail?: () => boolean } = {},
+  opts: { wecFail?: () => boolean; localFlags?: boolean } = {},
 ): Promise<string[]> {
   const calls: string[] = [];
   await page.clock.setFixedTime(NOW);
-  await mockWikimedia(page, opts.wecFail ?? (() => false));
+  await mockWikimedia(page, opts.wecFail ?? (() => false), opts.localFlags ?? false);
   await page.route('https://api.jolpi.ca/ergast/f1/**', async (route: Route) => {
     const url = new URL(route.request().url());
     const path = url.pathname.replace('/ergast/f1', '');

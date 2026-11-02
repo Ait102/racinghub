@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { buildProgress, niceAxis } from './progress';
 import type { DriverStanding } from './types';
 

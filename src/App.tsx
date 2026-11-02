@@ -28,6 +28,7 @@ const WecParticipantsPage = lazy(() => wec().then((m) => ({ default: m.WecPartic
 const WecProfilePage = lazy(() => wec().then((m) => ({ default: m.WecProfilePage })));
 const WecRacePage = lazy(() => wec().then((m) => ({ default: m.WecRacePage })));
 const WecStandingsPage = lazy(() => wec().then((m) => ({ default: m.WecStandingsPage })));
+const WecSourcesPage = lazy(() => wec().then((m) => ({ default: m.WecSourcesPage })));
 
 /** /f1 → the remembered or latest F1 season. */
 function F1Entry() {
@@ -97,6 +98,7 @@ export function App() {
               <Route path="drivers" element={<WecParticipantsPage drivers />} />
               <Route path="teams" element={<WecParticipantsPage drivers={false} />} />
               <Route path="compare" element={<WecComparePage />} />
+              <Route path="about" element={<WecSourcesPage />} />
               <Route path="driver/:article" element={<WecProfilePage kind="driver" />} />
               <Route path="team/:article" element={<WecProfilePage kind="team" />} />
               <Route path="circuit/:article" element={<WecProfilePage kind="circuit" />} />

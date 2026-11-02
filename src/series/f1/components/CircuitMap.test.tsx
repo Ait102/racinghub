@@ -34,7 +34,7 @@ const SEASON_2026 = [
 
 describe('circuit geometry', () => {
   it('has a shapes file for every mapped circuit', () => {
-    const files = import.meta.glob('../data/circuits/shapes/*.ts');
+    const files = import.meta.glob('../../../data/circuits/shapes/*.ts');
     const slugs = new Set(Object.keys(files).map((p) => p.replace(/^.*\/(.*)\.ts$/, '$1')));
     for (const [id, slug] of Object.entries(CIRCUIT_SLUGS)) {
       expect(slugs.has(slug), `${id} -> ${slug}`).toBe(true);

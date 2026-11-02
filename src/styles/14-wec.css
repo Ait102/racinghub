@@ -11,7 +11,9 @@
 
 /* Class badge: one color per family of classes */
 .class-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 2px 8px;
   border-radius: var(--r-pill);
   font-size: 0.7rem;
@@ -33,6 +35,42 @@
 .class-badge--gt3,
 .class-badge--gte-am {
   background: #e07b00;
+}
+
+/* Hypercar and LMGT3: boxed two-line mark, like the official class signs, on a clear background */
+.class-mark {
+  --mark: #ff3347;
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 4px 1px;
+  border: 2px solid var(--mark);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--mark);
+  font-size: 0.62rem;
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.class-mark--gt3 {
+  --mark: #ff9a1f;
+}
+.wec-classes {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.chip .class-mark,
+.chip .class-badge,
+.section-title .class-mark,
+.section-title .class-badge {
+  margin-right: 8px;
 }
 .class-badge--gte-pro {
   background: #198754;
@@ -298,13 +336,6 @@
   }
 }
 
-.wec-calendar-profiles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  padding: 10px 4px 18px;
-  font-size: 0.8rem;
-}
 .wec-calendar-item {
   display: flex;
   flex-direction: column;
@@ -378,4 +409,171 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
+}
+.wec-cars__item {
+  min-width: 0;
+}
+/* In the grid a photo fills its own column; the header size (min(520px, 44vw)) made them overlap. */
+.wec-cars__item .photo--wide {
+  width: 100%;
+}
+
+.wec-home .page-header .progress {
+  max-width: 480px;
+  margin-top: var(--s3);
+}
+.wec-home-classes,
+.wec-home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: var(--s4);
+}
+.wec-home-classes .class-badge {
+  padding: 5px 12px;
+}
+.wec-home-classes .class-mark {
+  font-size: 0.85rem;
+  padding: 3px 7px 2px;
+}
+.wec-home-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--s4);
+  margin: var(--s5) 0;
+}
+.wec-home-grid > .card {
+  min-width: 0;
+}
+.wec-home-last {
+  grid-row: span 2;
+}
+.wec-home-last__name {
+  margin: var(--s4) 0;
+  font-size: 1.15rem;
+}
+.wec-home-last .winners {
+  gap: var(--s5);
+  margin-bottom: var(--s5);
+}
+.wec-home-last .winners__item {
+  border-top: 1px solid var(--border);
+  padding-top: var(--s4);
+}
+.wec-home-last .crew {
+  font-size: 0.86rem;
+  padding-left: 1px;
+}
+.wec-home-grid .wec-leaders__list {
+  margin: 0 0 var(--s3);
+  gap: 0;
+}
+.wec-home-standing-title {
+  margin: 0 0 var(--s3);
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+.wec-home-grid .wec-leaders__list li {
+  position: relative;
+  isolation: isolate;
+  padding: 9px 0;
+  grid-template-columns: 1.3em minmax(0, 1fr) auto;
+  font-size: 0.86rem;
+}
+.wec-home-grid .wec-leaders__list li::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 3px auto 3px 0;
+  width: var(--bar);
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.12), rgba(var(--accent-rgb), 0.02));
+  border-radius: var(--r-sm);
+}
+.wec-home-grid .with-flag {
+  min-width: 0;
+}
+.wec-home-grid .wec-leaders__pos {
+  font-size: 1rem;
+  font-weight: 900;
+}
+.wec-home-grid .meta {
+  font-size: 0.65rem;
+  gap: 6px;
+  margin-top: var(--s4);
+}
+.wec-home-grid .meta .btn {
+  font-size: 0.65rem;
+}
+.wec-home-grid .card__head {
+  flex-wrap: wrap;
+}
+.wec-source-emblems {
+  list-style: none;
+  padding: 0;
+}
+.wec-source-emblems li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.wec-profile-summary {
+  margin-bottom: var(--s5);
+}
+.wec-profile-summary p {
+  max-width: 78ch;
+  line-height: 1.7;
+}
+.wec-profile-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--s4);
+  margin: var(--s4) 0;
+}
+.wec-profile-facts dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+.wec-profile-facts dd {
+  margin: 0;
+  font-weight: 650;
+}
+.wec-cars__name {
+  font-size: 1rem;
+  margin: 0 0 var(--s3);
+}
+.wec-circuit-panel {
+  margin-bottom: var(--s5);
+}
+.wec-circuit-panel__description {
+  max-width: 66ch;
+  line-height: 1.65;
+}
+@media (max-width: 1000px) {
+  .wec-home-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .wec-home-last {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+  .wec-home-last .winners {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .wec-home-grid,
+  .wec-home-last .winners {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wec-home-classes {
+    margin-top: var(--s3);
+  }
+  .wec-home .hero__inner {
+    align-items: flex-start;
+  }
 }

@@ -87,18 +87,6 @@ function Calendar({ season }: { season: string }) {
                         </span>
                       )}
                     </Link>
-                    <div className="wec-calendar-profiles">
-                      {(r.eventArticle ?? r.circuit?.article) && (
-                        <Link
-                          to={`/wec/${season}/circuit/${encodeURIComponent((r.eventArticle ?? r.circuit?.article)!)}${r.circuit?.article ? `?circuit=${encodeURIComponent(r.circuit.article)}` : ''}`}
-                        >
-                          История · {r.circuit?.name ?? r.name}
-                        </Link>
-                      )}
-                      {r.winners.map((w) => (
-                        <NameFlag key={w.cls} who={w.team} />
-                      ))}
-                    </div>
                   </li>
                 ))}
               </ol>

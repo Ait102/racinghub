@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { isPastSeason, isSeasonId, seasonArticle, seasonEndYear, wecSeasons } from '../data/seasons';
 import { normalizeClass } from './parse';
 import { daysUntil, isLeMans, lastCompleted, nextRound, roundStatus } from './status';

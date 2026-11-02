@@ -1,0 +1,72 @@
+.wec-places-chart .chart__tip {
+  position: static;
+  transform: none;
+  min-width: 0;
+  max-height: none;
+  overflow: visible;
+  margin-top: var(--s3);
+}
+
+.wec-places-chart .chart__tip li {
+  align-items: start;
+  padding-block: 4px;
+}
+
+.wec-places-chart .chart__tip .team-dot {
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.wec-places-chart__name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.wec-places-chart .chart__tip strong {
+  flex-shrink: 0;
+}
+
+.wec-places-card .legend li {
+  align-items: start;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.wec-places-card .legend svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.wec-legend-pick {
+  display: inline-flex;
+  align-items: start;
+  gap: 8px;
+  min-width: 0;
+  padding: 3px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--r-pill, 999px);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.wec-legend-pick:hover,
+.wec-legend-pick:focus-visible {
+  background: rgba(255, 255, 255, 0.06);
+}
+.wec-legend-pick[aria-pressed='true'] {
+  border-color: var(--border);
+  background: rgba(255, 255, 255, 0.08);
+}
+.wec-legend-pick svg {
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+.wec-places-chart__out {
+  stroke-dasharray: 2 4;
+}
+.wec-places-chart g[data-series] {
+  transition: opacity 0.15s ease;
+}

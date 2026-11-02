@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { flagUrl } from './flags';
 
 describe('flagUrl', () => {

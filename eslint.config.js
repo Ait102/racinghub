@@ -10,7 +10,8 @@ export default tseslint.config(
       'node_modules',
       'test-results',
       'playwright-report',
-      'src/series/f1/data/circuits/shapes',
+      'src/data/circuits/shapes',
+      'src/series/wec/data/circuit-shapes.generated.ts',
     ],
   },
   {
@@ -29,8 +30,8 @@ export default tseslint.config(
     // Shared code and other series must not depend on F1: anything both need lives outside series/f1.
     files: [
       'src/series/wec/**/*.{ts,tsx}',
-      'src/{api,hooks,lib}/**/*.{ts,tsx}',
-      'src/components/{ui,DataState,SortableTable}.tsx',
+      'src/{api,data,hooks,lib}/**/*.{ts,tsx}',
+      'src/components/{ui,DataState,SortableTable,CircuitMap}.tsx',
     ],
     ignores: ['**/*.test.{ts,tsx}'],
     rules: {

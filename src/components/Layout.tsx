@@ -108,12 +108,13 @@ export function Layout() {
         ? [['/about', 'Источники']]
         : series === 'wec' && wecSeason
           ? [
-              [`/wec/${wecSeason}`, 'Обзор'],
+              [`/wec/${wecSeason}`, 'Главная'],
               [`/wec/${wecSeason}/calendar`, 'Календарь'],
               [`/wec/${wecSeason}/standings`, 'Зачёты'],
               [`/wec/${wecSeason}/drivers`, 'Пилоты'],
               [`/wec/${wecSeason}/teams`, 'Команды'],
               [`/wec/${wecSeason}/compare`, 'Сравнение'],
+              [`/wec/${wecSeason}/about`, 'Источники'],
             ]
           : [];
 
@@ -159,17 +160,39 @@ export function Layout() {
         <div className="container footer__inner">
           <p>
             Данные:{' '}
-            <a href="https://github.com/jolpica/jolpica-f1" target="_blank" rel="noreferrer">
-              Jolpica-F1
-            </a>{' '}
-            (открытый API, совместимый с Ergast), лицензия{' '}
-            <a
-              href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ru"
-              target="_blank"
-              rel="noreferrer"
-            >
-              CC BY-NC-SA 4.0
-            </a>
+            {series === 'wec' ? (
+              <>
+                <a
+                  href="https://en.wikipedia.org/wiki/FIA_World_Endurance_Championship"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Википедия
+                </a>
+                , лицензия{' '}
+                <a
+                  href="https://creativecommons.org/licenses/by-sa/4.0/deed.ru"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  CC BY-SA 4.0
+                </a>
+              </>
+            ) : (
+              <>
+                <a href="https://github.com/jolpica/jolpica-f1" target="_blank" rel="noreferrer">
+                  Jolpica-F1
+                </a>{' '}
+                (открытый API, совместимый с Ergast), лицензия{' '}
+                <a
+                  href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ru"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  CC BY-NC-SA 4.0
+                </a>
+              </>
+            )}
             . Некоммерческий неофициальный проект, не связан с Formula 1, FIA и WEC.
           </p>
           <p>

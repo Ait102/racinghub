@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
-import { NameFlag, WikiSourceNote } from '../components/bits';
+import { ClassBadge, classOfTitle, NameFlag, WikiSourceNote } from '../components/bits';
 import { PlacesChart, seriesStyle } from '../components/PlacesChart';
 import { seasonLabel } from '../data/seasons';
 import { placeSeries } from '../domain/places';
@@ -57,6 +57,7 @@ function Standings({ season }: { season: string }) {
                             aria-pressed={t.id === current.id}
                             onClick={() => setParams({ t: t.id }, { replace: true })}
                           >
+                            <ClassMark cls={classOfTitle(t.title, data.classes)} />
                             {t.title}
                           </button>
                         ))}
@@ -64,7 +65,12 @@ function Standings({ season }: { season: string }) {
                   </div>
                 ))}
               </div>
-              <StandingsTable table={current} season={season} rounds={data.rounds} />
+              <StandingsTable
+                table={current}
+                season={season}
+                rounds={data.rounds}
+                cls={classOfTitle(current.title, data.classes)}
+              />
               <Legend />
               <PlacesSection key={current.id} table={current} />
               <WikiSourceNote />
@@ -76,21 +82,31 @@ function Standings({ season }: { season: string }) {
   );
 }
 
+/** Class sign before a championship name; nothing when the title names no class. */
+function ClassMark({ cls }: { cls: string | undefined }) {
+  return cls ? <ClassBadge cls={cls} /> : null;
+}
+
 function StandingsTable({
   table,
   season,
   rounds,
+  cls,
 }: {
   table: StandingTable;
   season: string;
   rounds: WecRound[];
+  cls: string | undefined;
 }) {
   const roundOf = (report: string | null) => rounds.find((r) => r.report && r.report === report)?.round;
   const { isFav } = useWecFavorites();
   const favKind = table.kind === 'drivers' ? 'drivers' : 'teams';
   return (
     <>
-      <h2 className="section-title">{table.title}</h2>
+      <h2 className="section-title">
+        <ClassMark cls={cls} />
+        {table.title}
+      </h2>
       <div className="table-wrap">
         <table className="table wec-standings">
           <caption className="visually-hidden">{table.title}</caption>
@@ -182,14 +198,22 @@ const TOP = [5, 10] as const;
 
 function PlacesSection({ table }: { table: StandingTable }) {
   const [top, setTop] = useState<(typeof TOP)[number]>(5);
+  const [pointed, setPointed] = useState<string | null>(null);
+  const [picked, setPicked] = useState<string | null>(null);
   const series = placeSeries(table, top);
+  const highlight = pointed ?? (series.some((s) => s.id === picked) ? picked : null);
   if (series.length === 0) return null;
   return (
     <>
       <h2 className="section-title">Места по этапам</h2>
       <p className="muted small">
         Место в каждой гонке — как в таблице источника. Это не положение в зачёте после этапа: его источник не
-        публикует. Сход и неклассифицированный финиш — разрыв линии, значения смотрите в таблице.
+        публикует. Сход, неклассифицированный финиш и дисквалификация отмечены крестиком в строке «сход»;
+        пропуск этапа — пунктир.
+      </p>
+      <p className="muted small">
+        Наведите курсор или коснитесь графика, чтобы увидеть результаты этапа (с клавиатуры — стрелки).
+        Наведите на имя или нажмите его, чтобы выделить одну линию.
       </p>
       <div className="chips" role="group" aria-label="Сколько строк зачёта показать">
         {TOP.map((t) => (
@@ -198,23 +222,33 @@ function PlacesSection({ table }: { table: StandingTable }) {
           </button>
         ))}
       </div>
-      <div className="card chart-card">
-        <PlacesChart rounds={table.rounds.map((r) => r.abbr)} series={series} />
-        <ul className="legend">
+      <div className="card chart-card wec-places-card">
+        <PlacesChart rounds={table.rounds.map((r) => r.abbr)} series={series} highlight={highlight} />
+        <ul className="legend" onMouseLeave={() => setPointed(null)}>
           {series.map((s, i) => (
             <li key={s.id}>
-              <svg width="26" height="10" aria-hidden="true">
-                <line
-                  x1="1"
-                  x2="25"
-                  y1="5"
-                  y2="5"
-                  stroke={seriesStyle(i).color}
-                  strokeWidth="3"
-                  strokeDasharray={seriesStyle(i).dash}
-                />
-              </svg>
-              {s.label}
+              <button
+                type="button"
+                className="wec-legend-pick"
+                aria-pressed={picked === s.id}
+                onMouseEnter={() => setPointed(s.id)}
+                onFocus={() => setPointed(s.id)}
+                onBlur={() => setPointed(null)}
+                onClick={() => setPicked((p) => (p === s.id ? null : s.id))}
+              >
+                <svg width="26" height="10" aria-hidden="true">
+                  <line
+                    x1="1"
+                    x2="25"
+                    y1="5"
+                    y2="5"
+                    stroke={seriesStyle(i).color}
+                    strokeWidth="3"
+                    strokeDasharray={seriesStyle(i).dash}
+                  />
+                </svg>
+                {s.label}
+              </button>
             </li>
           ))}
         </ul>

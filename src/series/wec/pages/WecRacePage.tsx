@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
-import { DataState, ErrorBox, Loading } from '../../../components/DataState';
+import { DataState, ErrorBox, Loading, MetaLine } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
 import { SortableTable, type Column } from '../../../components/SortableTable';
 import { useNow } from '../../../hooks/useNow';
 import { articleUrl } from '../api/wikipedia';
 import { ClassBadge, Crew, NameFlag, WecStatusBadge, WikiFlagImg, WikiSourceNote } from '../components/bits';
+import { WecCircuitPanel } from '../components/WecCircuitPanel';
 import { seasonLabel } from '../data/seasons';
 import { classesOf } from '../domain/parse';
 import { roundStatus } from '../domain/status';
@@ -64,11 +65,18 @@ function RaceView({ season }: { season: string }) {
           <Link
             to={`/wec/${season}/circuit/${encodeURIComponent((r.eventArticle ?? r.circuit?.article)!)}${r.circuit?.article ? `?circuit=${encodeURIComponent(r.circuit.article)}` : ''}`}
           >
-            История трассы и победители
+            О трассе и победители
           </Link>
         </p>
       )}
+      <WecCircuitPanel
+        article={r.circuit?.article ?? r.eventArticle}
+        name={r.circuit?.name}
+        season={season}
+        year={r.start ? Number(r.start.slice(0, 4)) : undefined}
+      />
       <Winners r={r} />
+      <MetaLine meta={res.meta} onRefresh={res.reload} />
       {r.report ? (
         <RaceData season={season} article={r.report} />
       ) : (

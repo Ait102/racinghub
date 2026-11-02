@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { matchesDriver } from './search';
 import type { Constructor, Driver } from './types';
 

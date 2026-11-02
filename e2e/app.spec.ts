@@ -228,12 +228,13 @@ test('WEC has its own menu and season list, without F1 items', async ({ page }) 
   await page.goto('./#/wec/2026');
   const nav = page.getByRole('navigation', { name: 'Основная навигация' });
   await expect(nav.getByRole('link')).toHaveText([
-    'Обзор',
+    'Главная',
     'Календарь',
     'Зачёты',
     'Пилоты',
     'Команды',
     'Сравнение',
+    'Источники',
   ]);
   // The WEC season list has the two super seasons and no 2020.
   const options = await page.getByLabel('Сезон').locator('option').allInnerTexts();

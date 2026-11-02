@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { useResource } from '../../../hooks/useResource';
@@ -15,6 +16,45 @@ export function useWecParticipants(id: string | null, drivers: boolean) {
   return useResource(id === null ? null : `wec:participants:${id}:${drivers}`, (force) =>
     wikipedia.getParticipants(id!, drivers, { force }),
   );
+}
+
+// Parsed once per season: every emblem on a page asks for the same entry list.
+const teamCarsBySeason = new Map<string, Promise<Map<string, string[]>>>();
+const NO_CARS: ReadonlyMap<string, string[]> = new Map();
+
+function loadTeamCars(season: string): Promise<Map<string, string[]>> {
+  let cars = teamCarsBySeason.get(season);
+  if (!cars) {
+    cars = wikipedia.getParticipants(season, false).then(({ data }) => {
+      const map = new Map<string, string[]>();
+      for (const team of data) {
+        const names = team.cars.map((car) => car.name);
+        if (team.who.article) map.set(team.who.article, names);
+        map.set(team.who.name, names);
+      }
+      return map;
+    });
+    cars.catch(() => teamCarsBySeason.delete(season));
+    teamCarsBySeason.set(season, cars);
+  }
+  return cars;
+}
+
+/** Cars each team entered in the season, by team article and name; empty until loaded or on failure. */
+export function useWecTeamCars(season: string | null): ReadonlyMap<string, string[]> {
+  const [loaded, setLoaded] = useState<{ season: string; cars: ReadonlyMap<string, string[]> } | null>(null);
+  useEffect(() => {
+    if (!season) return;
+    let alive = true;
+    loadTeamCars(season).then(
+      (cars) => alive && setLoaded({ season, cars }),
+      () => {},
+    );
+    return () => {
+      alive = false;
+    };
+  }, [season]);
+  return loaded?.season === season ? loaded.cars : NO_CARS;
 }
 
 export function useWecSeason(id: string | null) {

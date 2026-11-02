@@ -6,3 +6,4 @@ export { WecParticipantsPage } from './WecParticipantsPage';
 export { WecProfilePage } from './WecProfilePage';
 export { WecRacePage } from './WecRacePage';
 export { WecStandingsPage } from './WecStandingsPage';
+export { WecSourcesPage } from './WecSourcesPage';

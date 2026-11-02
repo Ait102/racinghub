@@ -1,4 +1,4 @@
-// Refresh real Wikipedia profile fixtures, keeping only relevant tables.
+// Refresh real Wikipedia profile fixtures, keeping the intro and relevant tables.
 import { writeFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
 
@@ -34,6 +34,16 @@ for (const [page, file] of pages) {
   let heading = '';
   let sectionLevel = 0;
   const parts = [];
+  const infobox = doc.querySelector('.infobox');
+  if (infobox) parts.push(infobox.outerHTML);
+  const root = doc.querySelector('.mw-parser-output') ?? doc.body;
+  for (const el of root.children) {
+    if (/^H[2-6]$/.test(el.tagName) || el.classList.contains('mw-heading')) break;
+    if (el.tagName === 'P' && el.textContent.trim().length >= 50) {
+      parts.push(el.outerHTML);
+      break;
+    }
+  }
   for (const el of doc.querySelectorAll('h2,h3,h4,h5,table.wikitable')) {
     if (/^H/.test(el.tagName)) {
       const level = Number(el.tagName.slice(1));

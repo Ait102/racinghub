@@ -1,9 +1,19 @@
+import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
+import { leaderShare, posClass } from '../../../components/ui';
 import { useNow } from '../../../hooks/useNow';
-import { ClassBadge, Crew, NameFlag, WecStatusBadge, WikiFlagImg, WikiSourceNote } from '../components/bits';
+import {
+  ClassBadge,
+  classOfTitle,
+  Crew,
+  NameFlag,
+  WecStatusBadge,
+  WikiFlagImg,
+  WikiSourceNote,
+} from '../components/bits';
 import { seasonLabel } from '../data/seasons';
 import { daysUntil, lastCompleted, nextRound, roundStatus } from '../domain/status';
 import type { StandingTable, WecRound, WecSeasonData } from '../domain/types';
@@ -19,13 +29,36 @@ export function WecHomePage() {
 function Overview({ season }: { season: string }) {
   const res = useWecSeason(season);
   const now = useNow(60_000);
+  const completed = res.status === 'success' ? res.data.rounds.filter((r) => r.winners.length > 0).length : 0;
   return (
-    <section className="page">
+    <section className="page wec-home">
       <PageHeader eyebrow="FIA World Endurance Championship" title={`WEC ${seasonLabel(season)}`}>
         {res.status === 'success' && (
-          <p className="lead">
-            {res.data.rounds.length} этапов · классы: {res.data.classes.join(', ') || '—'}
-          </p>
+          <>
+            <p className="lead">
+              Завершено этапов: {completed} из {res.data.rounds.length}
+            </p>
+            {res.data.rounds.length > 0 && (
+              <div
+                className="progress"
+                role="progressbar"
+                aria-label="Прогресс сезона"
+                aria-valuemin={0}
+                aria-valuemax={res.data.rounds.length}
+                aria-valuenow={completed}
+              >
+                <div
+                  className="progress__bar"
+                  style={{ width: `${(completed / res.data.rounds.length) * 100}%` }}
+                />
+              </div>
+            )}
+            <div className="wec-home-classes" aria-label="Классы сезона">
+              {res.data.classes.map((cls) => (
+                <ClassBadge key={cls} cls={cls} />
+              ))}
+            </div>
+          </>
         )}
       </PageHeader>
       <DataState
@@ -36,9 +69,9 @@ function Overview({ season }: { season: string }) {
         {(data) => (
           <>
             <NextRace data={data} now={now} />
-            <div className="grid-2">
+            <div className="wec-home-grid">
               <LastRace data={data} />
-              <Leaders season={season} tables={data.standings} />
+              <Leaders season={season} tables={data.standings} classes={data.classes} />
             </div>
             <Favorites season={season} tables={data.standings} />
             <WikiSourceNote />
@@ -147,6 +180,14 @@ function NextRace({ data, now }: { data: WecSeasonData; now: Date }) {
             {place(next)}
           </p>
           <p className="hero__date">Даты: {next.dateText || '—'}</p>
+          <div className="wec-home-actions">
+            <Link className="btn btn--small" to={`/wec/${data.id}/race/${next.round}`}>
+              Открыть этап →
+            </Link>
+            <Link className="btn btn--ghost btn--small" to={`/wec/${data.id}/calendar`}>
+              Весь календарь
+            </Link>
+          </div>
         </div>
         {status === 'upcoming' && days !== null && days > 0 && (
           <div className="countdown" role="timer" aria-label={`До этапа ${days} дн.`}>
@@ -164,13 +205,13 @@ function NextRace({ data, now }: { data: WecSeasonData; now: Date }) {
 function LastRace({ data }: { data: WecSeasonData }) {
   const last = lastCompleted(data.rounds);
   return (
-    <article className="card">
+    <article className="card wec-home-last">
       <h2 className="card__title">Последняя гонка</h2>
       {!last ? (
         <p className="muted">В этом сезоне ещё не было гонок с опубликованным результатом.</p>
       ) : (
         <>
-          <p>
+          <p className="wec-home-last__name">
             <Link to={`/wec/${data.id}/race/${last.round}`}>
               <strong>{last.name}</strong>
             </Link>{' '}
@@ -181,7 +222,8 @@ function LastRace({ data }: { data: WecSeasonData }) {
               <li key={w.cls} className="winners__item">
                 <ClassBadge cls={w.cls} />
                 <span className="winners__team">
-                  {w.number && <span className="car-no">#{w.number}</span>} <NameFlag who={w.team} strong />
+                  {w.number && <span className="car-no">#{w.number}</span>}{' '}
+                  <NameFlag who={w.team} strong emblem />
                 </span>
                 <Crew drivers={w.drivers} />
               </li>
@@ -193,25 +235,45 @@ function LastRace({ data }: { data: WecSeasonData }) {
   );
 }
 
-/** First drivers' and manufacturers'/teams' table of each kind, top three. */
-function Leaders({ season, tables }: { season: string; tables: StandingTable[] }) {
+/** First four published championships, keeping the source's names visible across eras. */
+function Leaders({
+  season,
+  tables,
+  classes,
+}: {
+  season: string;
+  tables: StandingTable[];
+  classes: string[];
+}) {
   const shown = tables.slice(0, 4);
   return (
-    <article className="card">
-      <h2 className="card__title">Лидеры зачётов</h2>
+    <>
       {shown.length === 0 ? (
         <p className="muted">Зачётов у источника пока нет.</p>
       ) : (
-        <div className="wec-leaders">
+        <>
           {shown.map((t) => (
-            <div key={t.id} className="wec-leaders__table">
-              <Link to={`/wec/${season}/standings?t=${t.id}`} className="wec-leaders__title">
-                {t.title}
-              </Link>
+            <article key={t.id} className="card wec-leaders__table" aria-label={t.title}>
+              <div className="card__head">
+                <h2 className="card__title">
+                  {t.kind === 'drivers'
+                    ? 'Личный зачёт'
+                    : t.kind === 'manufacturers'
+                      ? 'Производители'
+                      : 'Командный зачёт'}
+                </h2>
+                <ClassBadge cls={classOfTitle(t.title, classes)} />
+              </div>
+              <p className="wec-home-standing-title">{t.title}</p>
               <ol className="wec-leaders__list">
-                {t.rows.slice(0, 3).map((r, i) => (
-                  <li key={`${r.name.name}-${i}`}>
-                    <span className="wec-leaders__pos">{r.posText}</span>
+                {t.rows.slice(0, 5).map((r, i) => (
+                  <li
+                    key={`${r.name.name}-${i}`}
+                    style={
+                      { '--bar': `${leaderShare(r.pointsValue, t.rows[0]?.pointsValue)}%` } as CSSProperties
+                    }
+                  >
+                    <span className={posClass('wec-leaders__pos', r.pos)}>{r.posText}</span>
                     <NameFlag
                       who={r.name}
                       kind={t.kind === 'drivers' ? 'driver' : 'team'}
@@ -221,13 +283,13 @@ function Leaders({ season, tables }: { season: string; tables: StandingTable[] }
                   </li>
                 ))}
               </ol>
-            </div>
+              <Link to={`/wec/${season}/standings?t=${t.id}`} className="card__more">
+                Вся таблица →
+              </Link>
+            </article>
           ))}
-        </div>
+        </>
       )}
-      <p>
-        <Link to={`/wec/${season}/standings`}>Все зачёты →</Link>
-      </p>
-    </article>
+    </>
   );
 }

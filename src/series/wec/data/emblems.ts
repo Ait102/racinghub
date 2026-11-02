@@ -43,8 +43,8 @@ const EMBLEMS: Readonly<Record<string, WecEmblem>> = {
     source: 'https://en.wikipedia.org/wiki/File:Peugeot_2021_Logo.svg',
     license: FAIR,
     holder: 'Stellantis',
-    tone: 'invert',
-    color: '#13233d',
+    tone: 'color',
+    color: '#000000',
   },
   lamborghini: {
     file: 'lamborghini.png',
@@ -67,8 +67,8 @@ const EMBLEMS: Readonly<Record<string, WecEmblem>> = {
     source: 'https://commons.wikimedia.org/wiki/File:Ford_logo_flat.svg',
     license: PD,
     holder: 'Ford Motor Company',
-    tone: 'invert',
-    color: '#1b3a8c',
+    tone: 'color',
+    color: '#3d6fd8',
   },
   corvette: {
     file: 'corvette.png',
@@ -161,6 +161,25 @@ const EMBLEMS: Readonly<Record<string, WecEmblem>> = {
 };
 
 const ALIASES: Readonly<Record<string, string>> = { chevrolet: 'corvette' };
+
+/**
+ * Emblem of a team: by its own name ("Toyota Gazoo Racing"), else by the cars it entered when they
+ * are all of one make — a customer team such as The Bend Manthey runs Porsches.
+ */
+export function teamEmblem(name: string, cars: readonly string[] = []): WecEmblem | null {
+  const own = emblemOf(name);
+  if (own) return own;
+  const makes = cars.map(emblemOf);
+  return makes.length > 0 && makes.every((make) => make && make === makes[0]) ? makes[0] : null;
+}
+
+/** Attribution directory shown on the WEC sources page. */
+export const wecEmblemSources = Object.entries(EMBLEMS).map(([name, entry]) => ({
+  name:
+    ({ bmw: 'BMW', mclaren: 'McLaren' } as Record<string, string>)[name] ??
+    name.replace(/\b\w/g, (c) => c.toUpperCase()),
+  ...entry,
+}));
 
 /**
  * Emblem of the manufacturer a name starts with: "Toyota", "Toyota Gazoo Racing",

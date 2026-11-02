@@ -2,11 +2,11 @@ import { Link } from 'react-router-dom';
 
 import { Emblem } from '../../../components/Emblem';
 import type { WikiFlag } from '../../../lib/wikitable';
-import { emblemOf } from '../data/emblems';
+import { teamEmblem } from '../data/emblems';
 import { validArticle, type ProfileKind } from '../domain/profiles';
 import { WEC_STATUS_LABELS, type WecStatus } from '../domain/status';
 import type { Named } from '../domain/types';
-import { useWecSeasonParam } from '../hooks/data';
+import { useWecSeasonParam, useWecTeamCars } from '../hooks/data';
 
 /** Flag picture straight from Wikipedia (flags there are public domain). */
 export function WikiFlagImg({ flag }: { flag: WikiFlag | null | undefined }) {
@@ -35,7 +35,7 @@ export function NameFlag({
   const text = strong ? <strong>{who.name}</strong> : who.name;
   return (
     <span className="with-flag">
-      {emblem && <WecEmblem name={who.name} />}
+      {emblem && <WecEmblem who={who} />}
       <WikiFlagImg flag={who.flag} />
       {link && season && who.article && validArticle(who.article) ? (
         <Link to={`/wec/${season}/${kind}/${encodeURIComponent(who.article)}`}>{text}</Link>
@@ -46,9 +46,16 @@ export function NameFlag({
   );
 }
 
-/** Manufacturer emblem when the name starts with a known manufacturer; nothing otherwise. */
-export function WecEmblem({ name, size = 'sm' }: { name: string; size?: 'sm' | 'lg' }) {
-  const entry = emblemOf(name);
+/** Manufacturer emblem by the team's name or, failing that, by the make of its cars in the season's entry list. */
+export function WecEmblem({
+  who,
+  size = 'sm',
+}: {
+  who: Pick<Named, 'name' | 'article'>;
+  size?: 'sm' | 'lg';
+}) {
+  const cars = useWecTeamCars(useWecSeasonParam());
+  const entry = teamEmblem(who.name, (who.article && cars.get(who.article)) || cars.get(who.name));
   return entry ? <Emblem entry={entry} color={entry.color} size={size} /> : null;
 }
 
@@ -78,9 +85,39 @@ function classSlug(cls: string): string {
   return 'other';
 }
 
+/** The two current classes get a boxed two-line mark, like their official signs. */
+const CLASS_MARKS: Record<string, [string, string]> = { hypercar: ['HYPER', 'CAR'], lmgt3: ['LM', 'GT3'] };
+
 export function ClassBadge({ cls }: { cls: string | null | undefined }) {
   if (!cls) return <span className="muted">—</span>;
-  return <span className={`class-badge class-badge--${classSlug(cls)}`}>{cls}</span>;
+  const slug = classSlug(cls);
+  const mark = CLASS_MARKS[cls.toLowerCase().replace(/\s+/g, '')];
+  if (mark) {
+    return (
+      <span className={`class-mark class-mark--${slug}`} title={cls}>
+        <span aria-hidden="true">{mark[0]}</span>
+        <span aria-hidden="true">{mark[1]}</span>
+        <span className="visually-hidden">{cls}</span>
+      </span>
+    );
+  }
+  return <span className={`class-badge class-badge--${slug}`}>{cls}</span>;
+}
+
+/** Class a championship belongs to, read from its title ("FIA Endurance Trophy for LMGT3 Drivers"). */
+export function classOfTitle(title: string, classes: readonly string[]): string | undefined {
+  return classes.find((cls) => title.toLowerCase().includes(cls.toLowerCase()));
+}
+
+/** Several classes side by side, e.g. a team entered in Hypercar and LMGT3. */
+export function ClassList({ classes }: { classes: readonly string[] }) {
+  return (
+    <span className="wec-classes">
+      {classes.map((cls) => (
+        <ClassBadge key={cls} cls={cls} />
+      ))}
+    </span>
+  );
 }
 
 export function WecStatusBadge({ status }: { status: WecStatus }) {
@@ -94,8 +131,20 @@ export function WecStatusBadge({ status }: { status: WecStatus }) {
 export function WikiSourceNote() {
   return (
     <p className="muted small">
-      Данные WEC — из английской Википедии (CC BY-SA 4.0), их ведут участники сообщества. Результаты обычно
-      появляются через несколько часов или на следующий день после гонки.
+      Данные WEC — из{' '}
+      <a
+        href="https://en.wikipedia.org/wiki/FIA_World_Endurance_Championship"
+        target="_blank"
+        rel="noreferrer"
+      >
+        английской Википедии
+      </a>{' '}
+      (
+      <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">
+        CC BY-SA 4.0
+      </a>
+      ), их ведут участники сообщества. Результаты обычно появляются через несколько часов или на следующий
+      день после гонки.
     </p>
   );
 }

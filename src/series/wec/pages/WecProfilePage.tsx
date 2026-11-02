@@ -10,9 +10,11 @@ import { SortableTable, type Column } from '../../../components/SortableTable';
 import { Stat } from '../../../components/ui';
 import { articleUrl } from '../api/wikipedia';
 import { NameFlag, WecEmblem, WikiSourceNote } from '../components/bits';
+import { WecCircuitPanel } from '../components/WecCircuitPanel';
 import { seasonLabel } from '../data/seasons';
 import {
   profileStats,
+  teamCars,
   validArticle,
   type ProfileCell,
   type ProfileKind,
@@ -42,10 +44,22 @@ export function WecProfilePage({ kind }: { kind: ProfileKind }) {
   );
 }
 
-function ProfilePhoto({ article, kind }: { article: string; kind: ProfileKind }) {
-  const state = usePhoto(`wec:${article}`, () =>
-    getArticlePhoto(article, { width: kind === 'driver' ? 480 : 900, photosOnly: true }),
+function ProfilePhoto({
+  article,
+  kind,
+  files,
+  pending,
+}: {
+  article: string;
+  kind: ProfileKind;
+  files?: string[];
+  pending: boolean;
+}) {
+  const state = usePhoto(pending ? null : `wec:${article}:${files ? 'infobox' : 'article'}`, () =>
+    getArticlePhoto(article, { width: kind === 'driver' ? 480 : 900, photosOnly: true, files }),
   );
+  // No free photo: the header simply has no picture, like in F1.
+  if (pending) return null;
   return <PhotoFigure state={state} alt={article} shape={kind === 'driver' ? 'portrait' : 'wide'} />;
 }
 
@@ -74,9 +88,18 @@ function Profile({ season, article, kind }: { season: string; article: string; k
       <PageHeader
         eyebrow={`WEC ${seasonLabel(season)} · ${kind === 'driver' ? 'Пилот' : kind === 'team' ? 'Команда / производитель' : 'Трасса и гонка'}`}
         title={canonical.replace(/_/g, ' ')}
-        aside={<ProfilePhoto article={photoArticle} kind={kind} />}
+        aside={
+          <ProfilePhoto
+            article={photoArticle}
+            kind={kind}
+            pending={res.status === 'loading'}
+            files={
+              res.status === 'success' && (kind !== 'circuit' || !circuit) ? res.data.photoFiles : undefined
+            }
+          />
+        }
       >
-        {kind === 'team' && <WecEmblem name={canonical} size="lg" />}
+        {kind === 'team' && <WecEmblem who={{ name: canonical, article }} size="lg" />}
         {kind !== 'circuit' && (
           <div className="profile-actions">
             <ProfileFav
@@ -95,10 +118,46 @@ function Profile({ season, article, kind }: { season: string; article: string; k
           </div>
         )}
       </PageHeader>
+      {kind === 'driver' && (
+        <section className="wec-profile-summary" aria-labelledby="wec-profile-summary-title">
+          <h2 className="section-title" id="wec-profile-summary-title">
+            О пилоте
+          </h2>
+          <DataState
+            state={res}
+            isEmpty={(data) => !data.facts.length && !data.biography}
+            emptyText="В статье нет основных сведений о пилоте."
+          >
+            {(data) => (
+              <>
+                {data.facts.length > 0 && (
+                  <dl className="wec-profile-facts">
+                    {data.facts.map((fact) => (
+                      <div key={fact.label}>
+                        <dt>{fact.label}</dt>
+                        <dd>{fact.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+                {data.biography && (
+                  <div className="wec-profile-biography">
+                    <p className="muted small">Краткая биография из статьи на английском языке.</p>
+                    <p lang="en">{data.biography}</p>
+                  </div>
+                )}
+              </>
+            )}
+          </DataState>
+        </section>
+      )}
       {kind !== 'circuit' && (
         <SeasonProfile season={season} article={article} canonical={canonical} kind={kind} />
       )}
       {kind === 'team' && <TeamCars season={season} article={article} canonical={canonical} />}
+      {kind === 'circuit' && (
+        <WecCircuitPanel article={photoArticle} name={circuit ?? canonical} season={season} />
+      )}
       <div className="wec-profile-history">
         <DataState state={res}>
           {(data) => {
@@ -179,33 +238,51 @@ function ProfileFav({ kind, article, canonical }: { kind: WecFavKind; article: s
 /** Cars of the team in the season's entry list, with the photo from each car's article. */
 function TeamCars({ season, article, canonical }: { season: string; article: string; canonical: string }) {
   const entries = useWecParticipants(season, false);
-  if (entries.status !== 'success') return null;
-  const cars = entries.data.find((p) => p.who.article === article || p.who.article === canonical)?.cars ?? [];
-  if (cars.length === 0) return null;
   return (
-    <div className="wec-cars">
-      <h2 className="section-title">Машины сезона {seasonLabel(season)}</h2>
+    <section className="wec-cars" aria-labelledby="wec-cars-title">
+      <h2 className="section-title" id="wec-cars-title">
+        Машины сезона {seasonLabel(season)}
+      </h2>
       <p className="muted small">
         Модели из заявки сезона. Фото — из статьи о модели и может показывать машину другой команды.
       </p>
-      <div className="wec-cars__grid">
-        {cars.map((car) => (
-          <CarPhoto key={car.name} car={car} />
-        ))}
-      </div>
-    </div>
+      <DataState
+        state={entries}
+        isEmpty={(data) => teamCars(data, [article, canonical]).length === 0}
+        emptyText="В заявке сезона модели этой команды не указаны."
+      >
+        {(data) => (
+          <div className="wec-cars__grid">
+            {teamCars(data, [article, canonical]).map((car) => (
+              <CarPhoto key={car.name} car={car} />
+            ))}
+          </div>
+        )}
+      </DataState>
+    </section>
   );
 }
 
 function CarPhoto({ car }: { car: Named }) {
   const valid = car.article !== null && validArticle(car.article);
-  const state = usePhoto(valid ? `wec:car:${car.article}` : null, () =>
-    getArticlePhoto(car.article!, { width: 900, photosOnly: true }),
+  const state = usePhoto(valid ? `wec:car:${car.article}:${car.name}` : null, () =>
+    getArticlePhoto(car.article!, { width: 900, photosOnly: true, model: car.name }),
   );
   return (
     <div className="wec-cars__item">
-      <PhotoFigure state={state} alt={car.name} caption={car.name} shape="wide" />
-      {state.status === 'done' && !state.photo && <p className="muted">{car.name} — фото нет у источника</p>}
+      <h3 className="wec-cars__name">
+        {valid ? (
+          <a href={articleUrl(car.article!)} target="_blank" rel="noreferrer">
+            {car.name}
+          </a>
+        ) : (
+          car.name
+        )}
+      </h3>
+      <PhotoFigure state={state} alt={car.name} shape="wide" />
+      {state.status === 'done' && !state.photo && (
+        <p className="muted">У источника нет подтверждённого свободного фото.</p>
+      )}
     </div>
   );
 }
@@ -237,7 +314,8 @@ function SeasonProfile({
       <h2 className="section-title">Сезон {seasonLabel(season)}</h2>
       {needsEntry && (
         <div className="wec-profile-entry">
-          <DataState state={entries}>
+          {/* Same season article as the standings below: one source line is enough. */}
+          <DataState state={entries} hideMeta>
             {(participants) => {
               const entry = participants.find(
                 (p) => p.who.article === article || p.who.article === canonical,
