@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
+import { ScheduleMoment } from '../../../components/WeekendSchedule';
 import { useNow } from '../../../hooks/useNow';
 import { FeStatusBadge, NameFlag, WikiFlagImg, WikiSourceNote } from '../components/bits';
+import { feWeekendSchedule, isFeSprintWeekend } from '../data/schedule';
 import { seasonLabel } from '../data/seasons';
 import { FE_STATUS_LABELS, nextRound, roundStatus, type FeStatus } from '../domain/status';
 import { useFeSeason } from '../hooks/data';
@@ -31,7 +33,12 @@ function Calendar({ season }: { season: string }) {
         }
       >
         {(data) => {
-          const rounds = data.rounds.map((r) => ({ r, status: roundStatus(r, now) }));
+          const rounds = data.rounds.map((r) => ({
+            r,
+            status: roundStatus(r, now),
+            start: feWeekendSchedule(season, r).sessions.find((session) => session.kind === 'race')?.start,
+            sprintWeekend: isFeSprintWeekend(season, r),
+          }));
           const next = nextRound(data.rounds, now);
           const statuses = (['completed', 'live', 'upcoming', 'awaiting', 'unknown'] as FeStatus[]).filter(
             (status) => rounds.some((r) => r.status === status),
@@ -56,17 +63,18 @@ function Calendar({ season }: { season: string }) {
                 ))}
               </div>
               <ol className="race-grid">
-                {shown.map(({ r, status }) => (
+                {shown.map(({ r, status, start, sprintWeekend }) => (
                   <li key={r.round} className="fe-calendar-item">
                     <Link
                       to={`/fe/${season}/race/${r.round}`}
-                      className={`race-card race-card--${status}${next?.round === r.round ? ' race-card--next' : ''}`}
+                      className={`race-card race-card--${status}${next?.round === r.round ? ' race-card--next' : ''}${sprintWeekend ? ' race-card--sprint' : ''}`}
                       data-round={r.round}
                     >
                       {next?.round === r.round && <span className="race-card__next">Следующий</span>}
                       <span className="race-card__top">
                         <span className="race-card__round">Этап {r.round}</span>
                         <span className="race-card__badges">
+                          {sprintWeekend && <span className="sprint-badge">Уик-энд со спринтом</span>}
                           <FeStatusBadge status={status} />
                         </span>
                       </span>
@@ -75,7 +83,9 @@ function Calendar({ season }: { season: string }) {
                         <WikiFlagImg flag={r.country} />
                         {r.circuit?.name ?? r.country?.country ?? 'Трасса не указана'}
                       </span>
-                      <span className="race-card__date">{r.dateText || '—'}</span>
+                      <span className="race-card__date">
+                        {start && start.length > 10 ? <ScheduleMoment start={start} /> : r.dateText || '—'}
+                      </span>
                       {r.raceNumber !== null && (
                         <span className="fe-double-badge">Сдвоенный этап · гонка {r.raceNumber}</span>
                       )}

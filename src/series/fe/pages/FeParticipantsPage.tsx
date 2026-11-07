@@ -31,27 +31,34 @@ function Participants({ season, drivers }: { season: string; drivers: boolean })
       render: (row) => <NameFlag who={row.who} kind={drivers ? 'driver' : 'team'} emblem={!drivers} />,
       sortValue: (row) => row.who.name,
     },
-    {
-      key: 'numbers',
-      header: 'Номер',
-      abbr: '№',
-      align: 'center',
-      render: (row) => row.numbers.join(', ') || '—',
-      sortValue: (row) => Number(row.numbers[0]) || null,
-    },
+    ...(drivers
+      ? [
+          {
+            key: 'numbers',
+            header: 'Номер',
+            abbr: '№',
+            align: 'center' as const,
+            render: (row: FeParticipant) => row.numbers.join(', ') || '—',
+            sortValue: (row: FeParticipant) => Number(row.numbers[0]) || null,
+          },
+        ]
+      : []),
     {
       key: 'partners',
-      header: drivers ? 'Команда' : 'Пилоты',
+      header: drivers ? 'Команда' : 'Номер и пилот',
       render: (row) =>
-        row.partners.length ? (
+        !drivers ? (
+          <span className="fe-partners">
+            {row.lineup.map(({ number, driver }) => (
+              <span key={JSON.stringify([number, driver?.article ?? driver?.name])}>
+                <strong>{number ? `№ ${number}` : '—'}</strong> <NameFlag who={driver} kind="driver" />
+              </span>
+            ))}
+          </span>
+        ) : row.partners.length ? (
           <span className="fe-partners">
             {row.partners.map((p) => (
-              <NameFlag
-                key={p.article ?? p.name}
-                who={p}
-                kind={drivers ? 'team' : 'driver'}
-                emblem={drivers}
-              />
+              <NameFlag key={p.article ?? p.name} who={p} kind="team" emblem />
             ))}
           </span>
         ) : (
@@ -85,6 +92,7 @@ function Participants({ season, drivers }: { season: string; drivers: boolean })
           const rows = data.filter(
             (row) =>
               row.who.name.toLocaleLowerCase().includes(query) ||
+              row.numbers.some((number) => number.includes(query)) ||
               row.partners.some((p) => p.name.toLocaleLowerCase().includes(query)),
           );
           return (

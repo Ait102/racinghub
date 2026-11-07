@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
+import { ScheduleMoment } from '../../../components/WeekendSchedule';
 import { useNow } from '../../../hooks/useNow';
 import { ClassBadge, NameFlag, WecStatusBadge, WikiFlagImg, WikiSourceNote } from '../components/bits';
+import { wecWeekendSchedule } from '../data/schedule';
 import { seasonLabel } from '../data/seasons';
 import { isLeMans, nextRound, roundStatus, WEC_STATUS_LABELS, type WecStatus } from '../domain/status';
 import { useWecSeason } from '../hooks/data';
@@ -30,7 +32,11 @@ function Calendar({ season }: { season: string }) {
         emptyText="У источника нет календаря этого сезона."
       >
         {(data) => {
-          const withStatus = data.rounds.map((r) => ({ r, status: roundStatus(r, now) }));
+          const withStatus = data.rounds.map((r) => ({
+            r,
+            status: roundStatus(r, now),
+            start: wecWeekendSchedule(r.start).sessions.find((session) => session.kind === 'race')?.start,
+          }));
           const next = nextRound(data.rounds, now);
           const statuses = (['completed', 'live', 'upcoming', 'awaiting'] as WecStatus[]).filter((s) =>
             withStatus.some((x) => x.status === s),
@@ -55,7 +61,7 @@ function Calendar({ season }: { season: string }) {
                 ))}
               </div>
               <ol className="race-grid">
-                {shown.map(({ r, status }) => (
+                {shown.map(({ r, status, start }) => (
                   <li key={r.round} className="wec-calendar-item">
                     <Link
                       to={`/wec/${season}/race/${r.round}`}
@@ -77,6 +83,11 @@ function Calendar({ season }: { season: string }) {
                       </span>
                       <span className="race-card__circuit muted">{r.circuit?.name ?? ''}</span>
                       <span className="race-card__date">{r.dateText || '—'}</span>
+                      {start && (
+                        <span className="small muted">
+                          Старт · <ScheduleMoment start={start} />
+                        </span>
+                      )}
                       {r.winners.length > 0 && (
                         <span className="race-card__winners">
                           {r.winners.map((w) => (

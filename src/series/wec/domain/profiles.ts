@@ -39,7 +39,10 @@ const WEC_LABELS: Record<string, string> = {
 };
 
 /** A team may appear under both the requested and canonical article titles. */
-export function teamCars(participants: Participant[], articles: readonly string[]): Named[] {
+export function teamCars(
+  participants: Pick<Participant, 'who' | 'cars' | 'categories'>[],
+  articles: readonly string[],
+): Named[] {
   const cars = new Map<string, Named>();
   for (const entry of participants) {
     if (!entry.who.article || !articles.includes(entry.who.article)) continue;

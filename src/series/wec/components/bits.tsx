@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Emblem } from '../../../components/Emblem';
 import { teamEmblem } from '../../../data/emblems';
 import type { WikiFlag } from '../../../lib/wikitable';
+import type { EntryCrew } from '../domain/participants';
 import { validArticle, type ProfileKind } from '../domain/profiles';
 import { WEC_STATUS_LABELS, type WecStatus } from '../domain/status';
 import type { Named } from '../domain/types';
@@ -67,6 +68,22 @@ export function Crew({ drivers }: { drivers: Named[] }) {
       {drivers.map((d, i) => (
         <span key={`${d.name}-${i}`} className="crew__driver">
           <NameFlag who={d} kind="driver" />
+        </span>
+      ))}
+    </span>
+  );
+}
+
+export function EntryDrivers({ crew }: { crew: EntryCrew }) {
+  if (!crew.drivers.length) return <span className="muted">—</span>;
+  return (
+    <span className="crew">
+      {crew.drivers.map(({ who, rounds }) => (
+        <span className="crew__driver" key={JSON.stringify([who.article ?? who.name, rounds])}>
+          <NameFlag who={who} kind="driver" />
+          {rounds && (
+            <span className="muted small"> · {rounds === 'All' ? 'Все этапы' : `Этапы: ${rounds}`}</span>
+          )}
         </span>
       ))}
     </span>

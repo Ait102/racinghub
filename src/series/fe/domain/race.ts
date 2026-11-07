@@ -185,9 +185,10 @@ export function parseRace(article: string, html: string): FeRaceData {
       for (const key of headings.keys()) if (key >= level) headings.delete(key);
       section = cleanText(node);
       headings.set(level, section);
-      const race = /^Race\s+([1-9]\d*)$/i.exec(section);
+      const race = /^Race\s+([1-9]\d*|one|two)$/i.exec(section);
       if (race) {
-        current = { raceNumber: Number(race[1]), title: section, classification: [], qualifying: [] };
+        const raceNumber = Number(race[1]) || ['one', 'two'].indexOf(race[1].toLowerCase()) + 1;
+        current = { raceNumber, title: section, classification: [], qualifying: [] };
         races.push(current);
       }
       qualifyingSection =

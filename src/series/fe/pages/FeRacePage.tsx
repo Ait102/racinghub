@@ -5,10 +5,12 @@ import { articleUrl } from '../../../api/wikipedia';
 import { DataState, ErrorBox, Loading, MetaLine } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
 import { SortableTable, type Column } from '../../../components/SortableTable';
+import { WeekendSchedule } from '../../../components/WeekendSchedule';
 import { useNow } from '../../../hooks/useNow';
 import { validArticle } from '../../../lib/wikiArticle';
 import { FeStatusBadge, NameFlag, WikiFlagImg, WikiSourceNote } from '../components/bits';
 import { FeCircuitPanel } from '../components/FeCircuitPanel';
+import { feWeekendSchedule } from '../data/schedule';
 import { seasonLabel } from '../data/seasons';
 import type { FeQualifyingTable, FeRaceEntry } from '../domain/race';
 import { roundStatus } from '../domain/status';
@@ -50,7 +52,7 @@ function RaceView({ season }: { season: string }) {
         <p className="lead">
           {r.dateText || 'Даты не указаны'} <FeStatusBadge status={status} />
         </p>
-        {r.raceNumber !== null && <p className="muted">Сдвоенный этап · Race {r.raceNumber}</p>}
+        {r.raceNumber !== null && <p className="muted">Сдвоенный этап · гонка {r.raceNumber}</p>}
         <p className="fe-race-links">
           {eprix && validArticle(eprix) && (
             <Link to={`/fe/${season}/eprix/${encodeURIComponent(eprix)}`}>История E-Prix →</Link>
@@ -62,6 +64,7 @@ function RaceView({ season }: { season: string }) {
           )}
         </p>
       </PageHeader>
+      <WeekendSchedule schedule={feWeekendSchedule(season, r)} />
       <div className="fe-race-summary grid-2">
         <article className="card">
           <h2 className="card__title">Победитель</h2>

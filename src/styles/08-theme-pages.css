@@ -197,6 +197,25 @@
   color: var(--accent-text);
 }
 
+.race-weekend {
+  margin-bottom: var(--s4);
+}
+
+.race-weekend .schedule__list li {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.race-weekend__sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s4);
+  margin-top: var(--s3);
+}
+
 .tabs {
   gap: var(--s1);
   border-bottom: 1px solid var(--border);

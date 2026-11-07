@@ -8,6 +8,7 @@ export interface FeParticipant {
   numbers: string[];
   /** For a driver — the teams; for a team — its drivers. */
   partners: Named[];
+  lineup: { number: string | null; driver: Named | null }[];
   /** Powertrain names, e.g. "Jaguar I-Type 7". */
   powertrains: string[];
 }
@@ -44,10 +45,23 @@ export function parseFeParticipants(html: string, drivers: boolean): FeParticipa
       const people = driverCell.lines.map(namedLine).filter((n): n is Named => n !== null);
       const subjects = drivers ? people : teamName ? [teamName] : [];
       for (const who of subjects) {
-        const entry = entries.get(byName(who)) ?? { who, numbers: [], partners: [], powertrains: [] };
+        const entry = entries.get(byName(who)) ?? {
+          who,
+          numbers: [],
+          partners: [],
+          powertrains: [],
+          lineup: [],
+        };
         addUnique(entry.numbers, num || null, (x) => x);
         addUnique(entry.powertrains, engine || null, (x) => x);
         for (const partner of drivers ? [teamName] : people) addUnique(entry.partners, partner, byName);
+        if (!drivers) {
+          for (const pilot of people.length ? people : [null]) {
+            addUnique(entry.lineup, { number: num || null, driver: pilot }, (seat) =>
+              JSON.stringify([seat.number, seat.driver && byName(seat.driver)]),
+            );
+          }
+        }
         entries.set(byName(who), entry);
       }
     }

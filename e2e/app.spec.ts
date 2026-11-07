@@ -233,6 +233,7 @@ test('WEC has its own menu and season list, without F1 items', async ({ page }) 
     'Зачёты',
     'Пилоты',
     'Команды',
+    'Экипажи',
     'Сравнение',
     'Источники',
   ]);

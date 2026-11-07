@@ -29,4 +29,17 @@ describe('season entry lists', () => {
     const buemi = parseParticipants(entries2026, true).find((p) => p.who.article === 'Sébastien Buemi');
     expect(buemi?.cars.map((c) => c.name)).toEqual(['Toyota TR010 Hybrid']);
   });
+
+  it('keeps numbered crews separate and retains each driver’s listed rounds', () => {
+    const team = parseParticipants(entries2026, false).find((p) => p.who.name === 'Aston Martin THOR Team');
+    const seven = team?.crews.find((crew) => crew.number === '007');
+    expect(seven?.drivers.map(({ who, rounds }) => [who.name, rounds])).toEqual([
+      ['Tom Gamble', 'All'],
+      ['Harry Tincknell', 'All'],
+      ['Ross Gunn', '3'],
+    ]);
+    expect(
+      team?.crews.find((crew) => crew.number === '009')?.drivers.map(({ who }) => who.name),
+    ).not.toContain('Tom Gamble');
+  });
 });

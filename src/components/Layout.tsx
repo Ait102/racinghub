@@ -118,6 +118,7 @@ export function Layout() {
               [`/wec/${wecSeason}/standings`, 'Зачёты'],
               [`/wec/${wecSeason}/drivers`, 'Пилоты'],
               [`/wec/${wecSeason}/teams`, 'Команды'],
+              [`/wec/${wecSeason}/crews`, 'Экипажи'],
               [`/wec/${wecSeason}/compare`, 'Сравнение'],
               [`/wec/${wecSeason}/about`, 'Источники'],
             ]

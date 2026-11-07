@@ -72,8 +72,8 @@ it('renders every model for team aliases and keeps the entry-list source', async
   const named = (name: string) => ({ name, article: name, flag: null });
   vi.mocked(useWecParticipants).mockReturnValue(
     success([
-      { who: named('Old Team'), categories: ['Hypercar'], cars: [named('Model A')] },
-      { who: named('Canonical Team'), categories: ['LMGT3'], cars: [named('Model B')] },
+      { who: named('Old Team'), categories: ['Hypercar'], cars: [named('Model A')], crews: [] },
+      { who: named('Canonical Team'), categories: ['LMGT3'], cars: [named('Model B')], crews: [] },
     ]),
   );
   await act(async () => {

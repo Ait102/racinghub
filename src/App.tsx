@@ -35,6 +35,7 @@ const WecCalendarPage = lazy(() => wec().then((m) => ({ default: m.WecCalendarPa
 const WecComparePage = lazy(() => wec().then((m) => ({ default: m.WecComparePage })));
 const WecHomePage = lazy(() => wec().then((m) => ({ default: m.WecHomePage })));
 const WecParticipantsPage = lazy(() => wec().then((m) => ({ default: m.WecParticipantsPage })));
+const WecCrewsPage = lazy(() => wec().then((m) => ({ default: m.WecCrewsPage })));
 const WecProfilePage = lazy(() => wec().then((m) => ({ default: m.WecProfilePage })));
 const WecRacePage = lazy(() => wec().then((m) => ({ default: m.WecRacePage })));
 const WecStandingsPage = lazy(() => wec().then((m) => ({ default: m.WecStandingsPage })));
@@ -127,6 +128,7 @@ export function App() {
               <Route path="standings" element={<WecStandingsPage />} />
               <Route path="drivers" element={<WecParticipantsPage drivers />} />
               <Route path="teams" element={<WecParticipantsPage drivers={false} />} />
+              <Route path="crews" element={<WecCrewsPage />} />
               <Route path="compare" element={<WecComparePage />} />
               <Route path="about" element={<WecSourcesPage />} />
               <Route path="driver/:article" element={<WecProfilePage kind="driver" />} />

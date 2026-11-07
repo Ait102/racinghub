@@ -4,10 +4,12 @@ import { Link, useParams } from 'react-router-dom';
 import { DataState, ErrorBox, Loading, MetaLine } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
 import { SortableTable, type Column } from '../../../components/SortableTable';
+import { WeekendSchedule } from '../../../components/WeekendSchedule';
 import { useNow } from '../../../hooks/useNow';
 import { articleUrl } from '../api/wikipedia';
 import { ClassBadge, Crew, NameFlag, WecStatusBadge, WikiFlagImg, WikiSourceNote } from '../components/bits';
 import { WecCircuitPanel } from '../components/WecCircuitPanel';
+import { wecWeekendSchedule } from '../data/schedule';
 import { seasonLabel } from '../data/seasons';
 import { classesOf } from '../domain/parse';
 import { roundStatus } from '../domain/status';
@@ -60,6 +62,7 @@ function RaceView({ season }: { season: string }) {
           </p>
         )}
       </PageHeader>
+      <WeekendSchedule schedule={wecWeekendSchedule(r.start)} />
       {(r.eventArticle ?? r.circuit?.article) && (
         <p>
           <Link

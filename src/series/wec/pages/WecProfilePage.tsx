@@ -9,7 +9,7 @@ import { PhotoFigure, usePhoto } from '../../../components/PhotoFigure';
 import { SortableTable, type Column } from '../../../components/SortableTable';
 import { Stat } from '../../../components/ui';
 import { articleUrl } from '../api/wikipedia';
-import { NameFlag, WecEmblem, WikiSourceNote } from '../components/bits';
+import { ClassBadge, EntryDrivers, NameFlag, WecEmblem, WikiSourceNote } from '../components/bits';
 import { WecCircuitPanel } from '../components/WecCircuitPanel';
 import { seasonLabel } from '../data/seasons';
 import {
@@ -238,6 +238,7 @@ function ProfileFav({ kind, article, canonical }: { kind: WecFavKind; article: s
 /** Cars of the team in the season's entry list, with the photo from each car's article. */
 function TeamCars({ season, article, canonical }: { season: string; article: string; canonical: string }) {
   const entries = useWecParticipants(season, false);
+  const titles = [article, canonical];
   return (
     <section className="wec-cars" aria-labelledby="wec-cars-title">
       <h2 className="section-title" id="wec-cars-title">
@@ -248,16 +249,46 @@ function TeamCars({ season, article, canonical }: { season: string; article: str
       </p>
       <DataState
         state={entries}
-        isEmpty={(data) => teamCars(data, [article, canonical]).length === 0}
-        emptyText="В заявке сезона модели этой команды не указаны."
+        isEmpty={(data) =>
+          !data.some(
+            (team) =>
+              team.who.article &&
+              titles.includes(team.who.article) &&
+              (team.cars.length || team.crews.length),
+          )
+        }
+        emptyText="В заявке сезона нет машин и экипажей этой команды."
       >
-        {(data) => (
-          <div className="wec-cars__grid">
-            {teamCars(data, [article, canonical]).map((car) => (
-              <CarPhoto key={car.name} car={car} />
-            ))}
-          </div>
-        )}
+        {(data) => {
+          const crews = data
+            .filter((team) => team.who.article && titles.includes(team.who.article))
+            .flatMap((team) => team.crews);
+          const cars = teamCars(data, titles);
+          return (
+            <>
+              {crews.length > 0 && (
+                <div className="wec-cars__grid">
+                  {crews.map((crew, index) => (
+                    <article className="card" key={index}>
+                      <h3>
+                        № {crew.number} <ClassBadge cls={crew.category} />
+                      </h3>
+                      {crew.car && <p>{crew.car.name}</p>}
+                      <EntryDrivers crew={crew} />
+                    </article>
+                  ))}
+                </div>
+              )}
+              {cars.length > 0 && (
+                <div className="wec-cars__grid">
+                  {cars.map((car) => (
+                    <CarPhoto key={car.name} car={car} />
+                  ))}
+                </div>
+              )}
+            </>
+          );
+        }}
       </DataState>
     </section>
   );

@@ -29,6 +29,12 @@ describe('Formula E entry lists', { timeout: 20_000 }, () => {
     expect(nissan.partners.map((d) => d.name)).toEqual(
       expect.arrayContaining(['Oliver Rowland', 'Norman Nato']),
     );
+    expect(nissan.lineup.map(({ number, driver }) => [number, driver?.name])).toEqual(
+      expect.arrayContaining([
+        ['1', 'Oliver Rowland'],
+        ['23', 'Norman Nato'],
+      ]),
+    );
   });
 });
 

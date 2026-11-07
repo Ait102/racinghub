@@ -44,6 +44,43 @@ test('FE single race includes classification and track details', async ({ page }
   await expect(page.locator('main table').first()).toBeVisible();
   await expect(page.locator('main')).toContainText('Квалификация');
   await expect(page.locator('main')).toContainText('О трассе');
+  const schedule = page.getByRole('region', { name: 'Расписание' });
+  await expect(schedule).toContainText('Свободная практика 2');
+  await expect(schedule.getByRole('link', { name: /Официальное расписание/ })).toHaveAttribute(
+    'href',
+    /^https:\/\/www\.fiaformulae\.com\//,
+  );
+});
+
+test('FE highlights a GEN4 sprint weekend without assigning its sprint to a round', async ({ page }) => {
+  await mockApi(page);
+  await page.route('https://en.wikipedia.org/w/api.php**', async (route) => {
+    const params = new URL(route.request().url()).searchParams;
+    if (params.get('page') !== '2026–27 Formula E World Championship') return route.fallback();
+    await route.fulfill({
+      json: {
+        parse:
+          params.get('prop') === 'sections'
+            ? { sections: [{ index: '1', line: 'Calendar', toclevel: 1 }] }
+            : {
+                text: `<table class="wikitable">
+          <tr><th>Round</th><th>E-Prix</th><th>Date</th></tr>
+          <tr><th>1</th><td rowspan="2">Jeddah ePrix</td><td>18 December 2026</td></tr>
+          <tr><th>2</th><td>19 December 2026</td></tr>
+        </table>`,
+              },
+      },
+      headers: { 'Access-Control-Allow-Origin': '*' },
+    });
+  });
+  await page.goto('./#/fe/2026-27/calendar');
+  await expect(page.getByText('Уик-энд со спринтом', { exact: true })).toHaveCount(2);
+  await page.locator('[data-round="1"]').click();
+  const schedule = page.getByRole('region', { name: 'Расписание' });
+  await expect(schedule).toContainText('Квалификация E-PrixUnleashed');
+  const sprint = schedule.locator('li', { hasText: 'Спринт E-PrixUnleashed' });
+  await expect(sprint).toContainText('Дата и время не объявлены');
+  await expect(sprint.locator('time')).toHaveCount(0);
 });
 
 test('FE standings chart and favourites are independent of WEC', async ({ page }) => {
@@ -139,6 +176,8 @@ test('FE entry lists lead to driver, team and E-Prix profiles', async ({ page })
   await page.getByRole('button', { name: /Добавить Pascal Wehrlein в избранное/ }).click();
 
   await page.goto('./#/fe/2025-26/teams');
+  const nissan = page.getByRole('row', { name: /Nissan Formula E Team.*Oliver Rowland/ });
+  await expect(nissan.locator('.fe-partners > span')).toHaveText(['№ 1 Oliver Rowland', '№ 23 Norman Nato']);
   // Customer teams get the make of their powertrain.
   await expect(
     page.locator('tbody tr', { hasText: 'Andretti' }).locator('.team-logo--emblem img').first(),

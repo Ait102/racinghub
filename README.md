@@ -188,6 +188,7 @@ src/
 | `#/wec/{season}/calendar`, `/race/{round}`      | WEC: календарь и этап                              |
 | `#/wec/{season}/standings`                      | WEC: все зачёты и график мест                      |
 | `#/wec/{season}/drivers`, `/teams`              | WEC: заявочные списки с поиском                    |
+| `#/wec/{season}/crews`                          | WEC: номера машин, составы экипажей и этапы        |
 | `#/wec/{season}/compare?a=…&b=…`                | WEC: сравнение пилотов                             |
 | `#/wec/{season}/driver/…`, `/team/…`            | WEC: профили пилота и команды (по названию статьи) |
 | `#/wec/{season}/circuit/…`                      | WEC: трасса и победители гонки по годам            |

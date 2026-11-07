@@ -3,6 +3,20 @@ import { expect, test } from '@playwright/test';
 
 import { mockApi } from './fixtures';
 
+test('WEC crew list keeps car numbers, drivers and round assignments', async ({ page }) => {
+  await mockApi(page, undefined, { localFlags: true });
+  await page.goto('./#/wec/2026/teams');
+  await page.getByRole('link', { name: 'Экипажи', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Экипажи' })).toBeVisible();
+  await page.getByRole('searchbox').fill('№ 007');
+  const crew = page.getByRole('row', { name: /007.*Aston Martin THOR Team/ });
+  await expect(crew).toContainText('Tom Gamble');
+  await expect(crew).toContainText('Ross Gunn · Этапы: 3');
+  await expect(crew).not.toContainText('009');
+  await page.setViewportSize({ width: 375, height: 812 });
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+});
+
 test('WEC opens on the latest season with the next race, winners and leaders', async ({ page }) => {
   await mockApi(page);
   await page.goto('./');
@@ -42,6 +56,12 @@ test('WEC race: classification by class, qualifying and practice', async ({ page
   await page.locator('.race-card[data-round="3"]').click();
   await expect(page).toHaveURL(/#\/wec\/2026\/race\/3$/);
   await expect(page.getByRole('heading', { level: 1, name: '24 Hours of Le Mans' })).toBeVisible();
+  const schedule = page.getByRole('region', { name: 'Расписание' });
+  await expect(schedule).toContainText('Hyperpole 1 Hypercar');
+  await expect(schedule.locator('li', { hasText: /^Гонка/ }).locator('time')).toHaveAttribute(
+    'datetime',
+    '2026-06-13T14:00:00Z',
+  );
   await expect(page.locator('.winners--cards .winners__item')).toHaveCount(2);
 
   const rows = page.locator('[role=tabpanel] tbody tr');

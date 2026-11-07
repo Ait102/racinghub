@@ -1,3 +1,4 @@
+import berlin from '../__fixtures__/race-2025-berlin.html?raw';
 import single from '../__fixtures__/race-2025-sao-paulo.html?raw';
 import london from '../__fixtures__/race-2026-london.html?raw';
 import double from '../__fixtures__/race-2026-monaco.html?raw';
@@ -71,6 +72,16 @@ describe('Formula E race articles', () => {
     expect(later.races[0].classification[0].driver?.name).toBe('Nyck de Vries');
     expect(later.races[1].classification[0].driver?.name).toBe('Oliver Rowland');
     expect(later.races[1].qualifying).toHaveLength(3);
+  });
+
+  it('keeps both classifications and qualifying results when the report spells out race numbers', () => {
+    const { races } = parseRace('2025 Berlin ePrix', berlin);
+    expect(races.map((race) => race.raceNumber)).toEqual([1, 2]);
+    expect(races.map((race) => race.classification[0]?.driver?.name)).toEqual([
+      'Mitch Evans',
+      'Nick Cassidy',
+    ]);
+    expect(races.map((race) => race.qualifying[0]?.rows[0]?.[2])).toEqual(['Mitch Evans', 'Pascal Wehrlein']);
   });
 
   it('uses the actual race infobox for track facts and provides the article lead', () => {
