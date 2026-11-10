@@ -52,6 +52,21 @@ export function ChoosePage() {
           <span className="series-card__cta">Открыть →</span>
         </Link>
       </div>
+      <div className="choose__grid choose__grid--upcoming">
+        {[
+          { id: 'imsa', name: 'IMSA', description: 'Гонки на выносливость в Северной Америке.' },
+          { id: 'dtm', name: 'DTM', description: 'Немецкая серия кузовных гонок.' },
+        ].map(({ id, name, description }) => (
+          <Link key={id} to={`/${id}`} className={`series-card series-card--${id}`}>
+            <span className="series-card__mark" aria-hidden="true">
+              {name}
+            </span>
+            <h2 className="series-card__title">{name}</h2>
+            <p className="series-card__text">{description}</p>
+            <span className="series-card__cta">Раздел в разработке →</span>
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }

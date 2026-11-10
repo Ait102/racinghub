@@ -285,13 +285,6 @@
   margin-bottom: 6px;
 }
 
-/* Favourites */
-.fav-btn {
-  font: inherit;
-  background: transparent;
-  cursor: pointer;
-}
-
 /* Chart */
 
 .chart {

@@ -81,8 +81,7 @@
 }
 
 .fe-podium-list,
-.fe-leaders__list,
-.fe-favorites-list {
+.fe-leaders__list {
   display: grid;
   gap: 4px;
   list-style: none;
@@ -91,8 +90,7 @@
 }
 
 .fe-podium-list li,
-.fe-leaders__list li,
-.fe-favorites-list li {
+.fe-leaders__list li {
   display: grid;
   grid-template-columns: 1.5em minmax(0, 1fr) auto;
   align-items: center;
@@ -229,80 +227,16 @@
   margin: 0;
 }
 
-.fe-places-chart .chart__tip {
-  position: static;
-  transform: none;
-  min-width: 0;
-  max-height: none;
-  overflow: visible;
-  margin-top: var(--s3);
-}
-
-.fe-places-chart .chart__tip li {
-  align-items: start;
-  padding-block: 4px;
-}
-
-.fe-places-chart .chart__tip .team-dot {
-  flex-shrink: 0;
-  margin-top: 5px;
-}
-
-.fe-places-chart__name {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.fe-places-chart .chart__tip strong {
-  flex-shrink: 0;
-}
-
-.fe-places-card .legend li {
-  align-items: start;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.fe-legend-pick {
-  display: inline-flex;
-  align-items: start;
-  gap: 8px;
-  min-width: 0;
-  padding: 3px 8px;
-  border: 1px solid transparent;
-  border-radius: var(--r-pill, 999px);
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  overflow-wrap: anywhere;
-  cursor: pointer;
-}
-
-.fe-legend-pick:hover,
-.fe-legend-pick:focus-visible {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.fe-legend-pick[aria-pressed='true'] {
-  border-color: var(--border);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.fe-legend-pick svg {
-  flex-shrink: 0;
-  margin-top: 6px;
-}
-
-.fe-places-chart__out {
-  stroke-dasharray: 2 4;
-}
-
 .fe-race-summary,
 .fe-circuit-panel,
 .fe-circuit-description {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.fe-circuit-description {
+  max-width: 66ch;
+  line-height: 1.65;
 }
 
 .fe-qualifying-groups {
@@ -342,12 +276,6 @@
   }
   .fe-home .hero__inner {
     align-items: flex-start;
-  }
-  .fe-favorites-list li {
-    grid-template-columns: 1.5em minmax(0, 1fr);
-  }
-  .fe-favorites-list li > :last-child {
-    grid-column: 2;
   }
 }
 

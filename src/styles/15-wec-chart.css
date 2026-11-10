@@ -1,43 +1,69 @@
-.wec-places-chart .chart__tip {
+:is(.places-chart, .points-chart) .chart__tip {
+  width: max-content;
+  min-width: min(150px, 43%);
+  max-width: min(300px, 43%);
+  max-height: none;
+}
+
+@media (max-width: 640px), (hover: none) {
+  :is(.places-chart, .points-chart) .chart__tip {
+    position: static;
+    transform: none;
+    width: auto;
+    max-width: none;
+    margin-top: var(--s3);
+  }
+}
+
+:is(.places-chart, .points-chart) :is(.places-chart__tip--stacked, .chart__tip--stacked) {
   position: static;
   transform: none;
-  min-width: 0;
-  max-height: none;
-  overflow: visible;
+  width: auto;
+  max-width: none;
   margin-top: var(--s3);
 }
 
-.wec-places-chart .chart__tip li {
+.places-chart .chart__tip li {
   align-items: start;
   padding-block: 4px;
 }
 
-.wec-places-chart .chart__tip .team-dot {
+.places-chart .chart__tip .team-dot {
   flex-shrink: 0;
   margin-top: 5px;
 }
 
-.wec-places-chart__name {
+:is(.wec-places-chart__name, .fe-places-chart__name, .chart__tip-name, .points-legend__name) {
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.wec-places-chart .chart__tip strong {
+.points-chart .chart__tip .team-dot,
+.chart-card .legend > li > svg {
   flex-shrink: 0;
 }
 
-.wec-places-card .legend li {
+.points-legend__name {
+  padding-left: 8px;
+  border-left: 4px solid;
+}
+
+.places-chart .chart__tip strong {
+  flex-shrink: 0;
+}
+
+.places-card .legend li {
   align-items: start;
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.wec-places-card .legend svg {
+.places-card .legend svg {
   flex-shrink: 0;
   margin-top: 4px;
 }
 
-.wec-legend-pick {
+.places-legend-pick {
   display: inline-flex;
   align-items: start;
   gap: 8px;
@@ -52,21 +78,21 @@
   overflow-wrap: anywhere;
   cursor: pointer;
 }
-.wec-legend-pick:hover,
-.wec-legend-pick:focus-visible {
+.places-legend-pick:hover,
+.places-legend-pick:focus-visible {
   background: rgba(255, 255, 255, 0.06);
 }
-.wec-legend-pick[aria-pressed='true'] {
+.places-legend-pick[aria-pressed='true'] {
   border-color: var(--border);
   background: rgba(255, 255, 255, 0.08);
 }
-.wec-legend-pick svg {
+.places-legend-pick svg {
   flex-shrink: 0;
   margin-top: 6px;
 }
-.wec-places-chart__out {
+:is(.wec-places-chart__out, .fe-places-chart__out) {
   stroke-dasharray: 2 4;
 }
-.wec-places-chart g[data-series] {
+.places-chart g[data-series] {
   transition: opacity 0.15s ease;
 }

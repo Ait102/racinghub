@@ -1,4 +1,20 @@
-/* Series: start page (F1 / WEC), header switch. */
+/* Series: start page and header switch. */
+
+:root[data-series='imsa'] {
+  --accent: #41c878;
+  --accent-rgb: 65, 200, 120;
+  --accent-text: #78e4a3;
+}
+
+:root[data-series='dtm'] {
+  --accent: #f3cb42;
+  --accent-rgb: 243, 203, 66;
+  --accent-text: #ffe17a;
+}
+
+:is([data-series='imsa'], [data-series='dtm']) :is(.logo__mark, .series-switch__item.is-active) {
+  color: var(--bg);
+}
 
 .choose__grid {
   display: grid;
@@ -6,8 +22,14 @@
   gap: 16px;
 }
 
+.choose__grid.choose__grid--upcoming {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 16px;
+}
+
 @media (max-width: 720px) {
-  .choose__grid {
+  .choose__grid,
+  .choose__grid.choose__grid--upcoming {
     grid-template-columns: 1fr;
   }
 }
@@ -51,6 +73,27 @@
   border-color: rgba(90, 176, 255, 0.6);
 }
 
+.series-card--imsa {
+  --preview-color: 65, 200, 120;
+}
+
+.series-card--dtm {
+  --preview-color: 243, 203, 66;
+}
+
+.choose__grid--upcoming .series-card {
+  background: linear-gradient(135deg, rgba(var(--preview-color), 0.2), transparent 60%), var(--surface);
+}
+
+.choose__grid--upcoming .series-card:hover,
+.choose__grid--upcoming .series-card:focus-visible {
+  border-color: rgba(var(--preview-color), 0.65);
+}
+
+.choose__grid--upcoming .series-card__cta {
+  color: rgb(var(--preview-color));
+}
+
 .series-card__mark {
   position: absolute;
   right: 16px;
@@ -88,7 +131,7 @@
   color: var(--c-upcoming);
 }
 
-/* Header switch F1 / WEC */
+/* Header switch */
 .series-switch {
   display: inline-flex;
   padding: 3px;
@@ -119,6 +162,12 @@
 
 .series-switch__item.is-active[href='#/wec'] {
   background: var(--wec-blue);
+}
+
+@media (max-width: 480px) {
+  .series-switch__item {
+    padding-inline: 8px;
+  }
 }
 
 /* Up to mid-size screens: make room for the series switch (menu not hidden in a scroll, one header row on phones). */

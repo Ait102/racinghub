@@ -64,7 +64,7 @@ test('WEC chart remains readable with selected round details on a phone', async 
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('./#/wec/2026/standings');
   await page.getByRole('button', { name: 'Топ-10' }).click();
-  const chart = page.locator('.wec-places-chart');
+  const chart = page.locator('.points-chart');
   await chart.getByRole('img').focus();
   await page.keyboard.press('End');
   await expect(chart.getByRole('status')).toBeVisible();

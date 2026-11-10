@@ -96,10 +96,6 @@
   margin-bottom: 8px;
 }
 
-.profile-actions .fav-btn {
-  margin-bottom: 0;
-}
-
 .stats--grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));

@@ -26,6 +26,7 @@ export function seriesStyle(i: number): { color: string; dash?: string } {
 
 interface Props {
   rounds: string[];
+  roundLabels?: string[];
   series: PlaceSeries[];
   /** Series to bring forward (legend hover or pick); the others fade. */
   highlight?: string | null;
@@ -44,7 +45,13 @@ function bridges(places: Array<number | null>): Array<[number, number]> {
   return out;
 }
 
-export function PlacesChart({ rounds, series, highlight = null, classPrefix = 'wec-places-chart' }: Props) {
+export function PlacesChart({
+  rounds,
+  roundLabels,
+  series,
+  highlight = null,
+  classPrefix = 'wec-places-chart',
+}: Props) {
   const [hover, setHover] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -128,7 +135,7 @@ export function PlacesChart({ rounds, series, highlight = null, classPrefix = 'w
           .sort((a, b) => (a.p ?? Infinity) - (b.p ?? Infinity));
 
   return (
-    <div className={`chart ${classPrefix}`} ref={boxRef}>
+    <div className={`chart places-chart ${classPrefix}`} ref={boxRef}>
       <svg
         ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
@@ -158,7 +165,7 @@ export function PlacesChart({ rounds, series, highlight = null, classPrefix = 'w
             textAnchor={crowded || i === n - 1 ? 'end' : i === 0 ? 'start' : 'middle'}
             transform={crowded ? `rotate(-60 ${x(i)} ${H - bottom + 20})` : undefined}
           >
-            <title>{r}</title>
+            <title>{roundLabels?.[i] ?? r}</title>
             {r.length > 10 ? `${r.slice(0, 9)}…` : r}
           </text>
         ))}
@@ -201,7 +208,9 @@ export function PlacesChart({ rounds, series, highlight = null, classPrefix = 'w
                 />
               ))}
               {s.places.map((p, j) =>
-                p === null ? null : <circle key={j} cx={x(j)} cy={y(p)} r={3.5} fill={st.color} />,
+                p === null ? null : (
+                  <circle key={j} cx={x(j)} cy={y(p)} r={j === active ? 5 : 3.5} fill={st.color} />
+                ),
               )}
               {s.places.map((_, j) =>
                 isOut(s, j) ? (
@@ -222,8 +231,12 @@ export function PlacesChart({ rounds, series, highlight = null, classPrefix = 'w
       </svg>
 
       {active !== null && (
-        <div className="chart__tip" role="status">
-          <p className="chart__tip-title">{rounds[active]}</p>
+        <div
+          className={`chart__tip${x(active) >= W / 2 ? ' chart__tip--left' : ''}${hovered.length > 10 ? ' places-chart__tip--stacked' : ''}`}
+          style={{ left: `${(x(active) / W) * 100}%` }}
+          role="status"
+        >
+          <p className="chart__tip-title">{roundLabels?.[active] ?? rounds[active]}</p>
           {hovered.length === 0 && <p className="muted">Результатов пока нет.</p>}
           <ol>
             {hovered.map(({ s, i, text }) => (

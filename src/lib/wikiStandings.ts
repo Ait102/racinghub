@@ -87,7 +87,7 @@ const cellAt = (row: WikiCell[] | undefined, i: number): WikiCell | undefined =>
 const textAt = (row: WikiCell[] | undefined, i: number): string => cellAt(row, i)?.text ?? '';
 const orNull = (s: string) => (s && s !== '—' && s !== '-' ? s : null);
 
-export const TONES: Record<string, ResultTone> = {
+const TONES: Record<string, ResultTone> = {
   '#ffffbf': 'gold',
   '#dfdfdf': 'silver',
   '#ffdf9f': 'bronze',

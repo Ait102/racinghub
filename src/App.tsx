@@ -4,14 +4,18 @@ import { HashRouter, Link, Navigate, Route, Routes, useLocation } from 'react-ro
 import { ErrorBox, Loading } from './components/DataState';
 import { Layout } from './components/Layout';
 import { ChoosePage } from './pages/ChoosePage';
+import { dtm } from './series/dtm/data/seasons';
 import { rememberedSeason, useSeasons } from './series/f1/hooks/data';
 import { defaultFeSeason } from './series/fe/data/seasons';
+import { imsa } from './series/imsa/data/seasons';
 import { defaultWecSeason } from './series/wec/hooks/data';
 
 // Each series is its own chunk: a visitor of one series does not download the other.
 const f1 = () => import('./series/f1/pages');
 const wec = () => import('./series/wec/pages');
 const fe = () => import('./series/fe/pages');
+const ImsaSeasonPage = lazy(() => import('./series/imsa/pages').then((m) => ({ default: m.ImsaSeasonPage })));
+const DtmSeasonPage = lazy(() => import('./series/dtm/pages').then((m) => ({ default: m.DtmSeasonPage })));
 const FeParticipantsPage = lazy(() => fe().then((m) => ({ default: m.FeParticipantsPage })));
 const FeProfilePage = lazy(() => fe().then((m) => ({ default: m.FeProfilePage })));
 const FeComparePage = lazy(() => fe().then((m) => ({ default: m.FeComparePage })));
@@ -43,6 +47,15 @@ const WecSourcesPage = lazy(() => wec().then((m) => ({ default: m.WecSourcesPage
 
 function FeEntry() {
   return <Navigate to={`/fe/${defaultFeSeason()}`} replace />;
+}
+
+// Entry redirects are components, so the remembered season is read on every visit, not once at start.
+function WecEntry() {
+  return <Navigate to={`/wec/${defaultWecSeason()}`} replace />;
+}
+
+function YearSeriesEntry({ series }: { series: 'imsa' | 'dtm' }) {
+  return <Navigate to={`/${series}/${(series === 'imsa' ? imsa : dtm).defaultSeason()}`} replace />;
 }
 
 /** /f1 → the remembered or latest F1 season. */
@@ -103,6 +116,14 @@ export function App() {
         <Route element={<Layout />}>
           <Route index element={<ChoosePage />} />
           <Route path="f1" element={<F1Entry />} />
+          <Route path="imsa">
+            <Route index element={<YearSeriesEntry series="imsa" />} />
+            <Route path=":season" element={<ImsaSeasonPage />} />
+          </Route>
+          <Route path="dtm">
+            <Route index element={<YearSeriesEntry series="dtm" />} />
+            <Route path=":season" element={<DtmSeasonPage />} />
+          </Route>
           <Route path="fe">
             <Route index element={<FeEntry />} />
             <Route path=":season">
@@ -120,7 +141,7 @@ export function App() {
             </Route>
           </Route>
           <Route path="wec">
-            <Route index element={<Navigate to={`/wec/${defaultWecSeason()}`} replace />} />
+            <Route index element={<WecEntry />} />
             <Route path=":season">
               <Route index element={<WecHomePage />} />
               <Route path="calendar" element={<WecCalendarPage />} />

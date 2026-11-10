@@ -14,6 +14,8 @@ const ROUTES = [
   './#/fe/2025-26/race/9',
   './#/fe/2014-15/about',
   './#/fe/2025-26/drivers',
+  './#/imsa/2026',
+  './#/dtm/2026',
   './#/fe/2025-26/driver/Pascal%20Wehrlein',
   './#/fe/2025-26/eprix/Monaco%20ePrix',
   './#/fe/2025-26/compare?a=Pascal+Wehrlein&b=Mitch+Evans',
@@ -109,7 +111,7 @@ for (const width of [1280, 375]) {
         if (name && (width === 1280 || name === 'wec-home')) {
           const target =
             name === 'wec-chart'
-              ? page.locator('.wec-places-card')
+              ? page.locator('.chart-card').filter({ has: page.locator('.points-chart') })
               : name === 'wec-circuit'
                 ? page.locator('.wec-circuit-panel')
                 : page;
@@ -129,7 +131,8 @@ for (const width of [1280, 375]) {
         animations: 'disabled',
         // Native <select> text is anti-aliased differently on each run; the chosen values are checked by E2E.
         mask: [page.locator('main select')],
-        timeout: 20_000,
+        // Long lists (WEC drivers: ~6500 px) need two stable full-page captures; 20 s was not enough.
+        timeout: 60_000,
         // Chromium sometimes lays out the narrow pages 1–2 px apart (sub-pixel rounding), which
         // shifts a few thin lines by ~50 pixels in total; a real layout change differs by far more.
         // The long WEC race table also varies at inline text/badge edges on Windows (measured: 1,755 px).
@@ -137,7 +140,9 @@ for (const width of [1280, 375]) {
       });
       // Full-page FE standings capture stalls in Windows Chromium; cover its chart separately.
       if (width === 1280 && route === './#/fe/2025-26/standings') {
-        await expect(page.locator('.fe-places-card')).toHaveScreenshot('w1280-fe-places-chart.png', {
+        await expect(
+          page.locator('.chart-card').filter({ has: page.locator('.points-chart') }),
+        ).toHaveScreenshot('w1280-fe-points-chart.png', {
           animations: 'disabled',
           maxDiffPixels: 100,
         });

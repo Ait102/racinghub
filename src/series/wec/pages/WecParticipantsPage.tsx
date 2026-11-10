@@ -8,7 +8,6 @@ import { ClassBadge, ClassList, EntryDrivers, NameFlag, WikiSourceNote } from '.
 import { seasonLabel } from '../data/seasons';
 import type { EntryCrew, Participant } from '../domain/participants';
 import { useWecParticipants } from '../hooks/data';
-import { useWecFavorites } from '../hooks/favorites';
 import { WecGuard } from './common';
 
 export function WecParticipantsPage({ drivers }: { drivers: boolean }) {
@@ -95,7 +94,6 @@ function Crews({ season }: { season: string }) {
 function Participants({ season, drivers }: { season: string; drivers: boolean }) {
   const res = useWecParticipants(season, drivers);
   const [search, setSearch] = useState('');
-  const { isFav } = useWecFavorites();
   const title = drivers ? 'Пилоты' : 'Команды';
   const columns: Column<Participant>[] = [
     {
@@ -151,11 +149,6 @@ function Participants({ season, drivers }: { season: string; drivers: boolean })
                   rows={rows}
                   rowKey={(row) => row.who.article ?? row.who.name}
                   caption={title}
-                  rowClassName={(row) =>
-                    row.who.article && isFav(drivers ? 'drivers' : 'teams', row.who.article)
-                      ? 'row--fav'
-                      : undefined
-                  }
                 />
               ) : (
                 <p>Ничего не найдено.</p>

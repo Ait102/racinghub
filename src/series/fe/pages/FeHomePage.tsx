@@ -11,7 +11,6 @@ import { seasonLabel } from '../data/seasons';
 import { daysUntil, lastCompleted, nextRound, roundStatus } from '../domain/status';
 import type { FeRound, FeSeasonData } from '../domain/types';
 import { useFeRace, useFeSeason } from '../hooks/data';
-import { useFeFavorites } from '../hooks/favorites';
 import { FeGuard } from './common';
 
 export function FeHomePage() {
@@ -64,7 +63,6 @@ function Overview({ season }: { season: string }) {
               <LastRace data={data} />
               <Leaders season={season} tables={data.standings} />
             </div>
-            <Favorites tables={data.standings} season={season} />
             <WikiSourceNote />
           </>
         )}
@@ -260,61 +258,5 @@ function Leaders({ season, tables }: { season: string; tables: StandingTable[] }
         </article>
       ))}
     </>
-  );
-}
-
-function Favorites({ tables, season }: { tables: StandingTable[]; season: string }) {
-  const { favs } = useFeFavorites();
-  const all = [
-    ...favs.drivers.map((article) => ({ article, kind: 'drivers' as const })),
-    ...favs.teams.map((article) => ({ article, kind: 'teams' as const })),
-  ];
-  return (
-    <article className="card fe-favorites">
-      <h2 className="card__title">★ Избранное</h2>
-      {all.length === 0 ? (
-        <p className="muted small">
-          Добавьте пилотов и команды в избранное на странице{' '}
-          <Link to={`/fe/${season}/standings`}>зачётов</Link> — здесь появятся их место и очки.
-        </p>
-      ) : (
-        <ul className="fe-favorites-list">
-          {all.map(({ article, kind }) => {
-            const found = tables
-              .filter((table) => table.kind === kind)
-              .flatMap((table) => table.rows.map((row) => ({ table, row })))
-              .find(({ row }) => row.name.article === article);
-            return (
-              <li key={`${kind}:${article}`}>
-                <span className="fe-leaders__pos">{found?.row.posText || '—'}</span>
-                <span>
-                  {found ? (
-                    <NameFlag who={found.row.name} kind={kind === 'drivers' ? 'driver' : 'team'} />
-                  ) : (
-                    <Link
-                      to={`/fe/${season}/${kind === 'drivers' ? 'driver' : 'team'}/${encodeURIComponent(article)}`}
-                    >
-                      {article}
-                    </Link>
-                  )}
-                </span>
-                <span>
-                  {found ? (
-                    <>
-                      {found.row.points || '—'}{' '}
-                      <Link className="muted small" to={`/fe/${season}/standings?t=${found.table.id}`}>
-                        {found.table.title}
-                      </Link>
-                    </>
-                  ) : (
-                    <span className="muted small">нет в зачётах сезона</span>
-                  )}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </article>
   );
 }

@@ -97,19 +97,27 @@ test('WEC standings: every championship, both manufacturer cars, colors', async 
 test('WEC standings: places chart follows the table, shows retirements in the tooltip', async ({ page }) => {
   await mockApi(page);
   await page.goto('./#/wec/2026/standings');
+  await expect(page.getByRole('img', { name: /График очков/ })).toBeVisible();
+  const pointsLines = page.locator('.points-chart path[data-driver]');
+  await expect(pointsLines).toHaveCount(5);
+  expect(
+    new Set(await pointsLines.evaluateAll((paths) => paths.map((path) => path.getAttribute('d')))).size,
+  ).toBe(5);
+  await page.getByText('Места в отдельных гонках', { exact: true }).click();
   await expect(page.getByRole('heading', { level: 2, name: 'Места по этапам' })).toBeVisible();
-  const legend = page.locator('.chart-card .legend li');
+  const legend = page.locator('.wec-places-card .legend li');
   // A crew shares its results: one line with every name.
   await expect(legend.first()).toHaveText('Sébastien Buemi, Brendon Hartley, Ryō Hirakawa');
   await expect(legend).toHaveCount(2);
-  await page.getByRole('button', { name: 'Топ-10' }).click();
+  await page.locator('details[open]').getByRole('button', { name: 'Топ-10' }).click();
   await expect(legend).toHaveCount(5);
 
   await page.getByRole('button', { name: "Hypercar World Endurance Manufacturers' Championship" }).click();
+  await page.getByText('Места в отдельных гонках', { exact: true }).click();
   await expect(legend.first()).toContainText('Toyota · машина 1');
-  await page.locator('.chart__svg').focus();
+  await page.locator('.wec-places-chart .chart__svg').focus();
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowRight');
-  await expect(page.locator('.chart__tip')).toContainText('Ret');
+  await expect(page.locator('.wec-places-chart .chart__tip')).toContainText('Ret');
 });
 
 test('WEC season switch keeps the page and reads older eras', async ({ page }) => {
@@ -200,7 +208,7 @@ test('WEC teams list and empty article explain source limitations', async ({ pag
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Недопустимый адрес профиля');
 });
 
-test('WEC favorites, manufacturer emblems and the car photo of a team', async ({ page }) => {
+test('WEC manufacturer emblems and the car photo of a team', async ({ page }) => {
   await mockApi(page);
   await page.goto('./#/wec/2026/team/Toyota%20Racing%20GmbH');
   await expect(page.locator('.page-header .team-logo--emblem img')).toHaveAttribute('src', /toyota\.png$/);
@@ -209,22 +217,7 @@ test('WEC favorites, manufacturer emblems and the car photo of a team', async ({
   await expect(car.getByRole('img', { name: 'Toyota TR010 Hybrid', exact: true })).toBeVisible();
   await expect(car.locator('figcaption')).toContainText('CC BY-SA 4.0');
 
-  await page.goto('./#/wec/2026/driver/S%C3%A9bastien%20Buemi');
-  await page.getByRole('button', { name: 'Добавить Sébastien Buemi в избранное' }).click();
-  await expect(page.getByRole('button', { name: 'Убрать Sébastien Buemi из избранного' })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
-  await page.goto('./#/wec/2026');
-  const fav = page.locator('.card', { hasText: 'Избранное' });
-  await expect(fav).toContainText('Sébastien Buemi');
-  await expect(fav).toContainText('114');
-  await page.goto('./#/wec/2026/drivers');
-  await expect(page.locator('tr.row--fav')).toContainText('Sébastien Buemi');
   await page.goto('./#/wec/2026/standings');
-  await expect(page.locator('.wec-standings tr.row--fav').first()).toContainText('Sébastien Buemi');
-  expect(await page.evaluate(() => localStorage.getItem('racinghub:f1:favorites'))).toBeNull();
-
   await page.getByRole('button', { name: "Hypercar World Endurance Manufacturers' Championship" }).click();
   await expect(
     page.locator('.wec-standings tbody tr').first().locator('.team-logo--emblem img'),

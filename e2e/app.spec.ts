@@ -190,6 +190,13 @@ test('championship chart draws lines and a data table', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Борьба за чемпионство' })).toBeVisible();
   await expect(page.locator('.chart__svg path[data-driver]')).toHaveCount(3);
   await expect(page.locator('.legend li')).toHaveCount(3);
+  await expect(page.getByRole('button', { name: 'Топ-5' })).toHaveAttribute('aria-pressed', 'true');
+  const topTen = page.getByRole('button', { name: 'Топ-10' });
+  await topTen.click();
+  await expect(topTen).toHaveAttribute('aria-pressed', 'true');
+  const all = page.getByRole('button', { name: 'Все пилоты' });
+  await all.click();
+  await expect(all).toHaveAttribute('aria-pressed', 'true');
   await page.getByText('Таблица очков по этапам').click();
   await expect(page.locator('.chart-table tbody tr').first()).toContainText('25');
 });
@@ -200,27 +207,6 @@ test('chart shows an error instead of a partial picture', async ({ page }) => {
   await page.goto('./#/2026/chart');
   await expect(page.getByRole('alert')).toContainText('HTTP 500', { timeout: 20_000 });
   await expect(page.locator('.chart__svg')).toHaveCount(0);
-});
-
-test('favourite from profile shows on home and highlights rows', async ({ page }) => {
-  await mockApi(page);
-  await page.goto('./#/2026/driver/max_verstappen');
-  await page.getByRole('button', { name: /Добавить .* в избранное/ }).click();
-  await expect(page.getByRole('button', { name: /Убрать .* из избранного/ })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
-
-  await page.goto('./#/2026');
-  await expect(page.getByRole('heading', { name: /Избранное/ })).toBeVisible();
-
-  await page.goto('./#/2026/drivers');
-  await expect(page.locator('tr.row--fav')).toHaveCount(1);
-  await expect(page.locator('tr.row--fav')).toContainText('Verstappen');
-
-  // Survives reload.
-  await page.reload();
-  await expect(page.locator('tr.row--fav')).toHaveCount(1);
 });
 
 test('WEC has its own menu and season list, without F1 items', async ({ page }) => {
@@ -377,4 +363,25 @@ test('driver and team pages show a credited photo', async ({ page }) => {
   await page.goto('./#/2026/driver/antonelli');
   await expect(page.locator('main h1')).toHaveText(/Antonelli/);
   await expect(page.locator('figure.photo')).toHaveCount(0);
+});
+test('IMSA and DTM open from championship cards', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  for (const name of ['IMSA', 'DTM']) {
+    await page.goto('./#/');
+    await expect(page.locator('.choose__grid--upcoming')).toHaveCSS('grid-template-columns', /^[\d.]+px$/);
+    const card = page.getByRole('main').getByRole('link', { name: new RegExp(name) });
+    await expect(card.getByRole('heading', { name })).toBeVisible();
+    await card.click();
+    // The newest season opens, with its Wikipedia source and the series' own season picker.
+    await expect(page).toHaveURL(new RegExp(`#/${name.toLowerCase()}/2026$`));
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${name} 2026`);
+    await expect(page.getByRole('heading', { name: 'Что появится' })).toBeVisible();
+    await expect(page.locator('footer')).toContainText('CC BY-SA 4.0');
+  }
+  await page.getByRole('combobox', { name: 'Сезон' }).selectOption('2000');
+  await expect(page).toHaveURL(/#\/dtm\/2000$/);
+  await page.goto('./#/dtm');
+  await expect(page).toHaveURL(/#\/dtm\/2000$/);
+  await page.goto('./#/imsa/2013');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Такого сезона IMSA нет');
 });

@@ -1,18 +1,14 @@
-import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
-import { FavToggle } from '../../../components/FavButton';
 import { PageHeader } from '../../../components/PageHeader';
-import { PlacesChart, seriesStyle } from '../../../components/PlacesChart';
-import { placeSeries } from '../../../lib/places';
-import { validArticle } from '../../../lib/wikiArticle';
+import { StandingsCharts } from '../../../components/StandingsCharts';
 import type { StandingKind, StandingTable } from '../../../lib/wikiStandings';
 import { NameFlag, WikiSourceNote } from '../components/bits';
 import { seasonLabel } from '../data/seasons';
+import { feStandingProgress } from '../data/standingProgress';
 import type { FeRound } from '../domain/types';
 import { useFeSeason } from '../hooks/data';
-import { useFeFavorites } from '../hooks/favorites';
 import { FeGuard } from './common';
 
 const KIND_LABELS: Record<StandingKind, string> = {
@@ -72,7 +68,12 @@ function Standings({ season }: { season: string }) {
               </div>
               <StandingsTable table={current} season={season} rounds={data.rounds} />
               <Legend />
-              <PlacesSection key={current.id} table={current} />
+              <StandingsCharts
+                key={`${season}:${current.id}`}
+                table={current}
+                seriesId="fe"
+                progress={feStandingProgress(season, current)}
+              />
               <WikiSourceNote />
             </>
           );
@@ -91,9 +92,6 @@ function StandingsTable({
   season: string;
   rounds: FeRound[];
 }) {
-  const { isFav, toggle } = useFeFavorites();
-  const favKind = table.kind === 'drivers' ? 'drivers' : 'teams';
-  const canFavorite = table.kind !== 'manufacturers';
   return (
     <>
       <h2 className="section-title">{table.title}</h2>
@@ -153,27 +151,16 @@ function StandingsTable({
               <th scope="col" className="align-right">
                 Очки
               </th>
-              {canFavorite && (
-                <th scope="col">
-                  <span className="visually-hidden">Избранное</span>
-                </th>
-              )}
             </tr>
           </thead>
           <tbody>
             {table.rows.flatMap((row, index) => {
               const lines = row.lines.length > 0 ? row.lines : [[]];
-              const article = row.name.article;
               return lines.map((line, lineIndex) => (
                 <tr
                   key={`${index}-${lineIndex}`}
                   className={
-                    [
-                      row.pos !== null && row.pos >= 1 && row.pos <= 3 ? `row--p${row.pos}` : '',
-                      canFavorite && article && isFav(favKind, article) ? 'row--fav' : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ') || undefined
+                    row.pos !== null && row.pos >= 1 && row.pos <= 3 ? `row--p${row.pos}` : undefined
                   }
                 >
                   {lineIndex === 0 && (
@@ -207,101 +194,15 @@ function StandingsTable({
                     </td>
                   ))}
                   {lineIndex === 0 && (
-                    <>
-                      <td className="align-right" rowSpan={lines.length}>
-                        <strong>{row.points || '—'}</strong>
-                      </td>
-                      {canFavorite && (
-                        <td rowSpan={lines.length}>
-                          {article && validArticle(article) && (
-                            <FavToggle
-                              on={isFav(favKind, article)}
-                              name={row.name.name}
-                              onToggle={() => toggle(favKind, article)}
-                            />
-                          )}
-                        </td>
-                      )}
-                    </>
+                    <td className="align-right" rowSpan={lines.length}>
+                      <strong>{row.points || '—'}</strong>
+                    </td>
                   )}
                 </tr>
               ));
             })}
           </tbody>
         </table>
-      </div>
-    </>
-  );
-}
-
-const TOP = [5, 10] as const;
-
-function PlacesSection({ table }: { table: StandingTable }) {
-  const [top, setTop] = useState<(typeof TOP)[number]>(5);
-  const [pointed, setPointed] = useState<string | null>(null);
-  const [picked, setPicked] = useState<string | null>(null);
-  const series = placeSeries(table, top);
-  const highlight = pointed ?? (series.some((s) => s.id === picked) ? picked : null);
-  if (series.length === 0) return null;
-  return (
-    <>
-      <h2 className="section-title">Места по этапам</h2>
-      <p className="muted small">
-        Места в отдельных гонках — как у источника. Это не положение в чемпионате после этапа. Очки не
-        суммируются. Сходы, NC и DSQ показаны крестиком в строке «сход»; пропуски — пунктиром.
-      </p>
-      <p className="muted small">
-        Наведите курсор или коснитесь графика, чтобы увидеть результаты этапа. С клавиатуры — стрелки, Home,
-        End и Escape. Наведение или нажатие на имя в легенде выделяет линию.
-      </p>
-      <div className="chips" role="group" aria-label="Сколько строк зачёта показать">
-        {TOP.map((count) => (
-          <button
-            key={count}
-            type="button"
-            className="chip"
-            aria-pressed={top === count}
-            onClick={() => setTop(count)}
-          >
-            Топ-{count}
-          </button>
-        ))}
-      </div>
-      <div className="card chart-card fe-places-card">
-        <PlacesChart
-          rounds={table.rounds.map((round) => round.abbr)}
-          series={series}
-          highlight={highlight}
-          classPrefix="fe-places-chart"
-        />
-        <ul className="legend" onMouseLeave={() => setPointed(null)}>
-          {series.map((s, index) => (
-            <li key={s.id}>
-              <button
-                type="button"
-                className="fe-legend-pick"
-                aria-pressed={picked === s.id}
-                onMouseEnter={() => setPointed(s.id)}
-                onFocus={() => setPointed(s.id)}
-                onBlur={() => setPointed(null)}
-                onClick={() => setPicked((current) => (current === s.id ? null : s.id))}
-              >
-                <svg width="26" height="10" aria-hidden="true">
-                  <line
-                    x1="1"
-                    x2="25"
-                    y1="5"
-                    y2="5"
-                    stroke={seriesStyle(index).color}
-                    strokeWidth="3"
-                    strokeDasharray={seriesStyle(index).dash}
-                  />
-                </svg>
-                {s.label}
-              </button>
-            </li>
-          ))}
-        </ul>
       </div>
     </>
   );

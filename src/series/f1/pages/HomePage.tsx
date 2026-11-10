@@ -9,7 +9,6 @@ import { DriverCell, SprintBadge, StatusBadge, TeamCell } from '../components/bi
 import { findNextRace, raceStatus } from '../domain/status';
 import type { RaceEvent } from '../domain/types';
 import { useConstructorStandings, useDriverStandings, useRaceResults, useRaces } from '../hooks/data';
-import { useFavorites } from '../hooks/useFavorites';
 import { PageHeader, SeasonGuard } from './common';
 
 export function HomePage() {
@@ -132,8 +131,6 @@ function Home({ season }: { season: number }) {
           </DataState>
         </article>
       </div>
-
-      <FavoritesBlock season={season} ds={ds} cs={cs} />
     </section>
   );
 }
@@ -243,62 +240,5 @@ function LastRace({ season, round }: { season: number; round: number }) {
       )}
       <MetaLine meta={res.meta} onRefresh={res.reload} />
     </div>
-  );
-}
-
-type DS = ReturnType<typeof useDriverStandings>;
-type CS = ReturnType<typeof useConstructorStandings>;
-
-/** Favourites with their current-season position and points, from already-loaded standings. */
-function FavoritesBlock({ season, ds, cs }: { season: number; ds: DS; cs: CS }) {
-  const { favs } = useFavorites();
-  if (favs.drivers.length === 0 && favs.constructors.length === 0) {
-    return (
-      <p className="muted small fav-hint">
-        Совет: отметьте пилотов и команды звёздочкой ☆ в их профилях — они появятся здесь и будут выделены в
-        таблицах и на графике.
-      </p>
-    );
-  }
-  const dRows = ds.status === 'success' ? ds.data.rows : [];
-  const cRows = cs.status === 'success' ? cs.data.rows : [];
-  return (
-    <article className="card">
-      <h2 className="card__title">★ Избранное · сезон {season}</h2>
-      <ul className="leaders">
-        {favs.drivers.map((id) => {
-          const row = dRows.find((r) => r.driver.id === id);
-          return (
-            <li key={`d:${id}`}>
-              <span className="leaders__pos">{row ? (row.positionText ?? row.position ?? '—') : '—'}</span>
-              {row ? (
-                <DriverCell driver={row.driver} team={row.constructors.at(-1)} />
-              ) : (
-                <Link to={`/${season}/driver/${id}`}>{id}</Link>
-              )}
-              <span className="leaders__pts">
-                {row ? formatPoints(row.points) : <span className="muted small">не в зачёте сезона</span>}
-              </span>
-            </li>
-          );
-        })}
-        {favs.constructors.map((id) => {
-          const row = cRows.find((r) => r.constructor.id === id);
-          return (
-            <li key={`c:${id}`}>
-              <span className="leaders__pos">{row ? (row.positionText ?? row.position ?? '—') : '—'}</span>
-              {row ? (
-                <TeamCell team={row.constructor} />
-              ) : (
-                <Link to={`/${season}/constructor/${id}`}>{id}</Link>
-              )}
-              <span className="leaders__pts">
-                {row ? formatPoints(row.points) : <span className="muted small">не в зачёте сезона</span>}
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-    </article>
   );
 }

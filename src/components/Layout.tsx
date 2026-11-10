@@ -2,12 +2,15 @@ import { Suspense, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { localTimeZone, utcOffsetLabel } from '../lib/format';
+import { dtm } from '../series/dtm/data/seasons';
 import { rememberedSeason, rememberSeason, useSeasonParam, useSeasons } from '../series/f1/hooks/data';
 import { FeSeasonSelect } from '../series/fe/components/FeSeasonSelect';
 import { defaultFeSeason, feSeasonFromPath } from '../series/fe/data/seasons';
+import { imsa } from '../series/imsa/data/seasons';
 import { WecSeasonSelect } from '../series/wec/components/WecSeasonSelect';
 import { defaultWecSeason, wecSeasonFromPath } from '../series/wec/hooks/data';
 import { Loading } from './DataState';
+import { YearSeasonSelect } from './YearSeasonSelect';
 
 function SeasonSelect({ season }: { season: number | null }) {
   const seasons = useSeasons();
@@ -50,12 +53,14 @@ function SeasonSelect({ season }: { season: number | null }) {
   );
 }
 
-type Series = 'f1' | 'wec' | 'fe' | null;
+type Series = 'f1' | 'wec' | 'fe' | 'imsa' | 'dtm' | null;
 
 function seriesOf(pathname: string): Series {
   if (pathname === '/') return null;
   if (pathname === '/fe' || pathname.startsWith('/fe/')) return 'fe';
   if (pathname === '/wec' || pathname.startsWith('/wec/')) return 'wec';
+  if (pathname === '/imsa' || pathname.startsWith('/imsa/')) return 'imsa';
+  if (pathname === '/dtm' || pathname.startsWith('/dtm/')) return 'dtm';
   return 'f1';
 }
 
@@ -64,6 +69,8 @@ function SeriesSwitch({ series, f1Home }: { series: Series; f1Home: string }) {
     ['f1', 'F1', f1Home],
     ['wec', 'WEC', '/wec'],
     ['fe', 'FE', '/fe'],
+    ['imsa', 'IMSA', '/imsa'],
+    ['dtm', 'DTM', '/dtm'],
   ];
   return (
     <nav className="series-switch" aria-label="Чемпионат">
@@ -166,6 +173,12 @@ export function Layout() {
           {series === 'f1' && <SeasonSelect season={season} />}
           {series === 'wec' && <WecSeasonSelect />}
           {series === 'fe' && <FeSeasonSelect />}
+          {series === 'imsa' && (
+            <YearSeasonSelect series="imsa" seasons={imsa.seasons()} current={imsa.fromPath(pathname)} />
+          )}
+          {series === 'dtm' && (
+            <YearSeasonSelect series="dtm" seasons={dtm.seasons()} current={dtm.fromPath(pathname)} />
+          )}
         </div>
       </header>
       <main id="main" className="container main" tabIndex={-1}>
@@ -177,13 +190,17 @@ export function Layout() {
         <div className="container footer__inner">
           <p>
             Данные:{' '}
-            {series === 'wec' || series === 'fe' ? (
+            {series === 'wec' || series === 'fe' || series === 'imsa' || series === 'dtm' ? (
               <>
                 <a
                   href={
                     series === 'fe'
                       ? 'https://en.wikipedia.org/wiki/Formula_E'
-                      : 'https://en.wikipedia.org/wiki/FIA_World_Endurance_Championship'
+                      : series === 'imsa'
+                        ? 'https://en.wikipedia.org/wiki/IMSA_SportsCar_Championship'
+                        : series === 'dtm'
+                          ? 'https://en.wikipedia.org/wiki/Deutsche_Tourenwagen_Masters'
+                          : 'https://en.wikipedia.org/wiki/FIA_World_Endurance_Championship'
                   }
                   target="_blank"
                   rel="noreferrer"
@@ -214,7 +231,7 @@ export function Layout() {
                 </a>
               </>
             )}
-            . Некоммерческий неофициальный проект, не связан с Formula 1, FIA, WEC и Formula E.
+            . Некоммерческий неофициальный проект, не связан с Formula 1, FIA, WEC, Formula E, IMSA и DTM.
           </p>
           <p>
             Время показано в зоне <strong>{tz}</strong> ({utcOffsetLabel(tz)}). Наведите на время, чтобы

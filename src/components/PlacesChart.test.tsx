@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 
-import type { PlaceSeries } from '../domain/places';
+import type { PlaceSeries } from '../lib/places';
 import { PlacesChart } from './PlacesChart';
 
 const series: PlaceSeries[] = [

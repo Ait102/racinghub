@@ -104,7 +104,7 @@ beforeEach(() => {
   );
 });
 
-it('keeps both cars, source points, separate double-header links and isolated favorites', () => {
+it('keeps both cars, source points, separate double-header links', () => {
   show('standings');
   const table = screen.getByRole('table', { name: "Teams' Championship" });
   expect(within(table).getAllByRole('row')).toHaveLength(3);
@@ -116,9 +116,7 @@ it('keeps both cars, source points, separate double-header links and isolated fa
   ).toEqual(['/fe/2025-26/race/1', '/fe/2025-26/race/2']);
   expect(within(table).getByText('Ret')).toHaveClass('fe-result--retired');
   expect(within(table).getByText('12')).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Добавить Test Team в избранное' }));
-  expect(localStorage.getItem('racinghub:fe:favorites')).toContain('Test Team');
-  expect(localStorage.getItem('racinghub:wec:favorites')).toBeNull();
+  fireEvent.click(screen.getByText('Места в отдельных гонках', { exact: true }));
   expect(screen.getByRole('img', { name: /График мест/ })).toHaveClass('chart__svg');
 });
 

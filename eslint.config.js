@@ -37,7 +37,7 @@ export default tseslint.config(
           patterns: [
             {
               // Match relative paths through any series folder.
-              regex: String.raw`^\.{1,2}/(.*/)?(f1|wec|fe)(/|$)`,
+              regex: String.raw`^\.{1,2}/(.*/)?(f1|wec|fe|imsa|dtm)(/|$)`,
               message: 'Общий код не импортирует серии.',
             },
           ],
@@ -45,7 +45,7 @@ export default tseslint.config(
       ],
     },
   },
-  ...['f1', 'wec', 'fe'].map((series) => ({
+  ...['f1', 'wec', 'fe', 'imsa', 'dtm'].map((series) => ({
     files: [`src/series/${series}/**/*.{ts,tsx}`],
     rules: {
       'no-restricted-imports': [
@@ -53,7 +53,7 @@ export default tseslint.config(
         {
           patterns: [
             {
-              regex: `^\\.{1,2}/(.*/)?(${['f1', 'wec', 'fe'].filter((id) => id !== series).join('|')})(/|$)`,
+              regex: `^\\.{1,2}/(.*/)?(${['f1', 'wec', 'fe', 'imsa', 'dtm'].filter((id) => id !== series).join('|')})(/|$)`,
               message: 'Серии не импортируют друг друга; общее находится в src/.',
             },
           ],

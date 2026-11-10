@@ -4,7 +4,6 @@ import { Link, useParams } from 'react-router-dom';
 import { getArticlePhoto } from '../../../api/wikimedia';
 import { articleUrl } from '../../../api/wikipedia';
 import { DataState } from '../../../components/DataState';
-import { FavToggle } from '../../../components/FavButton';
 import { PageHeader } from '../../../components/PageHeader';
 import { PhotoFigure, usePhoto } from '../../../components/PhotoFigure';
 import { SortableTable, type Column } from '../../../components/SortableTable';
@@ -15,7 +14,6 @@ import { FeEmblem, NameFlag, WikiSourceNote } from '../components/bits';
 import { seasonLabel } from '../data/seasons';
 import { summaryColumns, summaryRows, type FeProfileKind, type FeProfileTable } from '../domain/profiles';
 import { useFeParticipants, useFeProfile, useFeSeason } from '../hooks/data';
-import { useFeFavorites } from '../hooks/favorites';
 import { FeGuard } from './common';
 
 const KIND_LABEL: Record<FeProfileKind, string> = { driver: 'Пилот', team: 'Команда', eprix: 'E-Prix' };
@@ -86,21 +84,14 @@ function Profile({ season, article, kind }: { season: string; article: string; k
         }
       >
         {kind === 'team' && <FeEmblem who={{ name: canonical, article }} size="lg" />}
-        {kind !== 'eprix' && (
+        {kind === 'driver' && (
           <div className="profile-actions">
-            <ProfileFav
-              kind={kind === 'driver' ? 'drivers' : 'teams'}
-              article={article}
-              canonical={canonical}
-            />
-            {kind === 'driver' && (
-              <Link
-                className="btn btn--ghost btn--small"
-                to={`/fe/${season}/compare?${new URLSearchParams({ a: canonical })}`}
-              >
-                Сравнить с другим пилотом
-              </Link>
-            )}
+            <Link
+              className="btn btn--ghost btn--small"
+              to={`/fe/${season}/compare?${new URLSearchParams({ a: canonical })}`}
+            >
+              Сравнить с другим пилотом
+            </Link>
           </div>
         )}
       </PageHeader>
@@ -165,23 +156,6 @@ function Profile({ season, article, kind }: { season: string; article: string; k
       </DataState>
       <WikiSourceNote />
     </section>
-  );
-}
-
-/** Stores the article from the address, so lists that link the same title highlight it. */
-function ProfileFav({
-  kind,
-  article,
-  canonical,
-}: {
-  kind: 'drivers' | 'teams';
-  article: string;
-  canonical: string;
-}) {
-  const { isFav, toggle } = useFeFavorites();
-  const saved = [article, canonical].find((a) => isFav(kind, a));
-  return (
-    <FavToggle on={saved !== undefined} name={canonical} onToggle={() => toggle(kind, saved ?? article)} />
   );
 }
 

@@ -7,7 +7,7 @@ import { SortableTable, type Column } from '../../../components/SortableTable';
 import { Stat, WithFlag } from '../../../components/ui';
 import { useNow } from '../../../hooks/useNow';
 import { formatDate, formatPoints } from '../../../lib/format';
-import { FavButton, TeamCell } from '../components/bits';
+import { TeamCell } from '../components/bits';
 import { SeasonHistory } from '../components/SeasonHistory';
 import { polesIncomplete, QUALIFYING_DATA_FROM, seasonSpan, titleYears } from '../domain/career';
 import { ageAt, driverName } from '../domain/mappers';
@@ -79,7 +79,6 @@ function DriverBody({ season, id }: { season: number; id: string }) {
           )}
         </p>
         <div className="profile-actions">
-          <FavButton kind="drivers" id={d.id} name={driverName(d)} />
           <Link className="btn btn--ghost btn--small" to={`/${season}/compare?a=${d.id}`}>
             Сравнить с другим пилотом →
           </Link>

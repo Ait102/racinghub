@@ -6,7 +6,6 @@ import { PointsWithBar, posClass, SearchBox, WithFlag } from '../../../component
 import { TeamCell } from '../components/bits';
 import type { ConstructorStanding } from '../domain/types';
 import { useConstructorStandings } from '../hooks/data';
-import { useFavorites } from '../hooks/useFavorites';
 import { PageHeader, SeasonGuard } from './common';
 
 function makeColumns(leader: number | null | undefined): Column<ConstructorStanding>[] {
@@ -59,7 +58,6 @@ export function ConstructorsPage() {
 function Constructors({ season }: { season: number }) {
   const cs = useConstructorStandings(season);
   const [q, setQ] = useState('');
-  const { isFav } = useFavorites();
   return (
     <section className="page">
       <PageHeader eyebrow={`Сезон ${season}`} title="Кубок конструкторов">
@@ -91,7 +89,6 @@ function Constructors({ season }: { season: number }) {
                   rows={rows}
                   rowKey={(r) => r.constructor.id}
                   caption={`Кубок конструкторов ${season}`}
-                  rowClassName={(r) => (isFav('constructors', r.constructor.id) ? 'row--fav' : undefined)}
                 />
               )}
             </>

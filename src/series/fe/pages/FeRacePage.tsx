@@ -26,9 +26,12 @@ function RaceView({ season }: { season: string }) {
   const { round = '' } = useParams();
   const res = useFeSeason(season);
   const now = useNow(60_000);
+  const r =
+    res.status === 'success' ? res.data.rounds.find((entry) => String(entry.round) === round) : undefined;
+  const race = useFeRace(season, r?.report ?? null);
+  const raceData = race.status === 'success' ? race.data : null;
   if (res.status === 'loading') return <Loading rows={6} />;
   if (res.status === 'error') return <ErrorBox error={res.error} onRetry={res.reload} />;
-  const r = res.data.rounds.find((entry) => String(entry.round) === round);
   if (!r)
     return (
       <section className="page">
@@ -64,6 +67,13 @@ function RaceView({ season }: { season: string }) {
           )}
         </p>
       </PageHeader>
+      <FeCircuitPanel
+        season={season}
+        venue={r.circuit}
+        circuit={raceData?.circuit ?? null}
+        description={raceData?.description}
+        article={r.report ?? res.data.article}
+      />
       <WeekendSchedule schedule={feWeekendSchedule(season, r)} />
       <div className="fe-race-summary grid-2">
         <article className="card">
@@ -91,16 +101,14 @@ function RaceView({ season }: { season: string }) {
           round={r}
           rounds={res.data.rounds}
           article={r.report}
+          res={race}
         />
       ) : (
-        <>
-          <FeCircuitPanel name={r.circuit?.name} circuit={null} article={res.data.article} />
-          <p className="muted">
-            {status === 'upcoming'
-              ? 'Этап ещё не состоялся — протоколы появятся после гонки.'
-              : 'У источника пока нет статьи об этой гонке.'}
-          </p>
-        </>
+        <p className="muted">
+          {status === 'upcoming'
+            ? 'Этап ещё не состоялся — протоколы появятся после гонки.'
+            : 'У источника пока нет статьи об этой гонке.'}
+        </p>
       )}
       <WikiSourceNote />
     </section>
@@ -112,13 +120,14 @@ function RaceData({
   round,
   rounds,
   article,
+  res,
 }: {
   season: string;
   round: FeRound;
   rounds: FeRound[];
   article: string;
+  res: ReturnType<typeof useFeRace>;
 }) {
-  const res = useFeRace(season, article);
   const [tab, setTab] = useState<'race' | 'qualifying'>('race');
   return (
     <DataState state={res} emptyText="В статье о гонке пока нет протокола.">
@@ -128,12 +137,6 @@ function RaceData({
           (round.raceNumber === null && data.races.length === 1 ? data.races[0] : undefined);
         return (
           <>
-            <FeCircuitPanel
-              name={round.circuit?.name}
-              circuit={data.circuit}
-              description={data.description}
-              article={article}
-            />
             {data.races.length > 1 && (
               <div className="chips fe-race-tabs" role="group" aria-label="Гонка сдвоенного этапа">
                 {data.races.map((r) => {

@@ -128,13 +128,6 @@
 }
 
 /* Championship leaders on the overview */
-.wec-leaders {
-  display: grid;
-  gap: var(--s4);
-}
-.wec-leaders__title {
-  font-weight: 700;
-}
 .wec-leaders__list {
   list-style: none;
   padding: 0;

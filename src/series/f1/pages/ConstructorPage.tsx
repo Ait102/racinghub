@@ -7,7 +7,7 @@ import { PhotoFigure, usePhoto } from '../../../components/PhotoFigure';
 import { SortableTable, type Column } from '../../../components/SortableTable';
 import { Flag, Stat, WithFlag } from '../../../components/ui';
 import { formatPoints } from '../../../lib/format';
-import { DriverCell, FavButton, teamColor } from '../components/bits';
+import { DriverCell, teamColor } from '../components/bits';
 import { SeasonHistory } from '../components/SeasonHistory';
 import { TeamLogo } from '../components/TeamLogo';
 import { CAR_PHOTOS, CAR_PHOTOS_SEASON } from '../data/carPhotos';
@@ -66,7 +66,6 @@ function ConstructorBody({ season, id }: { season: number; id: string }) {
             <WithFlag value={team.nationality} kind="nationality" />
           </p>
         )}
-        <FavButton kind="constructors" id={team.id} name={team.name} />
         {team.url && (
           <p>
             <a href={team.url} target="_blank" rel="noreferrer">

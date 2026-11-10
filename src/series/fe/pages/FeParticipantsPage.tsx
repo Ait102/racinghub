@@ -8,7 +8,6 @@ import { NameFlag, WikiSourceNote } from '../components/bits';
 import { seasonLabel } from '../data/seasons';
 import type { FeParticipant } from '../domain/participants';
 import { useFeParticipants } from '../hooks/data';
-import { useFeFavorites } from '../hooks/favorites';
 import { FeGuard } from './common';
 
 export function FeParticipantsPage({ drivers }: { drivers: boolean }) {
@@ -22,7 +21,6 @@ export function FeParticipantsPage({ drivers }: { drivers: boolean }) {
 function Participants({ season, drivers }: { season: string; drivers: boolean }) {
   const res = useFeParticipants(season, drivers);
   const [search, setSearch] = useState('');
-  const { isFav } = useFeFavorites();
   const title = drivers ? 'Пилоты' : 'Команды';
   const columns: Column<FeParticipant>[] = [
     {
@@ -107,11 +105,6 @@ function Participants({ season, drivers }: { season: string; drivers: boolean })
                   rows={rows}
                   rowKey={(row) => row.who.article ?? row.who.name}
                   caption={title}
-                  rowClassName={(row) =>
-                    row.who.article && isFav(drivers ? 'drivers' : 'teams', row.who.article)
-                      ? 'row--fav'
-                      : undefined
-                  }
                 />
               ) : (
                 <p>Ничего не найдено.</p>

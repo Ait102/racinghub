@@ -10,7 +10,6 @@ import { DriverCell } from '../components/bits';
 import { lineStyles, PointsChart } from '../components/PointsChart';
 import { buildProgress } from '../domain/progress';
 import { useDriverStandings, useRaces } from '../hooks/data';
-import { useFavorites } from '../hooks/useFavorites';
 import { PageHeader, SeasonGuard } from './common';
 
 type TopN = 5 | 10 | 'all';
@@ -44,7 +43,6 @@ function Chart({ season }: { season: number }) {
 function ChartBody({ season, lastRound }: { season: number; lastRound: number }) {
   const [done, setDone] = useState(0);
   const [top, setTop] = useState<TopN>(5);
-  const { isFav } = useFavorites();
   const races = useRaces(season);
   const prog = useResource(`prog:${season}:${lastRound}`, (force) => {
     setDone(0);
@@ -85,8 +83,7 @@ function ChartBody({ season, lastRound }: { season: number; lastRound: number })
     );
   }
 
-  const limit = top === 'all' ? Infinity : top;
-  const shown = progress.series.filter((s, i) => i < limit || isFav('drivers', s.driver.id));
+  const shown = top === 'all' ? progress.series : progress.series.slice(0, top);
   const styles = lineStyles(shown);
   const raceName = (r: number) =>
     (races.status === 'success' ? races.data.find((x) => x.round === r)?.name : null) ?? `Этап ${r}`;
@@ -106,17 +103,13 @@ function ChartBody({ season, lastRound }: { season: number; lastRound: number })
           </button>
         ))}
       </div>
-      <p className="muted small">
-        Избранные пилоты всегда на графике и выделены толстой линией. Наведите на график или используйте
-        стрелки.
-      </p>
+      <p className="muted small">Наведите на график или используйте стрелки.</p>
 
       <div className="card chart-card">
         <PointsChart
           rounds={progress.rounds}
           series={shown}
           roundLabel={(r) => `Этап ${r} · ${raceName(r)}`}
-          highlight={(id) => isFav('drivers', id)}
         />
         <ul className="legend">
           {shown.map((s) => {

@@ -8,7 +8,6 @@ import { DriverCell } from '../components/bits';
 import { matchesDriver } from '../domain/search';
 import type { DriverStanding } from '../domain/types';
 import { useDriverStandings } from '../hooks/data';
-import { useFavorites } from '../hooks/useFavorites';
 import { PageHeader, SeasonGuard } from './common';
 
 function makeColumns(leader: number | null | undefined): Column<DriverStanding>[] {
@@ -77,7 +76,6 @@ export function DriversPage() {
 function Drivers({ season }: { season: number }) {
   const ds = useDriverStandings(season);
   const [q, setQ] = useState('');
-  const { isFav } = useFavorites();
   return (
     <section className="page">
       <PageHeader eyebrow={`Сезон ${season}`} title="Личный зачёт">
@@ -111,7 +109,6 @@ function Drivers({ season }: { season: number }) {
                   rows={rows}
                   rowKey={(r) => r.driver.id}
                   caption={`Личный зачёт ${season}`}
-                  rowClassName={(r) => (isFav('drivers', r.driver.id) ? 'row--fav' : undefined)}
                 />
               )}
             </>

@@ -1,11 +1,9 @@
 import { Link } from 'react-router-dom';
 
-import { FavToggle } from '../../../components/FavButton';
 import { preloadCircuit } from '../data/circuits';
 import { STATUS_LABELS, type RaceStatus } from '../domain/status';
 import type { Constructor, Driver } from '../domain/types';
 import { useSeasonParam } from '../hooks/data';
-import { useFavorites, type FavKind } from '../hooks/useFavorites';
 import { TeamLogo } from './TeamLogo';
 
 // Decorative team accents only (not data). Unknown teams get a neutral color.
@@ -100,11 +98,6 @@ export function CircuitLink({
   ) : (
     <>{name}</>
   );
-}
-
-export function FavButton({ kind, id, name }: { kind: FavKind; id: string; name: string }) {
-  const { isFav, toggle } = useFavorites();
-  return <FavToggle on={isFav(kind, id)} name={name} onToggle={() => toggle(kind, id)} />;
 }
 
 /** Marks a sprint weekend: an extra short race for points on Saturday. */

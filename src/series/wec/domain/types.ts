@@ -3,15 +3,7 @@ import type { Named, StandingTable } from '../../../lib/wikiStandings';
 // shown as "—", never guessed. Points and positions are kept exactly as published.
 import type { WikiFlag } from '../../../lib/wikitable';
 
-export type {
-  Named,
-  ResultTone,
-  ResultCell,
-  StandingRound,
-  StandingRow,
-  StandingKind,
-  StandingTable,
-} from '../../../lib/wikiStandings';
+export type { Named, StandingRow, StandingKind, StandingTable } from '../../../lib/wikiStandings';
 
 export interface ClassWinner {
   /** Class as the source names it, e.g. "Hypercar", "LMGTE Am". */

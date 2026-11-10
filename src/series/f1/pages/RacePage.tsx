@@ -19,7 +19,6 @@ import {
   useRaces,
   useSprint,
 } from '../hooks/data';
-import { useFavorites } from '../hooks/useFavorites';
 import { PageHeader, SeasonGuard } from './common';
 
 export function RacePage() {
@@ -242,7 +241,6 @@ const RESULT_COLUMNS = resultColumns();
 
 function ResultsTable({ rows, caption }: { rows: RaceResult[]; caption: string }) {
   const [q, setQ] = useState('');
-  const { isFav } = useFavorites();
   const filtered = rows.filter((r) => matchesDriver(r.driver, r.constructor ? [r.constructor] : [], q));
   return (
     <>
@@ -255,11 +253,6 @@ function ResultsTable({ rows, caption }: { rows: RaceResult[]; caption: string }
           rows={filtered}
           rowKey={(r) => r.driver.id}
           caption={caption}
-          rowClassName={(r) =>
-            isFav('drivers', r.driver.id) || (r.constructor && isFav('constructors', r.constructor.id))
-              ? 'row--fav'
-              : undefined
-          }
         />
       )}
     </>

@@ -3,7 +3,6 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 
 import { getArticlePhoto } from '../../../api/wikimedia';
 import { DataState } from '../../../components/DataState';
-import { FavToggle } from '../../../components/FavButton';
 import { PageHeader } from '../../../components/PageHeader';
 import { PhotoFigure, usePhoto } from '../../../components/PhotoFigure';
 import { SortableTable, type Column } from '../../../components/SortableTable';
@@ -23,7 +22,6 @@ import {
 } from '../domain/profiles';
 import type { Named } from '../domain/types';
 import { useWecParticipants, useWecProfile, useWecSeason } from '../hooks/data';
-import { useWecFavorites, type WecFavKind } from '../hooks/favorites';
 import { WecGuard } from './common';
 
 export function WecProfilePage({ kind }: { kind: ProfileKind }) {
@@ -100,21 +98,14 @@ function Profile({ season, article, kind }: { season: string; article: string; k
         }
       >
         {kind === 'team' && <WecEmblem who={{ name: canonical, article }} size="lg" />}
-        {kind !== 'circuit' && (
+        {kind === 'driver' && (
           <div className="profile-actions">
-            <ProfileFav
-              kind={kind === 'driver' ? 'drivers' : 'teams'}
-              article={article}
-              canonical={canonical}
-            />
-            {kind === 'driver' && (
-              <Link
-                className="btn btn--ghost btn--small"
-                to={`/wec/${season}/compare?${new URLSearchParams({ a: canonical })}`}
-              >
-                Сравнить с другим пилотом
-              </Link>
-            )}
+            <Link
+              className="btn btn--ghost btn--small"
+              to={`/wec/${season}/compare?${new URLSearchParams({ a: canonical })}`}
+            >
+              Сравнить с другим пилотом
+            </Link>
           </div>
         )}
       </PageHeader>
@@ -223,15 +214,6 @@ function Profile({ season, article, kind }: { season: string; article: string; k
       </div>
       <WikiSourceNote />
     </section>
-  );
-}
-
-/** Stores the article from the address, so lists that link the same title highlight it. */
-function ProfileFav({ kind, article, canonical }: { kind: WecFavKind; article: string; canonical: string }) {
-  const { isFav, toggle } = useWecFavorites();
-  const saved = [article, canonical].find((a) => isFav(kind, a));
-  return (
-    <FavToggle on={saved !== undefined} name={canonical} onToggle={() => toggle(kind, saved ?? article)} />
   );
 }
 

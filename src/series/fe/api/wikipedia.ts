@@ -9,7 +9,7 @@ import { parseRace } from '../domain/race';
 import { parseSeason } from '../domain/season';
 import type { FeRaceData, FeSeasonData } from '../domain/types';
 
-export { articleUrl, WIKI_API, WIKI_PROVIDER } from '../../../api/wikipedia';
+export { WIKI_API, WIKI_PROVIDER } from '../../../api/wikipedia';
 
 export function createWikipedia(api: ApiClient = wikiClient) {
   const seasons = new Map<string, FeSeasonData>();

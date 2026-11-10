@@ -27,23 +27,29 @@ test('FE calendar keeps separate double-header rounds and qualifying', async ({ 
   await expect(page.locator('[data-round="10"]')).toContainText('гонка 2');
   await page.locator('[data-round="9"]').click();
   await expect(page.locator('main')).toContainText('Nyck de Vries');
+  const trackMap = page.getByRole('img', { name: /Схема трассы Circuit de Monaco/ });
+  await expect(trackMap).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Конфигурация Formula E' })).toBeVisible();
   await expect(page.locator('main')).toContainText('Квалификация');
   await page.getByRole('button', { name: 'Квалификация', exact: true }).click();
   await expect(page.locator('main')).toContainText('Дуэли');
   await expect(page.locator('main .meta').last()).toContainText('Википедия');
   await page.getByRole('link', { name: 'Race 2', exact: true }).click();
   await expect(page).toHaveURL(/#\/fe\/2025-26\/race\/10$/);
+  await expect(trackMap).toBeVisible();
   await expect(page.locator('.fe-race-summary')).toContainText('Oliver Rowland');
   await expect(page.locator('main table tbody tr').first()).toContainText('Oliver Rowland');
 });
 
-test('FE single race includes classification and track details', async ({ page }) => {
+test('FE single race includes classification and the São Paulo map', async ({ page }) => {
   await mockApi(page);
   await page.goto('./#/fe/2025-26/race/1');
   await expect(page.locator('main')).toContainText('São Paulo');
   await expect(page.locator('main table').first()).toBeVisible();
   await expect(page.locator('main')).toContainText('Квалификация');
-  await expect(page.locator('main')).toContainText('О трассе');
+  await expect(page.getByRole('img', { name: /Схема трассы São Paulo Street Circuit/ })).toBeVisible();
+  await expect(page.locator('main .page-header + .fe-circuit-panel')).toBeVisible();
+  await expect(page.locator('.fe-circuit-panel')).toContainText('самбодрома Анхемби');
   const schedule = page.getByRole('region', { name: 'Расписание' });
   await expect(schedule).toContainText('Свободная практика 2');
   await expect(schedule.getByRole('link', { name: /Официальное расписание/ })).toHaveAttribute(
@@ -83,22 +89,28 @@ test('FE highlights a GEN4 sprint weekend without assigning its sprint to a roun
   await expect(sprint.locator('time')).toHaveCount(0);
 });
 
-test('FE standings chart and favourites are independent of WEC', async ({ page }) => {
+test('FE championship points chart supports keyboard, readable tooltips and all rows', async ({ page }) => {
   await mockApi(page);
   await page.goto('./#/fe/2025-26/standings');
-  await expect(page.locator('.fe-places-chart svg')).toBeVisible();
-  await page.locator('.fe-places-chart svg').focus();
+  const chart = page.locator('.points-chart');
+  const plot = chart.getByRole('img', { name: /График очков/ });
+  await expect(plot).toBeVisible();
+  await plot.focus();
   await page.keyboard.press('Home');
-  await expect(page.locator('.fe-places-chart [role="status"]')).toContainText('SAO');
-  const favorite = page.getByRole('button', { name: /^Добавить .* в избранное$/ }).first();
-  await favorite.click();
-  await expect(page.getByRole('button', { name: /^Убрать .* из избранного$/ }).first()).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
-  await page.getByRole('link', { name: 'Главная', exact: true }).click();
-  await expect(page.locator('.fe-favorites-list li')).toHaveCount(1);
-  expect(await page.evaluate(() => localStorage.getItem('racinghub:wec:favorites'))).toBeNull();
+  await expect(chart.getByRole('status')).toContainText(/Сан-Паулу|S[ãa]o Paulo/i);
+  await page.keyboard.press('End');
+  const tip = (await chart.getByRole('status').boundingBox())!;
+  const box = (await chart.boundingBox())!;
+  expect(tip.width).toBeGreaterThanOrEqual(150);
+  expect(tip.x).toBeGreaterThanOrEqual(box.x);
+  expect(tip.x + tip.width).toBeLessThanOrEqual(box.x + box.width + 1);
+  const lines = plot.locator('path[data-driver]');
+  const topCount = await lines.count();
+  const all = page.getByRole('button', { name: 'Все пилоты', exact: true });
+  await all.click();
+  await expect(all).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'Топ-5' })).toHaveAttribute('aria-pressed', 'false');
+  await expect.poll(() => lines.count()).toBeGreaterThan(topCount);
 });
 
 test('FE first season and Berlin season keep historical calendars', async ({ page }) => {
@@ -130,6 +142,9 @@ test('FE pages fit a phone and reject an invalid season', async ({ page }) => {
     await page.goto(`./#/fe/2025-26${section}`);
     await expect(page.locator('main h1')).toBeVisible();
     await expect(page.locator('.skeleton')).toHaveCount(0);
+    if (section === '/race/9') {
+      await expect(page.getByRole('img', { name: /Схема трассы Circuit de Monaco/ })).toBeVisible();
+    }
     const overflow = await page.evaluate(() => ({
       width: document.documentElement.scrollWidth,
       viewport: innerWidth,
@@ -173,7 +188,6 @@ test('FE entry lists lead to driver, team and E-Prix profiles', async ({ page })
   await expect(page.locator('.stats')).toContainText('Старты');
   await expect(page.locator('.fe-profile-season')).toContainText('169');
   await expect(page.getByRole('heading', { name: 'Результаты по сезонам' })).toBeVisible();
-  await page.getByRole('button', { name: /Добавить Pascal Wehrlein в избранное/ }).click();
 
   await page.goto('./#/fe/2025-26/teams');
   const nissan = page.getByRole('row', { name: /Nissan Formula E Team.*Oliver Rowland/ });
@@ -190,7 +204,6 @@ test('FE entry lists lead to driver, team and E-Prix profiles', async ({ page })
   await page.goto('./#/fe/2025-26/eprix/Monaco%20ePrix');
   await expect(page.getByRole('heading', { name: 'Победители по годам' })).toBeVisible();
   await expect(page.locator('tbody tr').first()).toContainText('Sébastien Buemi');
-  expect(await page.evaluate(() => localStorage.getItem('racinghub:wec:favorites'))).toBeNull();
 });
 
 test('FE compares two drivers by season, as each article publishes them', async ({ page }) => {
