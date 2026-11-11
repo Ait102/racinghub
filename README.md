@@ -4,7 +4,6 @@
 
 **Formula 1, WEC и Formula E на одном сайте: календарь, результаты, зачёты, профили и графики**
 
-[![Tests and build](https://github.com/Ait102/racinghub/actions/workflows/ci.yml/badge.svg)](https://github.com/Ait102/racinghub/actions/workflows/ci.yml)
 ![F1](https://img.shields.io/badge/F1-с_1950-e10600)
 ![WEC](https://img.shields.io/badge/WEC-с_2012-1f6feb)
 ![Formula E](https://img.shields.io/badge/Formula_E-с_2014–15-8b3dff)
