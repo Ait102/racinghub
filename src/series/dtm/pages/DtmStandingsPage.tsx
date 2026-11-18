@@ -84,6 +84,11 @@ function Standings({ season }: { season: string }) {
                     ))}
                   </p>
                   <PlacesSection key={`${season}:${current.id}`} table={current} seriesId="dtm" />
+                  <p className="muted small">
+                    Графика накопленных очков нет: DTM публикует очки за каждую гонку и итог сезона, но не
+                    итог после каждого этапа, а складывать очки сайт не будет (
+                    <Link to={`/dtm/${season}/about`}>источники</Link>).
+                  </p>
                 </>
               )}
               <DtmSourceNote />

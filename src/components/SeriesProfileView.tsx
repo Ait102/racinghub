@@ -22,7 +22,7 @@ import { Stat } from './ui';
 /** Infobox figures shown as tiles; the other facts go to the list. */
 const TILES: Record<SeriesProfileKind, string[]> = {
   driver: ['Старты', 'Победы', 'Подиумы', 'Поулы', 'Титулы'],
-  team: ['Основана', 'Командные титулы', 'Титулы пилотов'],
+  team: ['Основана'],
   circuit: ['Длина круга', 'Повороты', 'Открыта'],
 };
 
@@ -186,4 +186,47 @@ function Cell({
   }
   pieces.push(<Fragment key="tail">{cell.text.slice(cursor) || (cell.text ? '' : '—')}</Fragment>);
   return <span className={cell.tone ? `wiki-result wiki-result--${cell.tone}` : undefined}>{pieces}</span>;
+}
+
+/** The season's cars of a team: a photo from the team's own article whose caption names that model. */
+export function SeriesTeamCars({
+  season,
+  cars,
+  teamArticle,
+}: {
+  season: string;
+  cars: string[];
+  teamArticle: string;
+}) {
+  if (cars.length === 0) return null;
+  return (
+    <section className="wiki-cars" aria-labelledby="wiki-cars-title">
+      <h2 className="section-title" id="wiki-cars-title">
+        Машины сезона {season}
+      </h2>
+      <p className="muted small">
+        Модель — из заявки сезона. Фото — из статьи о команде, только с этой моделью в подписи.
+      </p>
+      <div className="wiki-cars__grid">
+        {cars.map((model) => (
+          <CarPhoto key={model} model={model} teamArticle={teamArticle} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CarPhoto({ model, teamArticle }: { model: string; teamArticle: string }) {
+  const state = usePhoto(`car:${teamArticle}:${model}`, () =>
+    getArticlePhoto(teamArticle, { width: 900, photosOnly: true, model }),
+  );
+  return (
+    <div className="wiki-cars__item">
+      <h3 className="wiki-cars__name">{model}</h3>
+      <PhotoFigure state={state} alt={model} shape="wide" />
+      {state.status === 'done' && !state.photo && (
+        <p className="muted">У источника нет подтверждённого свободного фото этой модели.</p>
+      )}
+    </div>
+  );
 }

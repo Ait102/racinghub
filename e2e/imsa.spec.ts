@@ -57,3 +57,32 @@ test('IMSA entry list by class, driver profile and comparison', async ({ page })
   await page.locator('.imsa-facts').getByRole('link', { name: 'Daytona International Speedway' }).click();
   await expect(page.locator('.wiki-profile-facts')).toContainText('Sports Car Course');
 });
+
+test('IMSA points after each round, class colours, emblems and sources', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/imsa/2026/standings');
+  // Official totals after each round the class ran (GTP: 9 of 11).
+  await expect(page.getByRole('heading', { name: 'Очки после каждого этапа' })).toBeVisible();
+  await page.getByText('Таблица очков по этапам и источники').click();
+  const points = page.getByRole('table', { name: 'Очки после каждого этапа' });
+  await expect(points.locator('thead th')).toHaveCount(10);
+  await expect(points.locator('tbody tr').first()).toContainText(/3\s020/);
+  await expect(page.getByRole('link', { name: /IMSA · официальные очки/ })).toHaveAttribute(
+    'href',
+    /alkamelcloud\.com\/\?season=26_2026/,
+  );
+  await expect(page.locator('.imsa-class--gtp').first()).toHaveCSS('background-color', 'rgb(11, 11, 13)');
+
+  // A team named by its number gets the make emblem of its car.
+  await page
+    .getByRole('group', { name: 'Класс GTP', exact: true })
+    .getByRole('button', { name: 'Команды' })
+    .click();
+  await expect(
+    page.getByRole('table', { name: 'Команды · GTP' }).locator('img[src*="cadillac"]').first(),
+  ).toBeAttached();
+
+  await page.getByRole('link', { name: 'Источники', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Источники');
+  await expect(page.locator('.wiki-source-emblems')).toContainText('Acura');
+});

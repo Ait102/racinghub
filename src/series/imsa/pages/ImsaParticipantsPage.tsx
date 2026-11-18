@@ -37,7 +37,7 @@ function Participants({ season, drivers }: { season: string; drivers: boolean })
           <SeriesParticipants
             crews={crews}
             drivers={drivers}
-            name={(who, kind) => <ImsaName who={who} kind={kind} />}
+            name={(who, kind, cars) => <ImsaName who={who} kind={kind} cars={cars} />}
             classTag={(cls) => <ClassTag cls={cls} />}
           />
         )}

@@ -6,3 +6,4 @@ export { DtmStandingsPage } from './DtmStandingsPage';
 export { DtmComparePage } from './DtmComparePage';
 export { DtmParticipantsPage } from './DtmParticipantsPage';
 export { DtmProfilePage } from './DtmProfilePage';
+export { DtmSourcesPage } from './DtmSourcesPage';

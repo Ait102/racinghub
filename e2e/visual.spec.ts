@@ -60,6 +60,8 @@ const DOC_SHOTS: Record<string, string> = {
   './#/2026/chart': 'chart',
   './#/2026/race/1': 'f1-race',
   './#/wec/2026': 'wec-home',
+  './#/imsa/2026/standings': 'imsa-standings',
+  './#/dtm/2026': 'dtm-home',
   './#/wec/2026/calendar': 'wec-calendar',
   './#/wec/2026/standings': 'wec-chart',
   './#/wec/2026/circuit/6%20Hours%20of%20Spa-Francorchamps?circuit=Circuit%20de%20Spa-Francorchamps':
@@ -116,7 +118,7 @@ for (const width of [1280, 375]) {
         const name = DOC_SHOTS[route];
         if (name && (width === 1280 || name === 'wec-home')) {
           const target =
-            name === 'wec-chart'
+            name === 'wec-chart' || name === 'imsa-standings'
               ? page.locator('.chart-card').filter({ has: page.locator('.points-chart') })
               : name === 'wec-circuit'
                 ? page.locator('.wec-circuit-panel')

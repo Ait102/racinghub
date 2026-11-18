@@ -2,10 +2,10 @@ import { Link, useParams } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
-import { SeriesProfilePhoto, SeriesProfileView } from '../../../components/SeriesProfileView';
+import { SeriesProfilePhoto, SeriesProfileView, SeriesTeamCars } from '../../../components/SeriesProfileView';
 import { validArticle } from '../../../lib/wikiArticle';
 import type { SeriesProfileKind } from '../../../lib/wikiProfile';
-import { useDtmProfile, useDtmSeason } from '../hooks/data';
+import { useDtmParticipants, useDtmProfile, useDtmSeason } from '../hooks/data';
 import { DtmGuard, DtmName, DtmSourceNote } from './common';
 
 const KIND_LABEL: Record<SeriesProfileKind, string> = { driver: 'Пилот', team: 'Команда', circuit: 'Трасса' };
@@ -70,6 +70,9 @@ function Profile({ season, article, kind }: { season: string; article: string; k
         )}
       </PageHeader>
       {kind !== 'circuit' && <SeasonStanding season={season} articles={[article, canonical]} kind={kind} />}
+      {kind === 'team' && res.status === 'success' && (
+        <TeamCars season={season} articles={[article, canonical]} teamArticle={canonical} />
+      )}
       <DataState state={res}>
         {(profile) => (
           <SeriesProfileView
@@ -129,4 +132,26 @@ function SeasonStanding({
       )}
     </div>
   );
+}
+
+/** Models the team entered this season, from the entry list. */
+function TeamCars({
+  season,
+  articles,
+  teamArticle,
+}: {
+  season: string;
+  articles: string[];
+  teamArticle: string;
+}) {
+  const entries = useDtmParticipants(season);
+  if (entries.status !== 'success') return null;
+  const cars = [
+    ...new Set(
+      entries.data
+        .filter((crew) => crew.team?.article && articles.includes(crew.team.article) && crew.car)
+        .map((crew) => crew.car),
+    ),
+  ];
+  return <SeriesTeamCars season={season} cars={cars} teamArticle={teamArticle} />;
 }

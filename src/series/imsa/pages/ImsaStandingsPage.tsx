@@ -2,7 +2,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
-import { PlacesSection } from '../../../components/PlacesSection';
+import { StandingsCharts } from '../../../components/StandingsCharts';
+import { imsaStandingProgress } from '../data/standingProgress';
 import { seasonClasses, type ImsaSeasonData, type ImsaStanding } from '../domain/season';
 import { useImsaSeason } from '../hooks/data';
 import { ClassTag, IMSA_EMPTY, ImsaGuard, ImsaResult, ImsaRowName, ImsaSourceNote } from './common';
@@ -78,7 +79,12 @@ function Standings({ season }: { season: string }) {
                   </span>
                 ))}
               </p>
-              <PlacesSection key={`${season}:${current.id}`} table={current} seriesId="imsa" />
+              <StandingsCharts
+                key={`${season}:${current.id}`}
+                table={current}
+                seriesId="imsa"
+                progress={imsaStandingProgress(season, current)}
+              />
               <ImsaSourceNote />
             </>
           );

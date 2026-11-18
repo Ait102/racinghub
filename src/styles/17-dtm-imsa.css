@@ -194,13 +194,38 @@
 
 .imsa-class {
   display: inline-block;
-  padding: 1px 7px;
-  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border: 1px solid transparent;
   border-radius: 999px;
-  color: var(--accent-text);
-  font-size: 0.72rem;
+  background: #4b5263;
+  color: #fff;
+  font-size: 0.7rem;
   font-weight: 800;
+  letter-spacing: 0.04em;
   white-space: nowrap;
+}
+
+/* Class colours as IMSA marks its classes (decorative, not data): prototypes black, LMP2 blue,
+   GT Pro classes red, GTD green. */
+.imsa-class--gtp,
+.imsa-class--dpi,
+.imsa-class--p {
+  background: #0b0b0d;
+  border-color: rgba(255, 255, 255, 0.55);
+}
+.imsa-class--lmp2,
+.imsa-class--pc {
+  background: #1f5fbf;
+}
+.imsa-class--lmp3 {
+  background: #7a3fc4;
+}
+.imsa-class--gtd-pro,
+.imsa-class--gtlm {
+  background: #c8102e;
+}
+.imsa-class--gtd {
+  background: #198754;
 }
 
 .imsa-class-list {

@@ -5,7 +5,8 @@ import { entryDrivers, type Crew, type EntryDriver } from '../lib/wikiEntries';
 import type { Named } from '../lib/wikiStandings';
 import { SortableTable, type Column } from './SortableTable';
 
-type Link = (who: Named, kind: 'driver' | 'team') => ReactNode;
+/** A linked name; for a team, `cars` are its models (for the make emblem of customer teams). */
+type Link = (who: Named, kind: 'driver' | 'team', cars?: string[]) => ReactNode;
 
 const fold = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
@@ -71,7 +72,7 @@ export function SeriesParticipants({
       render: (row) => (
         <span className="wiki-list">
           {row.seats.map((s, i) => (
-            <span key={i}>{s.team ? name(s.team, 'team') : '—'}</span>
+            <span key={i}>{s.team ? name(s.team, 'team', [s.car]) : '—'}</span>
           ))}
         </span>
       ),
@@ -103,7 +104,7 @@ export function SeriesParticipants({
     {
       key: 'team',
       header: 'Команда',
-      render: (row) => (row.team ? name(row.team, 'team') : '—'),
+      render: (row) => (row.team ? name(row.team, 'team', [row.car]) : '—'),
       sortValue: (row) => row.team?.name ?? '',
     },
     {

@@ -150,6 +150,7 @@ export function Layout() {
                   [`/${series}/${yearSeason}/drivers`, 'Пилоты'],
                   [`/${series}/${yearSeason}/teams`, 'Команды'],
                   [`/${series}/${yearSeason}/compare`, 'Сравнение'],
+                  [`/${series}/${yearSeason}/about`, 'Источники'],
                 ]
               : [];
 

@@ -22,6 +22,7 @@ const ImsaStandingsPage = lazy(() => imsaPages().then((m) => ({ default: m.ImsaS
 const ImsaParticipantsPage = lazy(() => imsaPages().then((m) => ({ default: m.ImsaParticipantsPage })));
 const ImsaProfilePage = lazy(() => imsaPages().then((m) => ({ default: m.ImsaProfilePage })));
 const ImsaComparePage = lazy(() => imsaPages().then((m) => ({ default: m.ImsaComparePage })));
+const ImsaSourcesPage = lazy(() => imsaPages().then((m) => ({ default: m.ImsaSourcesPage })));
 const dtmPages = () => import('./series/dtm/pages');
 const DtmHomePage = lazy(() => dtmPages().then((m) => ({ default: m.DtmHomePage })));
 const DtmCalendarPage = lazy(() => dtmPages().then((m) => ({ default: m.DtmCalendarPage })));
@@ -30,6 +31,7 @@ const DtmStandingsPage = lazy(() => dtmPages().then((m) => ({ default: m.DtmStan
 const DtmParticipantsPage = lazy(() => dtmPages().then((m) => ({ default: m.DtmParticipantsPage })));
 const DtmProfilePage = lazy(() => dtmPages().then((m) => ({ default: m.DtmProfilePage })));
 const DtmComparePage = lazy(() => dtmPages().then((m) => ({ default: m.DtmComparePage })));
+const DtmSourcesPage = lazy(() => dtmPages().then((m) => ({ default: m.DtmSourcesPage })));
 const FeParticipantsPage = lazy(() => fe().then((m) => ({ default: m.FeParticipantsPage })));
 const FeProfilePage = lazy(() => fe().then((m) => ({ default: m.FeProfilePage })));
 const FeComparePage = lazy(() => fe().then((m) => ({ default: m.FeComparePage })));
@@ -140,6 +142,7 @@ export function App() {
               <Route path="drivers" element={<ImsaParticipantsPage drivers />} />
               <Route path="teams" element={<ImsaParticipantsPage drivers={false} />} />
               <Route path="compare" element={<ImsaComparePage />} />
+              <Route path="about" element={<ImsaSourcesPage />} />
               <Route path="driver/:article" element={<ImsaProfilePage kind="driver" />} />
               <Route path="team/:article" element={<ImsaProfilePage kind="team" />} />
               <Route path="circuit/:article" element={<ImsaProfilePage kind="circuit" />} />
@@ -155,6 +158,7 @@ export function App() {
               <Route path="drivers" element={<DtmParticipantsPage drivers />} />
               <Route path="teams" element={<DtmParticipantsPage drivers={false} />} />
               <Route path="compare" element={<DtmComparePage />} />
+              <Route path="about" element={<DtmSourcesPage />} />
               <Route path="driver/:article" element={<DtmProfilePage kind="driver" />} />
               <Route path="team/:article" element={<DtmProfilePage kind="team" />} />
               <Route path="circuit/:article" element={<DtmProfilePage kind="circuit" />} />

@@ -38,7 +38,7 @@ function Participants({ season, drivers }: { season: string; drivers: boolean })
           <SeriesParticipants
             crews={crews}
             drivers={drivers}
-            name={(who, kind) => <DtmName who={who} kind={kind} emblem={kind === 'team'} />}
+            name={(who, kind, cars) => <DtmName who={who} kind={kind} cars={cars} />}
           />
         )}
       </DataState>

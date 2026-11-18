@@ -124,3 +124,31 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.wiki-cars {
+  margin-bottom: var(--s5);
+}
+
+.wiki-cars__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--s4);
+}
+
+.wiki-cars__name {
+  margin: 0 0 var(--s2, 8px);
+  font-size: 0.95rem;
+}
+
+.wiki-source-emblems {
+  list-style: none;
+  padding: 0;
+}
+
+.wiki-source-emblems li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}

@@ -1,4 +1,4 @@
-// Manufacturer emblems for WEC and Formula E. They are registered trademarks of their owners and are
+// Manufacturer emblems for WEC, Formula E, IMSA and DTM. They are registered trademarks of their owners and are
 // shown only to identify the manufacturer, next to its name, on a non-commercial fan site.
 // Files live in public/logos/ (some are shared with F1): only the emblem, cropped and
 // shown in a circle of the manufacturer color. Every file needs a row here with its source and licence.
@@ -214,6 +214,22 @@ const EMBLEMS: Readonly<Record<string, MakeEmblem>> = {
     holder: 'NIO Inc.',
     tone: 'white',
     color: '#1f6f8b',
+  },
+  acura: {
+    file: 'acura.png',
+    source: 'https://commons.wikimedia.org/wiki/File:Acura_logo.svg',
+    license: PD,
+    holder: 'Honda Motor Co. (Acura)',
+    tone: 'white',
+    color: '#1d1d1f',
+  },
+  opel: {
+    file: 'opel.png',
+    source: 'https://commons.wikimedia.org/wiki/File:Opel_logo_2023.svg',
+    license: PD,
+    holder: 'Opel Automobile GmbH (Stellantis)',
+    tone: 'color',
+    color: '#f7ff14',
   },
   renault: {
     file: 'renault.png',

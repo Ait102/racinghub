@@ -63,3 +63,11 @@ test('DTM entry list, profiles of a driver, a team and a circuit, comparison', a
   await page.locator('.dtm-facts').getByRole('link', { name: 'Red Bull Ring' }).click();
   await expect(page.locator('.stats')).toContainText('4.326 km');
 });
+
+test('DTM explains why there is no cumulative points chart; sources list the makes', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/dtm/2026/standings');
+  await expect(page.locator('main')).toContainText('Графика накопленных очков нет');
+  await page.goto('./#/dtm/2026/about');
+  await expect(page.locator('.wiki-source-emblems')).toContainText('Opel');
+});

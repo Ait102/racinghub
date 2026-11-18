@@ -40,17 +40,20 @@ export function DtmName({
   strong,
   emblem,
   kind = 'external',
+  cars,
 }: {
   who: Named | null | undefined;
   strong?: boolean;
   emblem?: boolean;
   /** Profile page on the site; 'external' links to the Wikipedia article. */
   kind?: ProfileLinkKind;
+  /** Car models of a team: its make emblem when the name does not start with the make. */
+  cars?: string[];
 }) {
   const season = dtm.fromPath(useLocation().pathname);
   if (!who) return <span className="muted">—</span>;
   const text = strong ? <strong>{who.name}</strong> : who.name;
-  const entry = emblem ? teamEmblem(who.name) : null;
+  const entry = emblem || cars ? teamEmblem(who.name, cars?.filter(Boolean)) : null;
   return (
     <span className="with-flag">
       {entry && <Emblem entry={entry} color={entry.color} size="sm" />}

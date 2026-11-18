@@ -39,17 +39,20 @@ export function ImsaName({
   strong,
   emblem,
   kind = 'external',
+  cars,
 }: {
   who: Named | null | undefined;
   strong?: boolean;
   emblem?: boolean;
   /** Profile page on the site; 'external' links to the Wikipedia article. */
   kind?: ProfileLinkKind;
+  /** Car models of a team: its make emblem when the name does not start with the make. */
+  cars?: string[];
 }) {
   const season = imsa.fromPath(useLocation().pathname);
   if (!who) return <span className="muted">—</span>;
   const text = strong ? <strong>{who.name}</strong> : who.name;
-  const entry = emblem ? teamEmblem(who.name) : null;
+  const entry = emblem || cars ? teamEmblem(who.name, cars?.filter(Boolean)) : null;
   return (
     <span className="with-flag">
       {entry && <Emblem entry={entry} color={entry.color} size="sm" />}
@@ -79,7 +82,15 @@ export function ImsaName({
 
 /** A standings name: each driver of a crew sharing the row gets their own profile link. */
 export function ImsaRowName({ row, kind }: { row: StandingRow; kind: ProfileLinkKind }) {
-  if (!row.crew) return <ImsaName who={row.name} kind={kind} emblem={kind === 'external'} />;
+  if (!row.crew)
+    return (
+      <ImsaName
+        who={row.name}
+        kind={kind}
+        emblem={kind === 'external'}
+        cars={kind === 'team' && row.extra ? [row.extra] : undefined}
+      />
+    );
   return (
     <span className="wiki-crew">
       {row.crew.map((who) => (

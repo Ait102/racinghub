@@ -6,3 +6,4 @@ export { ImsaStandingsPage } from './ImsaStandingsPage';
 export { ImsaComparePage } from './ImsaComparePage';
 export { ImsaParticipantsPage } from './ImsaParticipantsPage';
 export { ImsaProfilePage } from './ImsaProfilePage';
+export { ImsaSourcesPage } from './ImsaSourcesPage';
