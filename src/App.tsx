@@ -37,7 +37,10 @@ const FeProfilePage = lazy(() => fe().then((m) => ({ default: m.FeProfilePage })
 const FeComparePage = lazy(() => fe().then((m) => ({ default: m.FeComparePage })));
 const FeHomePage = lazy(() => fe().then((m) => ({ default: m.FeHomePage })));
 const FeCalendarPage = lazy(() => fe().then((m) => ({ default: m.FeCalendarPage })));
-const FeStandingsPage = lazy(() => fe().then((m) => ({ default: m.FeStandingsPage })));
+const FeDriversPage = lazy(() => fe().then((m) => ({ default: m.FeDriversPage })));
+const FeTeamsPage = lazy(() => fe().then((m) => ({ default: m.FeTeamsPage })));
+const FeChartPage = lazy(() => fe().then((m) => ({ default: m.FeChartPage })));
+const FeStandingsRedirect = lazy(() => fe().then((m) => ({ default: m.FeStandingsRedirect })));
 const FeSourcesPage = lazy(() => fe().then((m) => ({ default: m.FeSourcesPage })));
 const FeRacePage = lazy(() => fe().then((m) => ({ default: m.FeRacePage })));
 const AboutPage = lazy(() => f1().then((m) => ({ default: m.AboutPage })));
@@ -169,11 +172,14 @@ export function App() {
             <Route path=":season">
               <Route index element={<FeHomePage />} />
               <Route path="calendar" element={<FeCalendarPage />} />
-              <Route path="standings" element={<FeStandingsPage />} />
+              <Route path="standings" element={<FeStandingsRedirect />} />
+              <Route path="chart" element={<FeChartPage />} />
               <Route path="about" element={<FeSourcesPage />} />
               <Route path="race/:round" element={<FeRacePage />} />
-              <Route path="drivers" element={<FeParticipantsPage drivers />} />
-              <Route path="teams" element={<FeParticipantsPage drivers={false} />} />
+              <Route path="drivers" element={<FeDriversPage />} />
+              <Route path="teams" element={<FeTeamsPage />} />
+              <Route path="entries" element={<FeParticipantsPage drivers />} />
+              <Route path="entries/teams" element={<FeParticipantsPage drivers={false} />} />
               <Route path="compare" element={<FeComparePage />} />
               <Route path="driver/:article" element={<FeProfilePage kind="driver" />} />
               <Route path="team/:article" element={<FeProfilePage kind="team" />} />

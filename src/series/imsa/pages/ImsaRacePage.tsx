@@ -3,7 +3,10 @@ import { Link, useParams } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
+import { SeriesCircuitMap } from '../../../components/SeriesCircuitMap';
+import { WeekendSchedule } from '../../../components/WeekendSchedule';
 import { useNow } from '../../../hooks/useNow';
+import { imsaWeekendSchedule } from '../data/schedule';
 import { imsaRaceStatus, type ImsaRace } from '../domain/season';
 import { useImsaRace, useImsaSeason } from '../hooks/data';
 import { ClassTag, ImsaGuard, ImsaName, ImsaSourceNote, ImsaStatusBadge } from './common';
@@ -37,6 +40,15 @@ function Race({ season }: { season: string }) {
                   {race.dateText || 'Дата не указана'} <ImsaStatusBadge status={imsaRaceStatus(race, now)} />
                 </p>
               </PageHeader>
+              {imsaWeekendSchedule(season, race.round) && (
+                <WeekendSchedule schedule={imsaWeekendSchedule(season, race.round)!} />
+              )}
+              {Number(season) >= 2023 && (
+                <SeriesCircuitMap
+                  names={[race.circuit?.article, race.circuit?.name]}
+                  title={race.circuit?.name ?? null}
+                />
+              )}
               <dl className="imsa-facts card">
                 <div>
                   <dt>Трасса</dt>

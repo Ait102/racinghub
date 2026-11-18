@@ -1,5 +1,5 @@
 // F1 for the site-wide search and "today in motorsport": the current season from Jolpica.
-import type { SeriesHub } from '../../lib/hub';
+import { circuitEntries, type SeriesHub } from '../../lib/hub';
 import { jolpica } from './api/jolpica';
 import { driverName } from './domain/mappers';
 
@@ -27,6 +27,13 @@ export async function loadHub(now = new Date()): Promise<SeriesHub> {
         kind: 'team' as const,
         to: `/${year}/constructor/${row.constructor.id}`,
       })),
+      ...circuitEntries(
+        races.data.map((race) => ({
+          circuit: race.circuitName,
+          to: race.circuitId ? `/${year}/circuit/${race.circuitId}` : null,
+          note: race.name,
+        })),
+      ),
     ],
     races: races.data.flatMap((race) =>
       race.date

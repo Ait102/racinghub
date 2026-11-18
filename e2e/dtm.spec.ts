@@ -61,7 +61,7 @@ test('DTM entry list, profiles of a driver, a team and a circuit, comparison', a
 
   await page.goto('./#/dtm/2026/race/1');
   await page.locator('.dtm-facts').getByRole('link', { name: 'Red Bull Ring' }).click();
-  await expect(page.locator('.stats')).toContainText('4.326 km');
+  await expect(page.locator('.stats').last()).toContainText('4.326 km');
 });
 
 test('DTM explains why there is no cumulative points chart; sources list the makes', async ({ page }) => {
@@ -70,4 +70,21 @@ test('DTM explains why there is no cumulative points chart; sources list the mak
   await expect(page.locator('main')).toContainText('Графика накопленных очков нет');
   await page.goto('./#/dtm/2026/about');
   await expect(page.locator('.wiki-source-emblems')).toContainText('Opel');
+});
+
+test('DTM timetable of both races and the circuit map; the header search finds circuits', async ({
+  page,
+}) => {
+  await mockApi(page);
+  await page.goto('./#/dtm/2026/race/3');
+  const schedule = page.getByRole('region', { name: 'Расписание' });
+  await expect(schedule).toContainText('Гонка 1');
+  await expect(schedule).toContainText('Гонка 2');
+  await expect(page.getByRole('img', { name: /Схема трассы Circuit Zandvoort/ })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Поиск' }).click();
+  await page.getByRole('combobox', { name: 'Пилот, команда или трасса любого чемпионата' }).fill('zandvoort');
+  const option = page.getByRole('option').filter({ hasText: 'DTM' }).filter({ hasText: 'трасса' });
+  await option.first().click();
+  await expect(page).toHaveURL(/#\/dtm\/2026\/circuit\//);
 });

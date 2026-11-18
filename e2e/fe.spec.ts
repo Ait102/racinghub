@@ -7,7 +7,16 @@ test('FE navigation remembers selected season and keeps its licence', async ({ p
   await page.goto('./#/fe/2025-26');
   await expect(page.locator('html')).toHaveAttribute('data-series', 'fe');
   await expect(page.getByRole('progressbar')).toBeVisible();
-  await expect(page.locator('.fe-home-last')).toContainText('Последняя гонка');
+  await expect(page.getByRole('heading', { name: 'Последний завершённый этап' })).toBeVisible();
+  // The same tabs as Formula 1.
+  await expect(page.getByRole('navigation', { name: 'Основная навигация' }).getByRole('link')).toHaveText([
+    'Главная',
+    'Календарь',
+    'Пилоты',
+    'Команды',
+    'График',
+    'Источники',
+  ]);
   await page.getByRole('combobox', { name: 'Сезон' }).selectOption('2019-20');
   await page.getByRole('link', { name: 'Календарь', exact: true }).click();
   await expect(page.locator('.fe-calendar-item').first()).toBeVisible();
@@ -91,7 +100,11 @@ test('FE highlights a GEN4 sprint weekend without assigning its sprint to a roun
 
 test('FE championship points chart supports keyboard, readable tooltips and all rows', async ({ page }) => {
   await mockApi(page);
+  // The old standings address opens the drivers' standings; the chart has its own tab.
   await page.goto('./#/fe/2025-26/standings');
+  await expect(page).toHaveURL(/#\/fe\/2025-26\/drivers$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Личный зачёт');
+  await page.getByRole('link', { name: 'График', exact: true }).click();
   const chart = page.locator('.points-chart');
   const plot = chart.getByRole('img', { name: /График очков/ });
   await expect(plot).toBeVisible();
@@ -138,7 +151,7 @@ test('FE missing article stays friendly and source error can be retried', async 
 test('FE pages fit a phone and reject an invalid season', async ({ page }) => {
   await mockApi(page);
   await page.setViewportSize({ width: 375, height: 812 });
-  for (const section of ['', '/calendar', '/standings', '/race/9', '/about']) {
+  for (const section of ['', '/calendar', '/drivers', '/teams', '/chart', '/race/9', '/about']) {
     await page.goto(`./#/fe/2025-26${section}`);
     await expect(page.locator('main h1')).toBeVisible();
     await expect(page.locator('.skeleton')).toHaveCount(0);
@@ -179,7 +192,7 @@ test('FE pages fit a phone and reject an invalid season', async ({ page }) => {
 
 test('FE entry lists lead to driver, team and E-Prix profiles', async ({ page }) => {
   await mockApi(page);
-  await page.goto('./#/fe/2025-26/drivers');
+  await page.goto('./#/fe/2025-26/entries');
   await page.getByRole('searchbox', { name: /Поиск/ }).fill('Wehrlein');
   await expect(page.locator('tbody tr')).toHaveCount(1);
   await page.getByRole('link', { name: 'Pascal Wehrlein', exact: true }).click();
@@ -189,7 +202,7 @@ test('FE entry lists lead to driver, team and E-Prix profiles', async ({ page })
   await expect(page.locator('.fe-profile-season')).toContainText('169');
   await expect(page.getByRole('heading', { name: 'Результаты по сезонам' })).toBeVisible();
 
-  await page.goto('./#/fe/2025-26/teams');
+  await page.goto('./#/fe/2025-26/entries/teams');
   const nissan = page.getByRole('row', { name: /Nissan Formula E Team.*Oliver Rowland/ });
   await expect(nissan.locator('.fe-partners > span')).toHaveText(['№ 1 Oliver Rowland', '№ 23 Norman Nato']);
   // Customer teams get the make of their powertrain.
@@ -215,4 +228,24 @@ test('FE compares two drivers by season, as each article publishes them', async 
   await expect(season).toContainText('нет у источника');
   await page.getByRole('button', { name: 'Поменять пилотов местами' }).click();
   await expect(page).toHaveURL(/a=Mitch\+Evans&b=Pascal\+Wehrlein/);
+});
+
+test('FE drivers and teams pages read like Formula 1: summary, search, race-by-race table', async ({
+  page,
+}) => {
+  await mockApi(page);
+  await page.goto('./#/fe/2025-26/drivers');
+  const summary = page.getByRole('table', { name: /Drivers' Championship — итог|— итог/ }).first();
+  await expect(summary.locator('tbody tr').first()).toContainText('Pascal Wehrlein');
+  await page.getByRole('searchbox', { name: 'Поиск пилота или команды' }).fill('Evans');
+  await expect(summary.locator('tbody tr')).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: 'Результаты по гонкам' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Заявка: пилоты →' })).toHaveAttribute(
+    'href',
+    '#/fe/2025-26/entries',
+  );
+
+  await page.getByRole('link', { name: 'Команды', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Командный зачёт');
+  await expect(page.locator('main')).toContainText('Jaguar TCS Racing');
 });

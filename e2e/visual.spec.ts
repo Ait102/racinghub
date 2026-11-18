@@ -10,10 +10,12 @@ const ROUTES = [
   './#/fe/2026-27',
   './#/fe/2025-26',
   './#/fe/2025-26/calendar',
-  './#/fe/2025-26/standings',
+  './#/fe/2025-26/teams',
+  './#/fe/2025-26/chart',
   './#/fe/2025-26/race/9',
   './#/fe/2014-15/about',
   './#/fe/2025-26/drivers',
+  './#/fe/2025-26/entries',
   './#/imsa/2026',
   './#/imsa/2026/race/1',
   './#/imsa/2026/standings',
@@ -53,7 +55,7 @@ const DOC_SHOTS: Record<string, string> = {
   './': 'choose',
   './#/fe/2025-26': 'fe-home',
   './#/fe/2025-26/calendar': 'fe-calendar',
-  './#/fe/2025-26/standings': 'fe-standings',
+  './#/fe/2025-26/chart': 'fe-standings',
   './#/fe/2025-26/race/9': 'fe-race',
   './#/2026': 'home',
   './#/2026/calendar': 'calendar',
@@ -118,7 +120,7 @@ for (const width of [1280, 375]) {
         const name = DOC_SHOTS[route];
         if (name && (width === 1280 || name === 'wec-home')) {
           const target =
-            name === 'wec-chart' || name === 'imsa-standings'
+            name === 'wec-chart' || name === 'imsa-standings' || name === 'fe-standings'
               ? page.locator('.chart-card').filter({ has: page.locator('.points-chart') })
               : name === 'wec-circuit'
                 ? page.locator('.wec-circuit-panel')
@@ -136,7 +138,7 @@ for (const width of [1280, 375]) {
         fullPage:
           !/\/(wec|dtm|imsa)\/[^/]+\/(driver|team|circuit)\//.test(route) &&
           !/\/imsa\/[^/]+\/teams$/.test(route) &&
-          !(width === 1280 && route === './#/fe/2025-26/standings'),
+          !(width === 1280 && route === './#/fe/2025-26/chart'),
         animations: 'disabled',
         // Native <select> text is anti-aliased differently on each run; the chosen values are checked by E2E.
         mask: [page.locator('main select')],
@@ -148,7 +150,7 @@ for (const width of [1280, 375]) {
         maxDiffPixels: /\/wec\/[^/]+\/race\//.test(route) ? 2000 : 100,
       });
       // Full-page FE standings capture stalls in Windows Chromium; cover its chart separately.
-      if (width === 1280 && route === './#/fe/2025-26/standings') {
+      if (width === 1280 && route === './#/fe/2025-26/chart') {
         await expect(
           page.locator('.chart-card').filter({ has: page.locator('.points-chart') }),
         ).toHaveScreenshot('w1280-fe-points-chart.png', {

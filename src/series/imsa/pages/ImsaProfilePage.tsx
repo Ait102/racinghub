@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
+import { SeriesCircuitMap } from '../../../components/SeriesCircuitMap';
 import { SeriesProfilePhoto, SeriesProfileView, SeriesTeamCars } from '../../../components/SeriesProfileView';
 import { validArticle } from '../../../lib/wikiArticle';
 import type { SeriesProfileKind } from '../../../lib/wikiProfile';
@@ -69,6 +70,9 @@ function Profile({ season, article, kind }: { season: string; article: string; k
           </div>
         )}
       </PageHeader>
+      {kind === 'circuit' && (
+        <SeriesCircuitMap names={[article, canonical]} title={canonical.replace(/_/g, ' ')} />
+      )}
       {kind !== 'circuit' && <SeasonStanding season={season} articles={[article, canonical]} kind={kind} />}
       {kind === 'team' && res.status === 'success' && (
         <TeamCars season={season} articles={[article, canonical]} teamArticle={canonical} />

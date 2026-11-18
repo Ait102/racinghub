@@ -1,6 +1,6 @@
 // Formula E for the site-wide search and "today in motorsport". The newest season gives the races;
 // before its first race it has no standings yet, so names come from the season before.
-import { standingEntries, type SeriesHub } from '../../lib/hub';
+import { circuitEntries, standingEntries, type SeriesHub } from '../../lib/hub';
 import { validArticle } from '../../lib/wikiArticle';
 import { wikipedia } from './api/wikipedia';
 import { feSeasons, seasonLabel } from './data/seasons';
@@ -13,14 +13,23 @@ export async function loadHub(now = new Date()): Promise<SeriesHub> {
     series: 'fe',
     label: 'Formula E',
     season: seasonLabel(newest),
-    entries: standingEntries(
-      named.standings,
-      (who, table) =>
-        who.article && validArticle(who.article)
-          ? `/fe/${named.id}/${table.kind === 'drivers' ? 'driver' : 'team'}/${encodeURIComponent(who.article)}`
-          : `/fe/${named.id}/standings`,
-      () => `сезон ${seasonLabel(named.id)}`,
-    ),
+    entries: [
+      ...standingEntries(
+        named.standings,
+        (who, table) =>
+          who.article && validArticle(who.article)
+            ? `/fe/${named.id}/${table.kind === 'drivers' ? 'driver' : 'team'}/${encodeURIComponent(who.article)}`
+            : `/fe/${named.id}/${table.kind === 'drivers' ? 'drivers' : 'teams'}`,
+        () => `сезон ${seasonLabel(named.id)}`,
+      ),
+      ...circuitEntries(
+        current.rounds.map((round) => ({
+          circuit: round.circuit?.name,
+          to: `/fe/${newest}/race/${round.round}`,
+          note: round.name,
+        })),
+      ),
+    ],
     races: current.rounds.flatMap((round) =>
       round.start
         ? [

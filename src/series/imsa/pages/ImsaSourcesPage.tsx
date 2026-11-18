@@ -13,6 +13,7 @@ const MAKES = [
   'Ford',
   'Lamborghini',
   'Lexus',
+  'Mazda',
   'McLaren',
   'Mercedes',
   'Porsche',

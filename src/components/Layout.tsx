@@ -136,10 +136,9 @@ export function Layout() {
             ? [
                 [`/fe/${feSeason}`, 'Главная'],
                 [`/fe/${feSeason}/calendar`, 'Календарь'],
-                [`/fe/${feSeason}/standings`, 'Зачёты'],
                 [`/fe/${feSeason}/drivers`, 'Пилоты'],
                 [`/fe/${feSeason}/teams`, 'Команды'],
-                [`/fe/${feSeason}/compare`, 'Сравнение'],
+                [`/fe/${feSeason}/chart`, 'График'],
                 [`/fe/${feSeason}/about`, 'Источники'],
               ]
             : (series === 'dtm' || series === 'imsa') && yearSeason

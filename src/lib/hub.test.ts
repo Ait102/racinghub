@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 
-import { daysTo, searchHub, standingEntries, upcomingRaces, type SeriesHub } from './hub';
+import { circuitEntries, daysTo, searchHub, standingEntries, upcomingRaces, type SeriesHub } from './hub';
 import type { StandingTable } from './wikiStandings';
 
 const hub = (series: SeriesHub['series'], over: Partial<SeriesHub>): SeriesHub => ({
@@ -86,5 +86,17 @@ describe('standingEntries', () => {
       ['B Two', 'driver', '/drivers/B Two'],
       ['Team', 'team', '/teams/Team'],
     ]);
+  });
+});
+
+describe('circuitEntries', () => {
+  it('lists each circuit once and skips ones without a page', () => {
+    expect(
+      circuitEntries([
+        { circuit: 'Red Bull Ring', to: '/dtm/2026/circuit/Red%20Bull%20Ring', note: 'Этап 1' },
+        { circuit: 'Red Bull Ring', to: '/dtm/2026/circuit/Red%20Bull%20Ring', note: 'Этап 1' },
+        { circuit: 'Norisring', to: null },
+      ]).map((e) => [e.name, e.kind]),
+    ).toEqual([['Red Bull Ring', 'circuit']]);
   });
 });

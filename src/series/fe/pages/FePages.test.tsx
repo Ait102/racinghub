@@ -8,7 +8,7 @@ import type { FeRound, FeSeasonData } from '../domain/types';
 import { useFeRace, useFeSeason } from '../hooks/data';
 import { FeCalendarPage } from './FeCalendarPage';
 import { FeHomePage } from './FeHomePage';
-import { FeStandingsPage } from './FeStandingsPage';
+import { FeChartPage, FeTeamsPage } from './FeStandingsPage';
 
 vi.mock('../hooks/data', () => ({
   useFeRace: vi.fn(),
@@ -84,9 +84,17 @@ const season: FeSeasonData = {
   standings: [teams],
 };
 
-function show(page: 'home' | 'calendar' | 'standings') {
+function show(page: 'home' | 'calendar' | 'teams' | 'chart') {
   const component =
-    page === 'home' ? <FeHomePage /> : page === 'calendar' ? <FeCalendarPage /> : <FeStandingsPage />;
+    page === 'home' ? (
+      <FeHomePage />
+    ) : page === 'calendar' ? (
+      <FeCalendarPage />
+    ) : page === 'teams' ? (
+      <FeTeamsPage />
+    ) : (
+      <FeChartPage />
+    );
   return render(
     <MemoryRouter initialEntries={[`/fe/2025-26/${page}`]}>
       <Routes>
@@ -105,7 +113,9 @@ beforeEach(() => {
 });
 
 it('keeps both cars, source points, separate double-header links', () => {
-  show('standings');
+  show('teams');
+  // Summary first, as in Formula 1: place, team, cars, points.
+  expect(screen.getByRole('table', { name: /Teams' Championship — итог/ })).toHaveTextContent('11, 12');
   const table = screen.getByRole('table', { name: "Teams' Championship" });
   expect(within(table).getAllByRole('row')).toHaveLength(3);
   expect(within(table).getByText('37.5').closest('td')).toHaveAttribute('rowspan', '2');
@@ -116,6 +126,10 @@ it('keeps both cars, source points, separate double-header links', () => {
   ).toEqual(['/fe/2025-26/race/1', '/fe/2025-26/race/2']);
   expect(within(table).getByText('Ret')).toHaveClass('fe-result--retired');
   expect(within(table).getByText('12')).toBeInTheDocument();
+});
+
+it('shows places per race on the chart page', () => {
+  show('chart');
   fireEvent.click(screen.getByText('Места в отдельных гонках', { exact: true }));
   expect(screen.getByRole('img', { name: /График мест/ })).toHaveClass('chart__svg');
 });

@@ -18,8 +18,8 @@ import { FeGuard } from './common';
 
 const KIND_LABEL: Record<FeProfileKind, string> = { driver: 'Пилот', team: 'Команда', eprix: 'E-Prix' };
 const BACK: Record<FeProfileKind, [string, string]> = {
-  driver: ['drivers', 'Пилоты'],
-  team: ['teams', 'Команды'],
+  driver: ['entries', 'Заявка: пилоты'],
+  team: ['entries/teams', 'Заявка: команды'],
   eprix: ['calendar', 'Календарь'],
 };
 /** Infobox figures shown as tiles; the rest of the facts go to the list. */
@@ -238,7 +238,11 @@ function SeasonStanding({
                   key: 'table',
                   header: 'Зачёт',
                   render: (row) => (
-                    <Link to={`/fe/${season}/standings?t=${row.table.id}`}>{row.table.title}</Link>
+                    <Link
+                      to={`/fe/${season}/${row.table.kind === 'drivers' ? 'drivers' : 'teams'}?t=${row.table.id}`}
+                    >
+                      {row.table.title}
+                    </Link>
                   ),
                 },
                 { key: 'pos', header: 'Место', align: 'center', render: (row) => row.posText || '—' },

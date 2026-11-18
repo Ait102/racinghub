@@ -49,12 +49,12 @@ export function GlobalSearch() {
             ref={input}
             type="search"
             role="combobox"
-            aria-label="Пилот или команда любого чемпионата"
+            aria-label="Пилот, команда или трасса любого чемпионата"
             aria-expanded={results.length > 0}
             aria-controls={listId}
             aria-activedescendant={results.length ? `${listId}-${active}` : undefined}
             aria-autocomplete="list"
-            placeholder="Пилот или команда…"
+            placeholder="Пилот, команда или трасса…"
             autoComplete="off"
             value={query}
             onChange={(e) => {
@@ -78,7 +78,7 @@ export function GlobalSearch() {
             </p>
           ) : query.trim().length < 2 ? (
             <p className="site-search__hint muted small">
-              Пилоты и команды текущих сезонов: {hubs.hubs.map((h) => h.label).join(', ')}.
+              Пилоты, команды и трассы текущих сезонов: {hubs.hubs.map((h) => h.label).join(', ')}.
             </p>
           ) : results.length === 0 ? (
             <p className="site-search__hint muted small" role="status">
@@ -107,7 +107,7 @@ export function GlobalSearch() {
                 </span>
                 <span className="site-search__name">{r.name}</span>
                 <span className="muted small">
-                  {r.kind === 'driver' ? 'пилот' : 'команда'}
+                  {r.kind === 'driver' ? 'пилот' : r.kind === 'team' ? 'команда' : 'трасса'}
                   {r.note ? ` · ${r.note}` : ''}
                 </span>
               </li>

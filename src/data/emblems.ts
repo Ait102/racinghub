@@ -223,6 +223,14 @@ const EMBLEMS: Readonly<Record<string, MakeEmblem>> = {
     tone: 'white',
     color: '#1d1d1f',
   },
+  mazda: {
+    file: 'mazda.png',
+    source: 'https://en.wikipedia.org/wiki/File:Mazda_logo_with_emblem.svg',
+    license: FAIR,
+    holder: 'Mazda Motor Corporation',
+    tone: 'color',
+    color: '#e9e9ec',
+  },
   opel: {
     file: 'opel.png',
     source: 'https://commons.wikimedia.org/wiki/File:Opel_logo_2023.svg',

@@ -1,5 +1,5 @@
 // WEC for the site-wide search and "today in motorsport": the newest season on Wikipedia.
-import { standingEntries, type SeriesHub } from '../../lib/hub';
+import { circuitEntries, standingEntries, type SeriesHub } from '../../lib/hub';
 import { validArticle } from '../../lib/wikiArticle';
 import { wikipedia } from './api/wikipedia';
 import { wecSeasons } from './data/seasons';
@@ -11,14 +11,29 @@ export async function loadHub(now = new Date()): Promise<SeriesHub> {
     series: 'wec',
     label: 'WEC',
     season,
-    entries: standingEntries(
-      data.standings,
-      (who, table) =>
-        who.article && validArticle(who.article)
-          ? `/wec/${season}/${table.kind === 'drivers' ? 'driver' : 'team'}/${encodeURIComponent(who.article)}`
-          : `/wec/${season}/standings`,
-      (table) => table.title,
-    ),
+    entries: [
+      ...standingEntries(
+        data.standings,
+        (who, table) =>
+          who.article && validArticle(who.article)
+            ? `/wec/${season}/${table.kind === 'drivers' ? 'driver' : 'team'}/${encodeURIComponent(who.article)}`
+            : `/wec/${season}/standings`,
+        (table) => table.title,
+      ),
+      ...circuitEntries(
+        data.rounds.map((round) => {
+          const page = round.eventArticle ?? round.circuit?.article;
+          return {
+            circuit: round.circuit?.name,
+            to:
+              page && validArticle(page)
+                ? `/wec/${season}/circuit/${encodeURIComponent(page)}${round.circuit?.article ? `?circuit=${encodeURIComponent(round.circuit.article)}` : ''}`
+                : null,
+            note: round.name,
+          };
+        }),
+      ),
+    ],
     races: data.rounds.flatMap((round) =>
       round.start
         ? [

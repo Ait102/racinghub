@@ -12,6 +12,7 @@ export default tseslint.config(
       'playwright-report',
       'src/data/circuits/shapes',
       'src/series/wec/data/circuit-shapes.generated.ts',
+      'src/data/circuits/atlas.generated.ts',
     ],
   },
   {

@@ -5,7 +5,7 @@ import { PageHeader } from '../../../components/PageHeader';
 import { PlacesSection } from '../../../components/PlacesSection';
 import type { StandingKind, StandingTable } from '../../../lib/wikiStandings';
 import { raceColumn, type DtmSeasonData } from '../domain/season';
-import { useDtmSeason } from '../hooks/data';
+import { useDtmSeason, useDtmTeamCars } from '../hooks/data';
 import { DTM_EMPTY, DtmGuard, DtmName, DtmResult, DtmSourceNote } from './common';
 
 const KIND_LABELS: Record<StandingKind, string> = {
@@ -101,6 +101,7 @@ function Standings({ season }: { season: string }) {
 }
 
 function Table({ table, data }: { table: StandingTable; data: DtmSeasonData }) {
+  const carsOf = useDtmTeamCars(data.id);
   // Race page behind each column, when the columns line up with the season's races.
   const raceAt = new Map(
     data.races.flatMap((race) => {
@@ -163,6 +164,7 @@ function Table({ table, data }: { table: StandingTable; data: DtmSeasonData }) {
                           kind={
                             table.kind === 'drivers' ? 'driver' : table.kind === 'teams' ? 'team' : 'external'
                           }
+                          cars={table.kind === 'teams' ? carsOf(row.name) : undefined}
                         />
                       </td>
                     </>

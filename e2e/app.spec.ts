@@ -401,7 +401,7 @@ test('start page lists the next races of every series; the header search finds n
   await expect(today.locator('.today__race--imsa')).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Поиск' }).click();
-  const search = page.getByRole('combobox', { name: 'Пилот или команда любого чемпионата' });
+  const search = page.getByRole('combobox', { name: 'Пилот, команда или трасса любого чемпионата' });
   await search.fill('preining');
   const options = page.getByRole('option');
   await expect(options.filter({ hasText: 'DTM' })).toContainText('Thomas Preining');

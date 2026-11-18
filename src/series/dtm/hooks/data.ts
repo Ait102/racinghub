@@ -19,3 +19,23 @@ export function useDtmProfile(article: string | null, kind: SeriesProfileKind) {
     dtmWikipedia.getProfile(article!, kind, { force }),
   );
 }
+
+/** Car models each team entered in the season, by team article and name (for make emblems); empty until loaded. */
+export function useDtmTeamCars(season: string): (team: { name: string; article: string | null }) => string[] {
+  const entries = useDtmParticipants(season);
+  return (team) =>
+    entries.status !== 'success'
+      ? []
+      : [
+          ...new Set(
+            entries.data
+              .filter(
+                (c) =>
+                  c.team &&
+                  (c.team.name === team.name || (!!team.article && c.team.article === team.article)),
+              )
+              .map((c) => c.car)
+              .filter(Boolean),
+          ),
+        ];
+}

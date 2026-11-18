@@ -2,7 +2,10 @@ import { Link, useParams } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
+import { SeriesCircuitMap } from '../../../components/SeriesCircuitMap';
+import { WeekendSchedule } from '../../../components/WeekendSchedule';
 import { useNow } from '../../../hooks/useNow';
+import { dtmWeekendSchedule } from '../data/schedule';
 import { dtmRaceStatus, raceResults } from '../domain/season';
 import { useDtmSeason } from '../hooks/data';
 import { DtmGuard, DtmName, DtmResult, DtmSourceNote, DtmStatusBadge, raceLabel } from './common';
@@ -41,6 +44,15 @@ function Race({ season }: { season: string }) {
                 </p>
               </PageHeader>
               {race.note && <p className="notice">{race.note}</p>}
+              {dtmWeekendSchedule(season, race.round) && (
+                <WeekendSchedule schedule={dtmWeekendSchedule(season, race.round)!} />
+              )}
+              {Number(season) >= 2023 && (
+                <SeriesCircuitMap
+                  names={[race.circuit?.article, race.circuit?.name]}
+                  title={race.circuit?.name ?? null}
+                />
+              )}
               <dl className="dtm-facts dtm-facts--row card">
                 <div>
                   <dt>Трасса</dt>

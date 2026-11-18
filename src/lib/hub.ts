@@ -7,7 +7,7 @@ export type HubSeriesId = 'f1' | 'wec' | 'fe' | 'imsa' | 'dtm';
 
 export interface HubEntry {
   name: string;
-  kind: 'driver' | 'team';
+  kind: 'driver' | 'team' | 'circuit';
   /** Site route of the profile or of the standings that list the name. */
   to: string;
   /** Team, car or class shown next to the name. */
@@ -90,6 +90,18 @@ export function daysTo(race: HubRace, now: Date): number {
   return Math.round(
     (Date.UTC(y, m - 1, d) - Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())) / 86_400_000,
   );
+}
+
+/** Circuits of the season's races, each once (by name), with the race it hosts as a note. */
+export function circuitEntries(
+  races: Array<{ circuit: string | null | undefined; to: string | null; note?: string }>,
+): HubEntry[] {
+  const seen = new Set<string>();
+  return races.flatMap(({ circuit, to, note }) => {
+    if (!circuit || !to || seen.has(circuit)) return [];
+    seen.add(circuit);
+    return [{ name: circuit, kind: 'circuit' as const, to, note }];
+  });
 }
 
 /**

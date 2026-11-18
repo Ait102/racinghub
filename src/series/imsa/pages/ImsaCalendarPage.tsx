@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
+import { ScheduleMoment } from '../../../components/WeekendSchedule';
 import { useNow } from '../../../hooks/useNow';
+import { imsaRaceStart } from '../data/schedule';
 import { IMSA_STATUS_LABELS, imsaRaceStatus, nextImsaRace, type ImsaStatus } from '../domain/season';
 import { useImsaSeason } from '../hooks/data';
 import { ClassTag, IMSA_EMPTY, ImsaGuard, ImsaSourceNote, ImsaStatusBadge } from './common';
@@ -68,7 +70,11 @@ function Calendar({ season }: { season: string }) {
                       <span className="race-card__name">{race.name}</span>
                       <span className="race-card__place">{race.circuit?.name ?? 'Трасса не указана'}</span>
                       <span className="race-card__date">
-                        {race.dateText || '—'}
+                        {imsaRaceStart(season, race.round) ? (
+                          <ScheduleMoment start={imsaRaceStart(season, race.round)!} />
+                        ) : (
+                          race.dateText || '—'
+                        )}
                         {race.length && ` · ${race.length}`}
                       </span>
                       <span className="imsa-class-list">

@@ -13,7 +13,7 @@ import {
   raceResults,
   type DtmSeasonData,
 } from '../domain/season';
-import { useDtmSeason } from '../hooks/data';
+import { useDtmSeason, useDtmTeamCars } from '../hooks/data';
 import { DTM_EMPTY, DtmGuard, DtmName, DtmResult, DtmSourceNote, DtmStatusBadge, raceLabel } from './common';
 
 export function DtmHomePage() {
@@ -173,6 +173,7 @@ function LastRace({ data }: { data: DtmSeasonData }) {
 }
 
 function Leaders({ data }: { data: DtmSeasonData }) {
+  const carsOf = useDtmTeamCars(data.id);
   const shown = ['drivers', 'teams'].flatMap((kind) => data.standings.find((t) => t.kind === kind) ?? []);
   if (shown.length === 0) return <p className="muted">Зачётов у источника пока нет.</p>;
   return (
@@ -193,6 +194,7 @@ function Leaders({ data }: { data: DtmSeasonData }) {
                   who={row.name}
                   emblem={table.kind !== 'drivers'}
                   kind={table.kind === 'drivers' ? 'driver' : 'team'}
+                  cars={table.kind === 'teams' ? carsOf(row.name) : undefined}
                 />
                 <span className="dtm-leaders__pts">{row.points || '—'}</span>
               </li>

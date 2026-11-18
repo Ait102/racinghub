@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
+import { ScheduleMoment } from '../../../components/WeekendSchedule';
 import { useNow } from '../../../hooks/useNow';
+import { dtmRaceStart } from '../data/schedule';
 import { DTM_STATUS_LABELS, dtmRaceStatus, nextDtmRace, type DtmStatus } from '../domain/season';
 import { useDtmSeason } from '../hooks/data';
 import { DTM_EMPTY, DtmGuard, DtmName, DtmSourceNote, DtmStatusBadge, raceLabel } from './common';
@@ -66,7 +68,13 @@ function Calendar({ season }: { season: string }) {
                         </span>
                       </span>
                       <span className="race-card__name">{race.circuit?.name ?? 'Трасса не указана'}</span>
-                      <span className="race-card__date">{race.dateText || '—'}</span>
+                      <span className="race-card__date">
+                        {dtmRaceStart(season, race) ? (
+                          <ScheduleMoment start={dtmRaceStart(season, race)!} />
+                        ) : (
+                          race.dateText || '—'
+                        )}
+                      </span>
                       {race.note && <span className="muted small">{race.note}</span>}
                       {race.winner && (
                         <span className="race-card__winner">

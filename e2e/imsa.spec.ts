@@ -86,3 +86,13 @@ test('IMSA points after each round, class colours, emblems and sources', async (
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Источники');
   await expect(page.locator('.wiki-source-emblems')).toContainText('Acura');
 });
+
+test('IMSA race weekend timetable and present-day circuit map', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/imsa/2026/race/1');
+  const schedule = page.getByRole('region', { name: 'Расписание' });
+  await expect(schedule.locator('li')).toHaveCount(5);
+  await expect(schedule.locator('li').last()).toContainText('Гонка');
+  await expect(page.getByRole('img', { name: /Схема трассы Daytona International Speedway/ })).toBeVisible();
+  await expect(page.locator('main')).toContainText('Современная конфигурация: Road Course');
+});
