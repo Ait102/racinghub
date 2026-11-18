@@ -68,6 +68,9 @@ describe('standingEntries', () => {
         pos: i + 1,
         posText: String(i + 1),
         name: { name, article: name, flag: null },
+        ...(name.includes(' / ')
+          ? { crew: name.split(' / ').map((n) => ({ name: n, article: n, flag: null })) }
+          : {}),
         extra: null,
         lines: [],
         points: '0',
@@ -79,8 +82,8 @@ describe('standingEntries', () => {
       (who, t) => `/${t.kind}/${who.article ?? '-'}`,
     );
     expect(entries.map((e) => [e.name, e.kind, e.to])).toEqual([
-      ['A One', 'driver', '/drivers/-'],
-      ['B Two', 'driver', '/drivers/-'],
+      ['A One', 'driver', '/drivers/A One'],
+      ['B Two', 'driver', '/drivers/B Two'],
       ['Team', 'team', '/teams/Team'],
     ]);
   });

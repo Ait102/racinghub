@@ -20,6 +20,8 @@ const ROUTES = [
   './#/dtm/2026',
   './#/dtm/2026/calendar',
   './#/dtm/2026/standings',
+  './#/dtm/2026/driver/Thomas%20Preining',
+  './#/imsa/2026/teams',
   './#/fe/2025-26/driver/Pascal%20Wehrlein',
   './#/fe/2025-26/eprix/Monaco%20ePrix',
   './#/fe/2025-26/compare?a=Pascal+Wehrlein&b=Mitch+Evans',
@@ -130,7 +132,8 @@ for (const width of [1280, 375]) {
         // Long career tables exceed reliable full-page capture on Windows Chromium.
         // Their rows are covered by parser/E2E checks; capture the profile's first screen.
         fullPage:
-          !/\/wec\/[^/]+\/(driver|team|circuit)\//.test(route) &&
+          !/\/(wec|dtm|imsa)\/[^/]+\/(driver|team|circuit)\//.test(route) &&
+          !/\/imsa\/[^/]+\/teams$/.test(route) &&
           !(width === 1280 && route === './#/fe/2025-26/standings'),
         animations: 'disabled',
         // Native <select> text is anti-aliased differently on each run; the chosen values are checked by E2E.

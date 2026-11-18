@@ -41,7 +41,7 @@ function Race({ season }: { season: string }) {
                 <div>
                   <dt>Трасса</dt>
                   <dd>
-                    <ImsaName who={race.circuit} />
+                    <ImsaName who={race.circuit} kind="circuit" />
                   </dd>
                 </div>
                 <div>
@@ -65,10 +65,10 @@ function Race({ season }: { season: string }) {
                       <li key={w.cls} className="card">
                         <ClassTag cls={w.cls} />
                         <span>
-                          <ImsaName who={w.team} strong />
+                          <ImsaName who={w.team} strong kind="team" />
                           <span className="imsa-winners__drivers">
                             {w.drivers.map((d) => (
-                              <ImsaName key={d.name} who={d} />
+                              <ImsaName key={d.name} who={d} kind="driver" />
                             ))}
                           </span>
                         </span>
@@ -173,10 +173,10 @@ function Classification({ season, race }: { season: string; race: ImsaRace }) {
                         {hasPic && <td className="align-center">{r.pic ?? '—'}</td>}
                         <td className="align-center">{r.number}</td>
                         <td>
-                          <ImsaName who={r.team} strong />
+                          <ImsaName who={r.team} strong kind="team" />
                           <span className="imsa-winners__drivers">
                             {r.drivers.map((d) => (
-                              <ImsaName key={d.name} who={d} />
+                              <ImsaName key={d.name} who={d} kind="driver" />
                             ))}
                           </span>
                         </td>

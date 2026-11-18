@@ -235,3 +235,10 @@ npm test && npm run test:e2e && npm run build
 - Общий разбор зачётов (`src/lib/wikiStandings.ts`, режим `fe`) понимает столбец `Total Points`, экипаж в одной ячейке («A / B»), строки-разделители на всю ширину и надстрочные пометки (`main`/`sup`).
 - Поиск в шапке и блок на главной берут данные из `src/series/<серия>/hub.ts` через `src/pages/hubs.ts` (каждая серия — отдельная часть сборки, загрузка один раз за визит). Общие типы и отбор — `src/lib/hub.ts`.
 - `src/series/fe/data/standingProgress.generated.ts` исключён из Prettier: скрипт читает свой JSON обратно, чтобы обновлять один сезон.
+
+## IMSA и DTM, этап 2: заявки, профили, сравнение (18.11.2026)
+
+- Заявки: общий `src/lib/wikiEntries.ts` (строка на пилота, экипаж = класс + команда + номер; подзаголовки внутри таблицы вроде «GTD Pro» задают класс). Серии: `domain/participants.ts`.
+- Профили: общий `parseSeriesProfile` в `src/lib/wikiProfile.ts` — цифры карточки только из раздела карьеры этой серии, таблицы результатов по заголовку, у трассы — конфигурация, на которой гоняется серия (`layout`). Серии задают правила в `domain/profiles.ts`.
+- Общие компоненты: `SeriesParticipants`, `SeriesProfileView`, `SeriesCompareView` (стили `19-wiki-pages.css`, классы `wiki-`). Имена в таблицах IMSA/DTM ведут на профили сайта (`kind` у `DtmName`/`ImsaName`), экипаж в строке зачёта — каждый пилот своей ссылкой (`StandingRow.crew`).
+- Фикстуры профилей: `node scripts/fetch-season-fixtures.mjs <dtm|imsa> "<статья>"` (список — `profiles` в скрипте; сохраняются карточка, вступление и таблицы).

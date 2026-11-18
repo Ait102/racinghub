@@ -1,11 +1,11 @@
 import { useEffect, type ReactNode } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 
 import { articleUrl } from '../../../api/wikipedia';
 import { Emblem } from '../../../components/Emblem';
 import { teamEmblem } from '../../../data/emblems';
 import { validArticle } from '../../../lib/wikiArticle';
-import type { Named, ResultCell } from '../../../lib/wikiStandings';
+import type { Named, ResultCell, StandingRow } from '../../../lib/wikiStandings';
 import { imsa } from '../data/seasons';
 import { IMSA_STATUS_LABELS, type ImsaStatus } from '../domain/season';
 
@@ -31,16 +31,22 @@ export function ImsaGuard({ children }: { children: (season: string) => ReactNod
   return <>{children(season)}</>;
 }
 
+export type ProfileLinkKind = 'driver' | 'team' | 'circuit' | 'external';
+
 /** Name with its flag and, for teams and makes, the make emblem; links to the Wikipedia article. */
 export function ImsaName({
   who,
   strong,
   emblem,
+  kind = 'external',
 }: {
   who: Named | null | undefined;
   strong?: boolean;
   emblem?: boolean;
+  /** Profile page on the site; 'external' links to the Wikipedia article. */
+  kind?: ProfileLinkKind;
 }) {
+  const season = imsa.fromPath(useLocation().pathname);
   if (!who) return <span className="muted">—</span>;
   const text = strong ? <strong>{who.name}</strong> : who.name;
   const entry = emblem ? teamEmblem(who.name) : null;
@@ -58,13 +64,27 @@ export function ImsaName({
           loading="lazy"
         />
       )}
-      {who.article && validArticle(who.article) ? (
+      {who.article && validArticle(who.article) && season && kind !== 'external' ? (
+        <Link to={`/imsa/${season}/${kind}/${encodeURIComponent(who.article)}`}>{text}</Link>
+      ) : who.article && validArticle(who.article) ? (
         <a href={articleUrl(who.article)} target="_blank" rel="noreferrer">
           {text}
         </a>
       ) : (
         text
       )}
+    </span>
+  );
+}
+
+/** A standings name: each driver of a crew sharing the row gets their own profile link. */
+export function ImsaRowName({ row, kind }: { row: StandingRow; kind: ProfileLinkKind }) {
+  if (!row.crew) return <ImsaName who={row.name} kind={kind} emblem={kind === 'external'} />;
+  return (
+    <span className="wiki-crew">
+      {row.crew.map((who) => (
+        <ImsaName key={who.name} who={who} kind={kind} />
+      ))}
     </span>
   );
 }

@@ -93,7 +93,7 @@ export function daysTo(race: HubRace, now: Date): number {
 }
 
 /**
- * Drivers and teams listed in Wikipedia standings tables (a crew sharing a row is split by " / ").
+ * Drivers and teams listed in Wikipedia standings tables (each member of a crew sharing a row).
  * `link` gives the site route for a name; manufacturers' tables are left out.
  */
 export function standingEntries(
@@ -106,12 +106,11 @@ export function standingEntries(
     if (table.kind === 'manufacturers') return [];
     const kind = table.kind === 'drivers' ? ('driver' as const) : ('team' as const);
     return table.rows.flatMap((row) =>
-      row.name.name.split(' / ').flatMap((name) => {
-        const key = `${kind}|${name}`;
-        if (!name.trim() || seen.has(key)) return [];
+      (row.crew ?? [row.name]).flatMap((who) => {
+        const key = `${kind}|${who.name}`;
+        if (!who.name.trim() || seen.has(key)) return [];
         seen.add(key);
-        const who = name === row.name.name ? row.name : { ...row.name, name, article: null };
-        return [{ name, kind, to: link(who, table), note: note?.(table) }];
+        return [{ name: who.name, kind, to: link(who, table), note: note?.(table) }];
       }),
     );
   });

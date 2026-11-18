@@ -140,19 +140,19 @@ function LastRace({ data }: { data: DtmSeasonData }) {
             <div>
               <dt>Победитель</dt>
               <dd>
-                <DtmName who={last.winner} strong />
+                <DtmName who={last.winner} strong kind="driver" />
               </dd>
             </div>
             <div>
               <dt>Команда</dt>
               <dd>
-                <DtmName who={last.winningTeam} />
+                <DtmName who={last.winningTeam} kind="team" />
               </dd>
             </div>
             <div>
               <dt>Поул</dt>
               <dd>
-                <DtmName who={last.pole} />
+                <DtmName who={last.pole} kind="driver" />
               </dd>
             </div>
           </dl>
@@ -161,7 +161,7 @@ function LastRace({ data }: { data: DtmSeasonData }) {
               {top.map((r) => (
                 <li key={r.driver.name}>
                   <DtmResult cell={r.cell} />
-                  <DtmName who={r.driver} />
+                  <DtmName who={r.driver} kind="driver" />
                 </li>
               ))}
             </ol>
@@ -189,7 +189,11 @@ function Leaders({ data }: { data: DtmSeasonData }) {
                 }
               >
                 <span className={posClass('dtm-leaders__pos', row.pos)}>{row.posText}</span>
-                <DtmName who={row.name} emblem={table.kind !== 'drivers'} />
+                <DtmName
+                  who={row.name}
+                  emblem={table.kind !== 'drivers'}
+                  kind={table.kind === 'drivers' ? 'driver' : 'team'}
+                />
                 <span className="dtm-leaders__pts">{row.points || '—'}</span>
               </li>
             ))}

@@ -13,7 +13,15 @@ import {
   type ImsaSeasonData,
 } from '../domain/season';
 import { useImsaSeason } from '../hooks/data';
-import { ClassTag, IMSA_EMPTY, ImsaGuard, ImsaName, ImsaSourceNote, ImsaStatusBadge } from './common';
+import {
+  ClassTag,
+  IMSA_EMPTY,
+  ImsaGuard,
+  ImsaName,
+  ImsaRowName,
+  ImsaSourceNote,
+  ImsaStatusBadge,
+} from './common';
 
 export function ImsaHomePage() {
   return <ImsaGuard>{(season) => <Overview season={season} />}</ImsaGuard>;
@@ -143,7 +151,7 @@ function LastRace({ data }: { data: ImsaSeasonData }) {
               <li key={w.cls}>
                 <ClassTag cls={w.cls} />
                 <span>
-                  <ImsaName who={w.team} strong />
+                  <ImsaName who={w.team} strong kind="team" />
                   <span className="muted small"> {w.drivers.map((d) => d.name).join(', ')}</span>
                 </span>
               </li>
@@ -170,7 +178,7 @@ function Leaders({ data }: { data: ImsaSeasonData }) {
             {table.rows.slice(0, 3).map((row, i) => (
               <li key={`${row.name.name}-${i}`}>
                 <span className={posClass('imsa-leaders__pos', row.pos)}>{row.posText}</span>
-                <ImsaName who={row.name} />
+                <ImsaRowName row={row} kind="driver" />
                 <span className="imsa-leaders__pts">{row.points || '—'}</span>
               </li>
             ))}

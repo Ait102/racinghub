@@ -152,7 +152,13 @@ function Table({ table, data }: { table: StandingTable; data: DtmSeasonData }) {
                         <strong>{row.posText || '—'}</strong>
                       </td>
                       <td rowSpan={lines.length}>
-                        <DtmName who={row.name} emblem={table.kind !== 'drivers'} />
+                        <DtmName
+                          who={row.name}
+                          emblem={table.kind !== 'drivers'}
+                          kind={
+                            table.kind === 'drivers' ? 'driver' : table.kind === 'teams' ? 'team' : 'external'
+                          }
+                        />
                       </td>
                     </>
                   )}

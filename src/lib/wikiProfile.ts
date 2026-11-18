@@ -160,3 +160,174 @@ export function sectionTables<K extends string>(
   }
   return out;
 }
+
+// --- Season summaries of any series' results table (IMSA, DTM) ---
+
+const SUMMARY_POS = /^(Pos\.?|Position|Rank|DC|D\.C\.|T\.C\.|WDC)$/i;
+const SUMMARY_POINTS = /^(Points|Pts\.?)$/i;
+const SUMMARY_COLS = /^(Year|Season|Team|Entrant|Class|Car|Chassis|Make|No\.?|Drivers?)$/i;
+
+/** Season-level columns of a results table; per-race columns stay in the source. */
+export function seasonColumns(table: ProfileTable): number[] {
+  return table.columns
+    .map((name, i) =>
+      SUMMARY_COLS.test(name) || SUMMARY_POS.test(name) || SUMMARY_POINTS.test(name) ? i : -1,
+    )
+    .filter((i) => i >= 0);
+}
+
+/** One row per distinct season line (a team lists every driver under one season with rowspan). */
+export function seasonRows(table: ProfileTable): ProfileRow[] {
+  const cols = seasonColumns(table);
+  const seen = new Set<string>();
+  return table.rows.filter((row) => {
+    const key = cols.map((i) => row.cells[i]?.text ?? '').join('|');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+export interface SeasonResult {
+  season: string;
+  team: string | null;
+  cls: string | null;
+  position: string | null;
+  points: string | null;
+}
+
+/** Position and points per season, as published, from every results table of a profile. */
+export function seasonResults(tables: ProfileTable[]): SeasonResult[] {
+  return tables.flatMap((table) => {
+    const col = (re: RegExp) => table.columns.findIndex((c) => re.test(c));
+    const [team, cls, pos, points] = [
+      col(/^(Team|Entrant)$/i),
+      col(/^Class$/i),
+      col(SUMMARY_POS),
+      col(SUMMARY_POINTS),
+    ];
+    return seasonRows(table).map((row) => {
+      const text = (i: number) => (i >= 0 && row.cells[i]?.text) || null;
+      return {
+        season: row.season,
+        team: text(team),
+        cls: text(cls),
+        position: text(pos),
+        points: text(points),
+      };
+    });
+  });
+}
+
+// --- One profile page of a Wikipedia-based series: driver, team or circuit ---
+
+export type SeriesProfileKind = 'driver' | 'team' | 'circuit';
+
+export interface SeriesProfile {
+  article: string;
+  kind: SeriesProfileKind;
+  facts: Fact[];
+  biography: string | null;
+  tables: ProfileTable<'results'>[];
+}
+
+export interface SeriesProfileRules {
+  /** Infobox section with the driver's figures in this series, e.g. /^DTM career$/. */
+  career: RegExp;
+  /** Headings of the series' results tables in driver and team articles. */
+  results: RegExp;
+  /** Preferred circuit layout in the infobox (the first one is often an oval or a motorcycle course). */
+  layout?: RegExp;
+}
+
+const PERSON_FACTS: Record<string, string> = {
+  Born: 'Родился',
+  'Full name': 'Полное имя',
+  Nationality: 'Национальность',
+};
+// The infobox's own figures for the series: shown as published, never recounted.
+const CAREER_FACTS: Record<string, string> = {
+  'Debut season': 'Дебют',
+  'Current team': 'Команда',
+  'Car number': 'Номер',
+  'Former teams': 'Прежние команды',
+  Categorisation: 'Категория FIA',
+  Starts: 'Старты',
+  Championships: 'Титулы',
+  Wins: 'Победы',
+  Podiums: 'Подиумы',
+  Poles: 'Поулы',
+  'Fastest laps': 'Быстрые круги',
+  'Best finish': 'Лучший итог',
+};
+const TEAM_FACTS: Record<string, string> = {
+  Founded: 'Основана',
+  Base: 'База',
+  'Team principal(s)': 'Руководитель',
+  'Founder(s)': 'Основатель',
+  'Current series': 'Серии сейчас',
+  'Former series': 'Прежние серии',
+  "Teams' Championships": 'Командные титулы',
+  "Teams'Championships": 'Командные титулы',
+  "Drivers' Championships": 'Титулы пилотов',
+  "Drivers'Championships": 'Титулы пилотов',
+};
+const CIRCUIT_FACTS: Record<string, string> = {
+  Location: 'Расположение',
+  Opened: 'Открыта',
+  Owner: 'Владелец',
+  Capacity: 'Вместимость',
+  'FIA Grade': 'Категория FIA',
+  'Major events': 'Главные события',
+};
+const LAYOUT_FACTS: Record<string, string> = {
+  Length: 'Длина круга',
+  Turns: 'Повороты',
+  'Race lap record': 'Рекорд круга в гонке',
+};
+
+/** Infobox facts, lead and season results of one article, read by the series' rules. */
+export function parseSeriesProfile(
+  article: string,
+  doc: Document,
+  kind: SeriesProfileKind,
+  rules: SeriesProfileRules,
+): SeriesProfile {
+  // The circuit layout the series races on: the first infobox section matching `layout`, else the first one.
+  const sections = [...doc.querySelectorAll('.infobox tr')]
+    .filter((row) => row.querySelector(':scope > th') && !row.querySelector(':scope > td'))
+    .map((row) => cleanText(row));
+  const layout =
+    kind === 'circuit'
+      ? (sections.find((s) => rules.layout?.test(s) && !/oval|motorcycle|nascar|kart/i.test(s)) ??
+        sections[0] ??
+        null)
+      : null;
+  const labels = (section: string) =>
+    kind === 'team'
+      ? TEAM_FACTS
+      : kind === 'circuit'
+        ? section === ''
+          ? CIRCUIT_FACTS
+          : section === layout
+            ? LAYOUT_FACTS
+            : {}
+        : rules.career.test(section)
+          ? CAREER_FACTS
+          : /career|series|titles|awards/i.test(section)
+            ? {} // other series' figures are not this series' facts
+            : PERSON_FACTS;
+  const facts = infoboxFacts(doc, labels);
+  if (layout && facts.some((f) => f.label === 'Длина круга'))
+    facts.push({ label: 'Конфигурация', value: layout });
+  return {
+    article,
+    kind,
+    facts,
+    biography: leadBiography(doc),
+    tables:
+      kind === 'circuit'
+        ? []
+        : sectionTables<'results'>(doc, (title) => (rules.results.test(title) ? 'results' : null)),
+  };
+}

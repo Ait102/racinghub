@@ -43,15 +43,21 @@ function Race({ season }: { season: string }) {
               {race.note && <p className="notice">{race.note}</p>}
               <dl className="dtm-facts dtm-facts--row card">
                 <div>
+                  <dt>Трасса</dt>
+                  <dd>
+                    <DtmName who={race.circuit} kind="circuit" />
+                  </dd>
+                </div>
+                <div>
                   <dt>Победитель</dt>
                   <dd>
-                    <DtmName who={race.winner} strong />
+                    <DtmName who={race.winner} strong kind="driver" />
                   </dd>
                 </div>
                 <div>
                   <dt>Команда</dt>
                   <dd>
-                    <DtmName who={race.winningTeam} />
+                    <DtmName who={race.winningTeam} kind="team" />
                   </dd>
                 </div>
                 <div>
@@ -63,13 +69,13 @@ function Race({ season }: { season: string }) {
                 <div>
                   <dt>Поул</dt>
                   <dd>
-                    <DtmName who={race.pole} />
+                    <DtmName who={race.pole} kind="driver" />
                   </dd>
                 </div>
                 <div>
                   <dt>Быстрый круг</dt>
                   <dd>
-                    <DtmName who={race.fastestLap} />
+                    <DtmName who={race.fastestLap} kind="driver" />
                   </dd>
                 </div>
               </dl>
@@ -98,7 +104,7 @@ function Race({ season }: { season: string }) {
                               <DtmResult cell={r.cell} />
                             </td>
                             <td>
-                              <DtmName who={r.driver} />
+                              <DtmName who={r.driver} kind="driver" />
                             </td>
                           </tr>
                         ))}

@@ -1,0 +1,126 @@
+/* Shared pages of Wikipedia-based series (IMSA, DTM): entry lists, profiles, comparison. */
+.wiki-search {
+  display: grid;
+  gap: 6px;
+  max-width: 30rem;
+  margin-bottom: var(--s4);
+}
+
+.wiki-search input {
+  width: 100%;
+  min-width: 0;
+}
+
+.wiki-list,
+.wiki-crew {
+  display: grid;
+  gap: 4px;
+}
+
+.wiki-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.wiki-block {
+  display: block;
+}
+
+.wiki-profile-season {
+  margin-bottom: var(--s5);
+}
+
+.wiki-season-list {
+  margin: 0;
+  padding-left: 1.2em;
+  line-height: 1.8;
+}
+
+.wiki-profile-summary {
+  margin: var(--s5) 0;
+}
+
+.wiki-profile-summary p {
+  max-width: 78ch;
+  line-height: 1.7;
+}
+
+.wiki-profile-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--s4);
+  margin: var(--s4) 0;
+}
+
+.wiki-profile-facts dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+
+.wiki-profile-facts dd {
+  margin: 0;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.wiki-profile-current td {
+  background: rgba(var(--accent-rgb), 0.08);
+}
+
+.wiki-result {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+.wiki-result--gold {
+  background: #ffffbf;
+  color: #292a15;
+}
+.wiki-result--silver {
+  background: #dfdfdf;
+  color: #292929;
+}
+.wiki-result--bronze {
+  background: #ffdf9f;
+  color: #3c2910;
+}
+.wiki-result--retired {
+  background: #efcfff;
+  color: #42294a;
+}
+.wiki-result--excluded {
+  background: #000;
+  color: #fff;
+}
+
+.wiki-compare-pickers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+}
+
+.wiki-compare-pick {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.wiki-compare-pick select {
+  width: 100%;
+  min-width: 0;
+}
+
+.wiki-compare th[scope='row'] {
+  color: var(--muted);
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .wiki-compare-pickers {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

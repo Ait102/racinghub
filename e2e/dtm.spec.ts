@@ -31,3 +31,35 @@ test('DTM season: home, two races per event, race results and standings', async 
   await expect(page.getByRole('table', { name: "Teams' Championship" })).toContainText('D2 AMG-Mercedes');
   await expect(page.locator('footer')).toContainText('CC BY-SA 4.0');
 });
+
+test('DTM entry list, profiles of a driver, a team and a circuit, comparison', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/dtm/2026/drivers');
+  await page.getByRole('searchbox').fill('preining');
+  const row = page.getByRole('table', { name: 'Пилоты' }).locator('tbody tr');
+  await expect(row).toHaveCount(1);
+  await expect(row).toContainText('91');
+  await row.getByRole('link', { name: 'Thomas Preining' }).click();
+  await expect(page).toHaveURL(/#\/dtm\/2026\/driver\/Thomas%20Preining$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Thomas Preining');
+  // Figures as the infobox publishes them; the season's place from the standings.
+  await expect(page.locator('.stats')).toContainText('79');
+  await expect(page.locator('.wiki-profile-season')).toContainText('1 место');
+  await expect(
+    page.getByRole('table', { name: 'Complete Deutsche Tourenwagen Masters results' }),
+  ).toContainText('225');
+
+  await page.getByRole('link', { name: 'Сравнить с другим пилотом' }).click();
+  await page.getByRole('combobox', { name: 'Второй пилот' }).selectOption('Maro Engel');
+  await expect(page.getByRole('table', { name: 'Цифры из карточек статей' })).toContainText('Старты');
+  await expect(page.getByRole('table', { name: 'Место и очки по сезонам' })).toContainText('2026');
+
+  await page.goto('./#/dtm/2026/teams');
+  await page.getByRole('link', { name: 'Manthey Racing' }).first().click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Manthey Racing');
+  await expect(page.locator('.wiki-profile-facts')).toContainText('Meuspath');
+
+  await page.goto('./#/dtm/2026/race/1');
+  await page.locator('.dtm-facts').getByRole('link', { name: 'Red Bull Ring' }).click();
+  await expect(page.locator('.stats')).toContainText('4.326 km');
+});

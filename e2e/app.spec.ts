@@ -406,5 +406,5 @@ test('start page lists the next races of every series; the header search finds n
   const options = page.getByRole('option');
   await expect(options.filter({ hasText: 'DTM' })).toContainText('Thomas Preining');
   await options.filter({ hasText: 'DTM' }).first().click();
-  await expect(page).toHaveURL(/#\/dtm\/2026\/standings\?t=/);
+  await expect(page).toHaveURL(/#\/dtm\/2026\/driver\/Thomas%20Preining$/);
 });

@@ -147,6 +147,9 @@ export function Layout() {
                   [`/${series}/${yearSeason}`, 'Главная'],
                   [`/${series}/${yearSeason}/calendar`, 'Календарь'],
                   [`/${series}/${yearSeason}/standings`, 'Зачёты'],
+                  [`/${series}/${yearSeason}/drivers`, 'Пилоты'],
+                  [`/${series}/${yearSeason}/teams`, 'Команды'],
+                  [`/${series}/${yearSeason}/compare`, 'Сравнение'],
                 ]
               : [];
 

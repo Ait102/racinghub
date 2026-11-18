@@ -32,3 +32,28 @@ test('IMSA season: class winners, race classification and class standings', asyn
   await expect(page.getByRole('group', { name: 'Класс PC' })).toBeVisible();
   await expect(page.locator('footer')).toContainText('CC BY-SA 4.0');
 });
+
+test('IMSA entry list by class, driver profile and comparison', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/imsa/2026/teams');
+  const crews = page.getByRole('table', { name: 'Команды и экипажи' });
+  await expect(crews.locator('tbody tr')).toHaveCount(68);
+  await page.getByRole('searchbox').fill('Triarsi');
+  await expect(crews.locator('tbody tr').first()).toContainText('GTD Pro');
+
+  await page.goto('./#/imsa/2026/drivers');
+  await page.getByRole('searchbox').fill('nasr');
+  await page.getByRole('table', { name: 'Пилоты' }).getByRole('link', { name: 'Felipe Nasr' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Felipe Nasr');
+  await expect(page.locator('.stats')).toContainText('77');
+  await expect(
+    page.getByRole('table', { name: 'Complete IMSA SportsCar Championship results' }),
+  ).toContainText('Porsche Penske Motorsport');
+
+  await page.goto('./#/imsa/2026/compare?a=Felipe+Nasr&b=Jack+Aitken');
+  await expect(page.getByRole('table', { name: 'Цифры из карточек статей' })).toContainText('Победы');
+
+  await page.goto('./#/imsa/2026/race/1');
+  await page.locator('.imsa-facts').getByRole('link', { name: 'Daytona International Speedway' }).click();
+  await expect(page.locator('.wiki-profile-facts')).toContainText('Sports Car Course');
+});

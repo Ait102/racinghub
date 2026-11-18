@@ -48,6 +48,8 @@ export interface StandingRow {
   lines: ResultCell[][];
   /** Published extra column for each car when the source shares a team cell. */
   lineLabels?: string[];
+  /** FE mode: every person of a crew sharing the row (IMSA), each with its own article. */
+  crew?: Named[];
   points: string;
   pointsValue: number | null;
 }
@@ -170,16 +172,20 @@ export function parseStandings(
         const byCar = carFirst && extra >= 0;
         const name = namedCell(cellAt(group[0], byCar ? extra : 1));
         if (!name) continue;
+        let crew: Named[] | undefined;
         if (series === 'fe') {
           // A crew sharing one position: names on separate lines of one cell.
-          const lines = (cellAt(group[0], byCar ? extra : 1)?.lines ?? [])
-            .map((l) => l.text.trim())
-            .filter(Boolean);
-          name.name = lines.length > 1 ? lines.join(' / ') : textAt(group[0], byCar ? extra : 1);
+          const lines = (cellAt(group[0], byCar ? extra : 1)?.lines ?? []).filter((l) => l.text.trim());
+          name.name =
+            lines.length > 1
+              ? lines.map((l) => l.text.trim()).join(' / ')
+              : textAt(group[0], byCar ? extra : 1);
+          if (lines.length > 1) crew = lines.map((l) => named(l)).filter((n): n is Named => n !== null);
         }
         const points = textAt(group[0], last);
         const extraText = extra >= 0 ? orNull(textAt(group[0], byCar ? 1 : extra)) : null;
         rows.push({
+          ...(crew ? { crew } : {}),
           pos: intOf(posText),
           posText,
           name,

@@ -1,5 +1,6 @@
 // IMSA for the site-wide search and "today in motorsport": the newest season on Wikipedia.
 import { standingEntries, type SeriesHub } from '../../lib/hub';
+import { validArticle } from '../../lib/wikiArticle';
 import { imsaWikipedia } from './api/wikipedia';
 import { imsa } from './data/seasons';
 import type { ImsaStanding } from './domain/season';
@@ -11,10 +12,13 @@ export async function loadHub(now = new Date()): Promise<SeriesHub> {
     series: 'imsa',
     label: 'IMSA',
     season,
-    // No profile pages yet: a name leads to its class standings.
+    // A name without an article leads to its class standings.
     entries: standingEntries(
       data.standings,
-      (_, table) => `/imsa/${season}/standings?t=${table.id}`,
+      (who, table) =>
+        who.article && validArticle(who.article)
+          ? `/imsa/${season}/${table.kind === 'drivers' ? 'driver' : 'team'}/${encodeURIComponent(who.article)}`
+          : `/imsa/${season}/standings?t=${table.id}`,
       (table) => (table as ImsaStanding).cls,
     ),
     races: data.races.flatMap((race) =>

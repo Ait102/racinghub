@@ -1,5 +1,6 @@
 // DTM for the site-wide search and "today in motorsport": the newest season on Wikipedia.
 import { standingEntries, type SeriesHub } from '../../lib/hub';
+import { validArticle } from '../../lib/wikiArticle';
 import { dtmWikipedia } from './api/wikipedia';
 import { dtm } from './data/seasons';
 
@@ -10,8 +11,12 @@ export async function loadHub(now = new Date()): Promise<SeriesHub> {
     series: 'dtm',
     label: 'DTM',
     season,
-    // No profile pages yet: a name leads to its standings.
-    entries: standingEntries(data.standings, (_, table) => `/dtm/${season}/standings?t=${table.id}`),
+    // A name without an article leads to its standings.
+    entries: standingEntries(data.standings, (who, table) =>
+      who.article && validArticle(who.article)
+        ? `/dtm/${season}/${table.kind === 'drivers' ? 'driver' : 'team'}/${encodeURIComponent(who.article)}`
+        : `/dtm/${season}/standings?t=${table.id}`,
+    ),
     races: data.races.flatMap((race) =>
       race.date
         ? [

@@ -5,7 +5,7 @@ import { PageHeader } from '../../../components/PageHeader';
 import { PlacesSection } from '../../../components/PlacesSection';
 import { seasonClasses, type ImsaSeasonData, type ImsaStanding } from '../domain/season';
 import { useImsaSeason } from '../hooks/data';
-import { ClassTag, IMSA_EMPTY, ImsaGuard, ImsaName, ImsaResult, ImsaSourceNote } from './common';
+import { ClassTag, IMSA_EMPTY, ImsaGuard, ImsaResult, ImsaRowName, ImsaSourceNote } from './common';
 
 const LEGEND = [
   ['gold', 'Победа'],
@@ -141,7 +141,12 @@ function Table({ table, data }: { table: ImsaStanding; data: ImsaSeasonData }) {
                         <strong>{row.posText || '—'}</strong>
                       </td>
                       <td rowSpan={lines.length}>
-                        <ImsaName who={row.name} emblem={table.kind === 'manufacturers'} />
+                        <ImsaRowName
+                          row={row}
+                          kind={
+                            table.kind === 'drivers' ? 'driver' : table.kind === 'teams' ? 'team' : 'external'
+                          }
+                        />
                       </td>
                     </>
                   )}

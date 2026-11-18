@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 
 import { articleUrl } from '../../../api/wikipedia';
 import { Emblem } from '../../../components/Emblem';
@@ -32,16 +32,22 @@ export function DtmGuard({ children }: { children: (season: string) => ReactNode
   return <>{children(season)}</>;
 }
 
+export type ProfileLinkKind = 'driver' | 'team' | 'circuit' | 'external';
+
 /** Name with its flag and, for teams and makes, the make emblem; links to the Wikipedia article. */
 export function DtmName({
   who,
   strong,
   emblem,
+  kind = 'external',
 }: {
   who: Named | null | undefined;
   strong?: boolean;
   emblem?: boolean;
+  /** Profile page on the site; 'external' links to the Wikipedia article. */
+  kind?: ProfileLinkKind;
 }) {
+  const season = dtm.fromPath(useLocation().pathname);
   if (!who) return <span className="muted">—</span>;
   const text = strong ? <strong>{who.name}</strong> : who.name;
   const entry = emblem ? teamEmblem(who.name) : null;
@@ -59,7 +65,9 @@ export function DtmName({
           loading="lazy"
         />
       )}
-      {who.article && validArticle(who.article) ? (
+      {who.article && validArticle(who.article) && season && kind !== 'external' ? (
+        <Link to={`/dtm/${season}/${kind}/${encodeURIComponent(who.article)}`}>{text}</Link>
+      ) : who.article && validArticle(who.article) ? (
         <a href={articleUrl(who.article)} target="_blank" rel="noreferrer">
           {text}
         </a>
