@@ -24,4 +24,20 @@ describe('wecStandingProgress', () => {
       25, 26, 56, 56, 64, 89, 114, 115,
     ]);
   });
+
+  it('has the 2025 season from the same source, in its own round order', () => {
+    const progress = wecStandingProgress('2025', tables[0]);
+    expect(progress?.rounds.map(({ label }) => label)).toEqual([
+      'QAT',
+      'IMO',
+      'SPA',
+      'LMS',
+      'SÃO',
+      'COA',
+      'FUJ',
+      'BHR',
+    ]);
+    expect(progress?.series[0]).toMatchObject({ label: 'Alessandro Pier Guidi', group: '#51' });
+    expect(wecStandingProgress('2024', tables[0])).toBeNull();
+  });
 });

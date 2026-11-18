@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
+import { TodayInMotorsport } from './TodayInMotorsport';
+
 /** Site start page: pick the championship to look at. */
 export function ChoosePage() {
   useEffect(() => {
@@ -14,6 +16,8 @@ export function ChoosePage() {
         <h1>Что смотрим?</h1>
         <p className="lead">Календарь, результаты и зачёты автоспорта. Выберите чемпионат.</p>
       </header>
+
+      <TodayInMotorsport />
 
       <div className="choose__grid">
         <Link to="/f1" className="series-card series-card--f1">
@@ -54,8 +58,18 @@ export function ChoosePage() {
       </div>
       <div className="choose__grid choose__grid--upcoming">
         {[
-          { id: 'imsa', name: 'IMSA', description: 'Гонки на выносливость в Северной Америке.' },
-          { id: 'dtm', name: 'DTM', description: 'Немецкая серия кузовных гонок.' },
+          {
+            id: 'imsa',
+            name: 'IMSA',
+            description:
+              'Гонки на выносливость в Северной Америке: календарь, протоколы и зачёты по классам. Сезоны с 2014 года.',
+          },
+          {
+            id: 'dtm',
+            name: 'DTM',
+            description:
+              'Немецкая серия кузовных гонок: две гонки на этапе, результаты и зачёты. Сезоны с 2000 года.',
+          },
         ].map(({ id, name, description }) => (
           <Link key={id} to={`/${id}`} className={`series-card series-card--${id}`}>
             <span className="series-card__mark" aria-hidden="true">
@@ -63,7 +77,7 @@ export function ChoosePage() {
             </span>
             <h2 className="series-card__title">{name}</h2>
             <p className="series-card__text">{description}</p>
-            <span className="series-card__cta">Раздел в разработке →</span>
+            <span className="series-card__cta">Открыть →</span>
           </Link>
         ))}
       </div>

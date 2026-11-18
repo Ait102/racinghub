@@ -51,6 +51,11 @@ function rowsOf(table, kind) {
       return [{ id: label, label, shortLabel: label, points }];
     }
     const car = cells[2].textContent.trim();
+    // The 2025 page has an empty row (no car, no drivers) next to a real one: nothing to identify.
+    if (!car && !cells[3]?.querySelector('a')) {
+      console.warn(`Skipped an empty ${kind} row with ${total} points.`);
+      return [];
+    }
     if (!/^#\d+$/.test(car)) throw new Error(`Invalid championship car number: ${car}`);
     if (kind.endsWith('teams')) {
       const label = `${car} ${displayName(cells[3].textContent.trim())}`;

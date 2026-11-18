@@ -365,6 +365,7 @@ test('driver and team pages show a credited photo', async ({ page }) => {
   await expect(page.locator('figure.photo')).toHaveCount(0);
 });
 test('IMSA and DTM open from championship cards', async ({ page }) => {
+  await mockApi(page);
   await page.setViewportSize({ width: 375, height: 812 });
   for (const name of ['IMSA', 'DTM']) {
     await page.goto('./#/');
@@ -375,7 +376,7 @@ test('IMSA and DTM open from championship cards', async ({ page }) => {
     // The newest season opens, with its Wikipedia source and the series' own season picker.
     await expect(page).toHaveURL(new RegExp(`#/${name.toLowerCase()}/2026$`));
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${name} 2026`);
-    await expect(page.getByRole('heading', { name: 'Что появится' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Календарь', exact: true })).toBeVisible();
     await expect(page.locator('footer')).toContainText('CC BY-SA 4.0');
   }
   await page.getByRole('combobox', { name: 'Сезон' }).selectOption('2000');
@@ -384,4 +385,26 @@ test('IMSA and DTM open from championship cards', async ({ page }) => {
   await expect(page).toHaveURL(/#\/dtm\/2000$/);
   await page.goto('./#/imsa/2013');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Такого сезона IMSA нет');
+});
+
+test('start page lists the next races of every series; the header search finds names in all of them', async ({
+  page,
+}) => {
+  await mockApi(page);
+  await page.goto('./#/');
+  const today = page.getByRole('region', { name: 'Сегодня в автоспорте' });
+  // Fixed test date 10 March 2026. The IMSA and DTM fixtures are finished seasons: no races of theirs.
+  await expect(today.getByRole('link')).toHaveCount(3);
+  await expect(today.getByRole('link').first()).toContainText('Chinese Grand Prix');
+  await expect(today.getByRole('link').first()).toContainText('через 5 дн.');
+  await expect(today.locator('.today__race--wec')).toContainText('6 Hours of Monza');
+  await expect(today.locator('.today__race--imsa')).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Поиск' }).click();
+  const search = page.getByRole('combobox', { name: 'Пилот или команда любого чемпионата' });
+  await search.fill('preining');
+  const options = page.getByRole('option');
+  await expect(options.filter({ hasText: 'DTM' })).toContainText('Thomas Preining');
+  await options.filter({ hasText: 'DTM' }).first().click();
+  await expect(page).toHaveURL(/#\/dtm\/2026\/standings\?t=/);
 });

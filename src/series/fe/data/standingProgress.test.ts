@@ -43,6 +43,16 @@ describe('Formula E championship progress', () => {
     expect(driverSeries.find((series) => series.label === 'Felipe Drugovich')?.points[14]).toBe(65);
   });
 
+  it('covers past seasons that publish CSV classifications', () => {
+    const past = feStandingProgress('2024-25', drivers)!;
+    expect(past.rounds).toHaveLength(16);
+    expect(past.series[0]).toMatchObject({ label: 'Oliver Rowland' });
+    expect(past.series[0].points.at(-1)).toBe(184);
+    // 2022-23 had no manufacturers' trophy in the classifications.
+    expect(feStandingProgress('2022-23', drivers)?.series[0].label).toBe('Jake Dennis');
+    expect(feStandingProgress('2023-24', drivers)).toBeNull();
+  });
+
   it('omits seasons without a verified set of classifications', () => {
     expect(feStandingProgress('2026-27', drivers)).toBeNull();
   });

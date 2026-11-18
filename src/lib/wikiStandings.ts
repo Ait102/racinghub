@@ -25,6 +25,10 @@ export interface ResultCell {
   tone: ResultTone;
   /** FE finishing position with superscript annotations removed; null for statuses. */
   place?: number | null;
+  /** FE mode, when the cell has superscripts (e.g. DTM qualifying points): the text without them… */
+  main?: string;
+  /** …and the superscripts themselves, as published. */
+  sup?: string;
 }
 
 export interface StandingRound {
@@ -118,11 +122,14 @@ function kindOf(nameHeader: string, title: string): StandingKind {
   return 'teams';
 }
 
+// Points column of FE-style tables ("Points", "Pts", IMSA's older "Total Points").
+const POINTS = /^(Total )?(Points|Pts)\.?$/i;
+
 function isStandings(t: WikiTable, series: 'wec' | 'fe'): boolean {
   return (
     /^Pos/i.test(t.columns[0] ?? '') &&
     (series === 'fe'
-      ? t.columns.some((column) => /^(Points|Pts)\.?$/i.test(column))
+      ? t.columns.some((column) => POINTS.test(column))
       : /points/i.test(t.columns[t.columns.length - 1] ?? ''))
   );
 }
@@ -137,9 +144,7 @@ export function parseStandings(
   for (const table of tables.filter((table) => isStandings(table, series))) {
     // Some FE source footers have an oversized colspan; the points header still locates the final data column.
     const last =
-      series === 'fe'
-        ? table.columns.findIndex((column) => /^(Points|Pts)\.?$/i.test(column))
-        : table.columns.length - 1;
+      series === 'fe' ? table.columns.findIndex((column) => POINTS.test(column)) : table.columns.length - 1;
     const roundCols = table.columns
       .map((_, i) => i)
       .filter((i) => i > 1 && i < last && table.head.some((r) => (r[i]?.links.length ?? 0) > 0));
@@ -157,13 +162,21 @@ export function parseStandings(
       const posText = textAt(posGroup[0], 0);
       if (!posText || /source|note/i.test(posText)) continue;
       if (series === 'fe' && /^Pos(?:ition)?\.?$/i.test(posText)) continue;
+      // A row spanning the table is a separator ("Guest drivers ineligible to score points").
+      if (cellAt(posGroup[0], 0)?.el === cellAt(posGroup[0], 1)?.el) continue;
       // Co-drivers can share one position cell; each name is its own entry.
       for (const group of groupRows(posGroup, 1)) {
         // Team trophies list the car number first and the team next to it.
         const byCar = carFirst && extra >= 0;
         const name = namedCell(cellAt(group[0], byCar ? extra : 1));
         if (!name) continue;
-        if (series === 'fe') name.name = textAt(group[0], byCar ? extra : 1);
+        if (series === 'fe') {
+          // A crew sharing one position: names on separate lines of one cell.
+          const lines = (cellAt(group[0], byCar ? extra : 1)?.lines ?? [])
+            .map((l) => l.text.trim())
+            .filter(Boolean);
+          name.name = lines.length > 1 ? lines.join(' / ') : textAt(group[0], byCar ? extra : 1);
+        }
         const points = textAt(group[0], last);
         const extraText = extra >= 0 ? orNull(textAt(group[0], byCar ? 1 : extra)) : null;
         rows.push({
@@ -177,13 +190,21 @@ export function parseStandings(
               const result: ResultCell = { text: c?.text ?? '', tone: c?.bg ? (TONES[c.bg] ?? null) : null };
               if (series === 'fe') {
                 const cell = c?.el.cloneNode(true) as Element | undefined;
-                cell?.querySelectorAll('sup').forEach((sup) => sup.remove());
+                const sups: string[] = [];
+                cell?.querySelectorAll('sup').forEach((sup) => {
+                  if (!sup.classList.contains('reference')) sups.push(cleanText(sup));
+                  sup.remove();
+                });
                 const value = cell
                   ? cleanText(cell)
                       .replace(/[†‡*]+$/g, '')
                       .trim()
                   : '';
                 result.place = /^\d+$/.test(value) && Number(value) > 0 ? Number(value) : null;
+                if (cell && sups.some(Boolean)) {
+                  result.main = cleanText(cell);
+                  result.sup = sups.filter(Boolean).join(' ');
+                }
               }
               return result;
             }),

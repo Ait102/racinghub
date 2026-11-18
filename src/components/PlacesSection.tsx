@@ -6,7 +6,13 @@ import { PlacesChart, seriesStyle } from './PlacesChart';
 
 const TOP = [5, 10, 'all'] as const;
 
-export function PlacesSection({ table, seriesId }: { table: StandingTable; seriesId: 'wec' | 'fe' }) {
+export function PlacesSection({
+  table,
+  seriesId,
+}: {
+  table: StandingTable;
+  seriesId: 'wec' | 'fe' | 'dtm' | 'imsa';
+}) {
   const [top, setTop] = useState<(typeof TOP)[number]>(5);
   const [pointed, setPointed] = useState<string | null>(null);
   const [picked, setPicked] = useState<string | null>(null);

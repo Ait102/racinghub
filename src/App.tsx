@@ -14,8 +14,16 @@ import { defaultWecSeason } from './series/wec/hooks/data';
 const f1 = () => import('./series/f1/pages');
 const wec = () => import('./series/wec/pages');
 const fe = () => import('./series/fe/pages');
-const ImsaSeasonPage = lazy(() => import('./series/imsa/pages').then((m) => ({ default: m.ImsaSeasonPage })));
-const DtmSeasonPage = lazy(() => import('./series/dtm/pages').then((m) => ({ default: m.DtmSeasonPage })));
+const imsaPages = () => import('./series/imsa/pages');
+const ImsaHomePage = lazy(() => imsaPages().then((m) => ({ default: m.ImsaHomePage })));
+const ImsaCalendarPage = lazy(() => imsaPages().then((m) => ({ default: m.ImsaCalendarPage })));
+const ImsaRacePage = lazy(() => imsaPages().then((m) => ({ default: m.ImsaRacePage })));
+const ImsaStandingsPage = lazy(() => imsaPages().then((m) => ({ default: m.ImsaStandingsPage })));
+const dtmPages = () => import('./series/dtm/pages');
+const DtmHomePage = lazy(() => dtmPages().then((m) => ({ default: m.DtmHomePage })));
+const DtmCalendarPage = lazy(() => dtmPages().then((m) => ({ default: m.DtmCalendarPage })));
+const DtmRacePage = lazy(() => dtmPages().then((m) => ({ default: m.DtmRacePage })));
+const DtmStandingsPage = lazy(() => dtmPages().then((m) => ({ default: m.DtmStandingsPage })));
 const FeParticipantsPage = lazy(() => fe().then((m) => ({ default: m.FeParticipantsPage })));
 const FeProfilePage = lazy(() => fe().then((m) => ({ default: m.FeProfilePage })));
 const FeComparePage = lazy(() => fe().then((m) => ({ default: m.FeComparePage })));
@@ -118,11 +126,21 @@ export function App() {
           <Route path="f1" element={<F1Entry />} />
           <Route path="imsa">
             <Route index element={<YearSeriesEntry series="imsa" />} />
-            <Route path=":season" element={<ImsaSeasonPage />} />
+            <Route path=":season">
+              <Route index element={<ImsaHomePage />} />
+              <Route path="calendar" element={<ImsaCalendarPage />} />
+              <Route path="standings" element={<ImsaStandingsPage />} />
+              <Route path="race/:round" element={<ImsaRacePage />} />
+            </Route>
           </Route>
           <Route path="dtm">
             <Route index element={<YearSeriesEntry series="dtm" />} />
-            <Route path=":season" element={<DtmSeasonPage />} />
+            <Route path=":season">
+              <Route index element={<DtmHomePage />} />
+              <Route path="calendar" element={<DtmCalendarPage />} />
+              <Route path="standings" element={<DtmStandingsPage />} />
+              <Route path="race/:index" element={<DtmRacePage />} />
+            </Route>
           </Route>
           <Route path="fe">
             <Route index element={<FeEntry />} />

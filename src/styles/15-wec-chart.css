@@ -33,7 +33,14 @@
   margin-top: 5px;
 }
 
-:is(.wec-places-chart__name, .fe-places-chart__name, .chart__tip-name, .points-legend__name) {
+:is(
+  .wec-places-chart__name,
+  .fe-places-chart__name,
+  .dtm-places-chart__name,
+  .imsa-places-chart__name,
+  .chart__tip-name,
+  .points-legend__name
+) {
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -90,7 +97,7 @@
   flex-shrink: 0;
   margin-top: 6px;
 }
-:is(.wec-places-chart__out, .fe-places-chart__out) {
+:is(.wec-places-chart__out, .fe-places-chart__out, .dtm-places-chart__out, .imsa-places-chart__out) {
   stroke-dasharray: 2 4;
 }
 .places-chart g[data-series] {

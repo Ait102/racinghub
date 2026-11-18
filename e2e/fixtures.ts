@@ -319,6 +319,8 @@ const PHOTOS: Record<string, [string, number, number]> = {
 const WEC_FIXTURES = fileURLToPath(new URL('../src/series/wec/__fixtures__/', import.meta.url));
 const wecFile = (name: string) => readFileSync(WEC_FIXTURES + name, 'utf8');
 const FE_FIXTURES = fileURLToPath(new URL('../src/series/fe/__fixtures__/', import.meta.url));
+const IMSA_FIXTURES = fileURLToPath(new URL('../src/series/imsa/__fixtures__/', import.meta.url));
+const DTM_FIXTURES = fileURLToPath(new URL('../src/series/dtm/__fixtures__/', import.meta.url));
 const FE_SEASONS: Record<string, string> = {
   '2014–15 Formula E Championship': '2014-15',
   '2019–20 Formula E Championship': '2019-20',
@@ -360,6 +362,29 @@ function wecParse(params: URLSearchParams, fail: boolean) {
   });
   if (fail) return { status: 503, headers: cors, body: '' };
   const page = params.get('page') ?? '';
+  // DTM: one section with the whole trimmed season article.
+  const dtmSeason = /^(2000|2021|2026) Deutsche Tourenwagen Masters$/.exec(page)?.[1];
+  if (dtmSeason && params.get('prop') === 'sections')
+    return json({ parse: { title: page, sections: [{ index: '1', line: 'Results', toclevel: 1 }] } });
+  if (dtmSeason)
+    return json({
+      parse: { title: page, text: readFileSync(DTM_FIXTURES + `season-${dtmSeason}.html`, 'utf8') },
+    });
+  // IMSA: the same, plus two race articles with full classifications.
+  const imsaSeason = /^(2014|2019|2026) (?:United|IMSA) SportsCar Championship$/.exec(page)?.[1];
+  if (imsaSeason && params.get('prop') === 'sections')
+    return json({ parse: { title: page, sections: [{ index: '1', line: 'Results', toclevel: 1 }] } });
+  if (imsaSeason)
+    return json({
+      parse: { title: page, text: readFileSync(IMSA_FIXTURES + `season-${imsaSeason}.html`, 'utf8') },
+    });
+  if (page === '2026 24 Hours of Daytona' || page === '2026 Grand Prix of Long Beach')
+    return json({
+      parse: {
+        title: page,
+        text: readFileSync(IMSA_FIXTURES + `race-${page.toLowerCase().replaceAll(' ', '-')}.html`, 'utf8'),
+      },
+    });
   const feSeason = FE_SEASONS[page];
   if (feSeason && params.get('prop') === 'sections') {
     return json({

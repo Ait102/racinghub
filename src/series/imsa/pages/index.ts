@@ -1,2 +1,5 @@
 // IMSA pages in one chunk: loaded only when an IMSA page is opened.
-export { ImsaSeasonPage } from './ImsaSeasonPage';
+export { ImsaCalendarPage } from './ImsaCalendarPage';
+export { ImsaHomePage } from './ImsaHomePage';
+export { ImsaRacePage } from './ImsaRacePage';
+export { ImsaStandingsPage } from './ImsaStandingsPage';

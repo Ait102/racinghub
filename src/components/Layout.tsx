@@ -2,6 +2,7 @@ import { Suspense, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { localTimeZone, utcOffsetLabel } from '../lib/format';
+import { GlobalSearch } from '../pages/GlobalSearch';
 import { dtm } from '../series/dtm/data/seasons';
 import { rememberedSeason, rememberSeason, useSeasonParam, useSeasons } from '../series/f1/hooks/data';
 import { FeSeasonSelect } from '../series/fe/components/FeSeasonSelect';
@@ -105,6 +106,8 @@ export function Layout() {
 
   const wecSeason = wecSeasonFromPath(pathname) ?? (series === 'wec' ? defaultWecSeason() : null);
   const feSeason = feSeasonFromPath(pathname) ?? (series === 'fe' ? defaultFeSeason() : null);
+  const yearSeason =
+    series === 'imsa' ? imsa.fromPath(pathname) : series === 'dtm' ? dtm.fromPath(pathname) : null;
   const tz = localTimeZone();
   const links: Array<[string, string]> =
     series === 'f1' && navSeason
@@ -139,7 +142,13 @@ export function Layout() {
                 [`/fe/${feSeason}/compare`, 'Сравнение'],
                 [`/fe/${feSeason}/about`, 'Источники'],
               ]
-            : [];
+            : (series === 'dtm' || series === 'imsa') && yearSeason
+              ? [
+                  [`/${series}/${yearSeason}`, 'Главная'],
+                  [`/${series}/${yearSeason}/calendar`, 'Календарь'],
+                  [`/${series}/${yearSeason}/standings`, 'Зачёты'],
+                ]
+              : [];
 
   return (
     <div className="app">
@@ -170,6 +179,7 @@ export function Layout() {
             ))}
           </nav>
           <SeriesSwitch series={series} f1Home={navSeason ? `/${navSeason}` : '/f1'} />
+          <GlobalSearch />
           {series === 'f1' && <SeasonSelect season={season} />}
           {series === 'wec' && <WecSeasonSelect />}
           {series === 'fe' && <FeSeasonSelect />}

@@ -1,0 +1,181 @@
+/* Site-wide pieces fed by every championship: header search and "today in motorsport". */
+.site-search {
+  position: relative;
+  margin-left: 8px;
+}
+
+.site-search__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.site-search__toggle[aria-expanded='true'],
+.site-search__toggle:hover {
+  border-color: var(--accent);
+}
+
+.site-search__panel {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(420px, calc(100vw - 32px));
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md, 12px);
+  background: var(--surface);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+.site-search__panel input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.site-search__hint {
+  margin: 8px 4px 0;
+}
+
+.site-search__list {
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-search__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 10px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.site-search__item[aria-selected='true'] {
+  background: rgba(var(--accent-rgb), 0.14);
+}
+
+.site-search__item > .small {
+  grid-column: 2;
+}
+
+.site-search__name {
+  font-weight: 700;
+}
+
+.site-search__series,
+.today__series {
+  align-self: start;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(var(--series-rgb, 255, 255, 255), 0.16);
+  color: rgb(var(--series-rgb, 220, 220, 220));
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.site-search__series--f1,
+.today__race--f1 {
+  --series-rgb: 225, 6, 0;
+}
+.site-search__series--wec,
+.today__race--wec {
+  --series-rgb: 30, 107, 255;
+}
+.site-search__series--fe,
+.today__race--fe {
+  --series-rgb: 139, 61, 255;
+}
+.site-search__series--imsa,
+.today__race--imsa {
+  --series-rgb: 65, 200, 120;
+}
+.site-search__series--dtm,
+.today__race--dtm {
+  --series-rgb: 243, 203, 66;
+}
+
+.today {
+  margin: var(--s5) 0;
+}
+
+.today__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin: var(--s3) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.today__race {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 10px;
+  height: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid rgb(var(--series-rgb));
+  border-radius: var(--r-sm, 8px);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.today__race:hover,
+.today__race:focus-visible {
+  border-color: rgb(var(--series-rgb));
+}
+
+.today__series {
+  justify-self: start;
+}
+
+.today__when {
+  grid-row: 1;
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.today__when.is-now {
+  color: rgb(var(--series-rgb));
+}
+
+.today__name {
+  grid-column: 1 / -1;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.today__place,
+.today__date {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 720px) {
+  .site-search__label {
+    display: none;
+  }
+}
