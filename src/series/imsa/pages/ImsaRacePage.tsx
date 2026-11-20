@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
 import { SeriesCircuitMap } from '../../../components/SeriesCircuitMap';
+import { SessionResults, type SessionData } from '../../../components/SessionResults';
 import { WeekendSchedule } from '../../../components/WeekendSchedule';
 import { useNow } from '../../../hooks/useNow';
 import { imsaWeekendSchedule } from '../data/schedule';
-import { imsaRaceStatus, type ImsaRace } from '../domain/season';
+import { loadImsaSessions } from '../data/sessions';
+import { imsaRaceStatus, raceCountry, type ImsaRace } from '../domain/season';
 import { useImsaRace, useImsaSeason } from '../hooks/data';
-import { ClassTag, ImsaGuard, ImsaName, ImsaSourceNote, ImsaStatusBadge } from './common';
+import { ClassTag, CountryFlag, ImsaGuard, ImsaName, ImsaSourceNote, ImsaStatusBadge } from './common';
 
 export function ImsaRacePage() {
   return <ImsaGuard>{(season) => <Race season={season} />}</ImsaGuard>;
@@ -37,6 +39,7 @@ function Race({ season }: { season: string }) {
             <>
               <PageHeader eyebrow={`IMSA ${season} · этап ${race.round}`} title={race.name}>
                 <p className="lead">
+                  <CountryFlag country={raceCountry(race.location)} /> {race.location || ''} ·{' '}
                   {race.dateText || 'Дата не указана'} <ImsaStatusBadge status={imsaRaceStatus(race, now)} />
                 </p>
               </PageHeader>
@@ -90,6 +93,7 @@ function Race({ season }: { season: string }) {
                 </>
               )}
               <Classification season={season} race={race} />
+              <EventSessions season={season} round={race.round} />
               <nav className="imsa-home-actions" aria-label="Соседние гонки">
                 {prev && (
                   <Link className="btn btn--ghost btn--small" to={`/imsa/${season}/race/${prev.round}`}>
@@ -208,5 +212,43 @@ function Classification({ season, race }: { season: string; race: ImsaRace }) {
         }}
       </DataState>
     </>
+  );
+}
+
+/** Practice, qualifying and race classifications from IMSA's official results. */
+function EventSessions({ season, round }: { season: string; round: number }) {
+  const [sessions, setSessions] = useState<{ key: string; list: SessionData[] } | null>(null);
+  const key = `${season}:${round}`;
+  useEffect(() => {
+    let alive = true;
+    loadImsaSessions(season, round).then(
+      (list) => alive && setSessions({ key, list }),
+      () => alive && setSessions({ key, list: [] }),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [season, round, key]);
+  const list = sessions?.key === key ? sessions.list : [];
+  if (!list.length) return null;
+  return (
+    <SessionResults
+      sessions={list}
+      initial={list.find((s) => /^Гонка/.test(s.label))?.key}
+      classTag={(cls) => <ClassTag cls={cls} />}
+      source={
+        <>
+          Официальные результаты IMSA (
+          <a
+            href={imsaWeekendSchedule(season, round)?.source ?? 'https://imsa.results.alkamelcloud.com/'}
+            target="_blank"
+            rel="noreferrer"
+          >
+            imsa.results.alkamelcloud.com
+          </a>
+          ): время, отставание и круги — как у источника; лучший круг гонки — у каждой машины.
+        </>
+      }
+    />
   );
 }

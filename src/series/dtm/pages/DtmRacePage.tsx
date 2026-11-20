@@ -3,12 +3,21 @@ import { Link, useParams } from 'react-router-dom';
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
 import { SeriesCircuitMap } from '../../../components/SeriesCircuitMap';
+import { SessionResults } from '../../../components/SessionResults';
 import { WeekendSchedule } from '../../../components/WeekendSchedule';
 import { useNow } from '../../../hooks/useNow';
 import { dtmWeekendSchedule } from '../data/schedule';
-import { dtmRaceStatus, raceResults } from '../domain/season';
-import { useDtmSeason } from '../hooks/data';
-import { DtmGuard, DtmName, DtmResult, DtmSourceNote, DtmStatusBadge, raceLabel } from './common';
+import { dtmRaceStatus, raceResults, type DtmRace } from '../domain/season';
+import { useDtmSeason, useDtmSessions } from '../hooks/data';
+import {
+  CountryFlag,
+  DtmGuard,
+  DtmName,
+  DtmResult,
+  DtmSourceNote,
+  DtmStatusBadge,
+  raceLabel,
+} from './common';
 
 export function DtmRacePage() {
   return <DtmGuard>{(season) => <Race season={season} />}</DtmGuard>;
@@ -40,6 +49,7 @@ function Race({ season }: { season: string }) {
                 title={race.circuit?.name ?? 'Гонка'}
               >
                 <p className="lead">
+                  <CountryFlag country={race.circuit?.flag?.country} /> {race.circuit?.flag?.country ?? ''} ·{' '}
                   {race.dateText || 'Дата не указана'} <DtmStatusBadge status={dtmRaceStatus(race, now)} />
                 </p>
               </PageHeader>
@@ -129,6 +139,7 @@ function Race({ season }: { season: string }) {
                   {race.note ? 'Гонка не состоялась.' : 'Результатов этой гонки у источника пока нет.'}
                 </p>
               )}
+              <EventSessions season={season} race={race} />
               <nav className="dtm-home-actions" aria-label="Соседние гонки">
                 {prev && (
                   <Link className="btn btn--ghost btn--small" to={`/dtm/${season}/race/${prev.index}`}>
@@ -150,5 +161,45 @@ function Race({ season }: { season: string }) {
         }}
       </DataState>
     </section>
+  );
+}
+
+/** Practice, qualifying and races of the event from the official DTM results. */
+function EventSessions({ season, race }: { season: string; race: DtmRace }) {
+  const res = useDtmSessions(season);
+  if (res.status !== 'success') return null;
+  const sessions = res.data.filter((x) => x.round === race.round);
+  if (!sessions.length) return null;
+  return (
+    <SessionResults
+      sessions={sessions.map((x) => ({
+        key: String(x.order),
+        label: x.label,
+        start: x.start,
+        rows: x.rows.map((r) => ({
+          pos: r.pos,
+          posText: r.status && r.pos === null ? r.status : undefined,
+          number: r.number,
+          drivers: [r.driver],
+          team: r.team,
+          car: r.car,
+          time: r.time,
+          gap: r.gap,
+          laps: r.laps,
+          bestLap: r.bestLap,
+          points: x.kind === 'race' ? r.points : null,
+        })),
+      }))}
+      initial={String(sessions.find((x) => x.name === `Race ${race.race ?? 1}`)?.order ?? '')}
+      source={
+        <>
+          Официальные результаты DTM (
+          <a href="https://www.dtm.com/en/results" target="_blank" rel="noreferrer">
+            dtm.com
+          </a>
+          ): время, отставание, круги и очки — как у источника.
+        </>
+      }
+    />
   );
 }

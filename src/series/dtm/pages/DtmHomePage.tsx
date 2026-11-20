@@ -14,7 +14,16 @@ import {
   type DtmSeasonData,
 } from '../domain/season';
 import { useDtmSeason, useDtmTeamCars } from '../hooks/data';
-import { DTM_EMPTY, DtmGuard, DtmName, DtmResult, DtmSourceNote, DtmStatusBadge, raceLabel } from './common';
+import {
+  CountryFlag,
+  DTM_EMPTY,
+  DtmGuard,
+  DtmName,
+  DtmResult,
+  DtmSourceNote,
+  DtmStatusBadge,
+  raceLabel,
+} from './common';
 
 export function DtmHomePage() {
   return <DtmGuard>{(season) => <Overview season={season} />}</DtmGuard>;
@@ -99,6 +108,10 @@ function NextRace({ data, now }: { data: DtmSeasonData; now: Date }) {
           <Link className="hero__name" to={`/dtm/${data.id}/race/${next.index}`}>
             {next.circuit?.name ?? 'Трасса не указана'}
           </Link>
+          <p className="hero__place">
+            <CountryFlag country={next.circuit?.flag?.country} />
+            {next.circuit?.flag?.country ?? ''}
+          </p>
           <p className="hero__date">Дата: {next.dateText || '—'}</p>
           <div className="dtm-home-actions">
             <Link className="btn btn--ghost btn--small" to={`/dtm/${data.id}/calendar`}>

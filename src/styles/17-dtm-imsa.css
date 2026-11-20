@@ -193,39 +193,45 @@
 }
 
 .imsa-class {
-  display: inline-block;
-  padding: 2px 8px;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: #4b5263;
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  --mark: #c9ced8;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.6em;
+  padding: 2px 4px 1px;
+  border: 2px solid var(--mark);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--mark);
+  font-size: 0.62rem;
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
   white-space: nowrap;
 }
 
-/* Class colours as IMSA marks its classes (decorative, not data): prototypes black, LMP2 blue,
-   GT Pro classes red, GTD green. */
+/* Class colours as IMSA marks its classes (decorative, not data): prototypes white on the dark site,
+   LMP2 blue, LMP3 purple, GT Pro classes red, GTD green. */
 .imsa-class--gtp,
 .imsa-class--dpi,
 .imsa-class--p {
-  background: #0b0b0d;
-  border-color: rgba(255, 255, 255, 0.55);
+  --mark: #f2f3f5;
 }
 .imsa-class--lmp2,
 .imsa-class--pc {
-  background: #1f5fbf;
+  --mark: #4d8fff;
 }
 .imsa-class--lmp3 {
-  background: #7a3fc4;
+  --mark: #a974ff;
 }
 .imsa-class--gtd-pro,
 .imsa-class--gtlm {
-  background: #c8102e;
+  --mark: #ff3347;
 }
 .imsa-class--gtd {
-  background: #198754;
+  --mark: #2fd17a;
 }
 
 .imsa-class-list {

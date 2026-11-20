@@ -71,7 +71,7 @@ test('IMSA points after each round, class colours, emblems and sources', async (
     'href',
     /alkamelcloud\.com\/\?season=26_2026/,
   );
-  await expect(page.locator('.imsa-class--gtp').first()).toHaveCSS('background-color', 'rgb(11, 11, 13)');
+  await expect(page.locator('.imsa-class--gtp').first()).toHaveCSS('border-top-color', 'rgb(242, 243, 245)');
 
   // A team named by its number gets the make emblem of its car.
   await page
@@ -95,4 +95,14 @@ test('IMSA race weekend timetable and present-day circuit map', async ({ page })
   await expect(schedule.locator('li').last()).toContainText('Гонка');
   await expect(page.getByRole('img', { name: /Схема трассы Daytona International Speedway/ })).toBeVisible();
   await expect(page.locator('main')).toContainText('Современная конфигурация: Road Course');
+});
+
+test('IMSA race page lists practice, qualifying and race classifications', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/imsa/2026/race/1');
+  const sessions = page.getByRole('region', { name: 'Результаты сессий' });
+  await expect(sessions.getByRole('button', { name: 'Гонка' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(sessions.locator('tbody tr').first()).toContainText('24:01:20.108');
+  await sessions.getByRole('button', { name: 'Квалификация' }).click();
+  await expect(sessions.locator('tbody tr')).toHaveCount(60);
 });

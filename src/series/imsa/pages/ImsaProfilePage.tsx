@@ -57,7 +57,11 @@ function Profile({ season, article, kind }: { season: string; article: string; k
       <PageHeader
         eyebrow={`IMSA ${season} · ${KIND_LABEL[kind]}`}
         title={canonical.replace(/_/g, ' ')}
-        aside={res.status === 'success' ? <SeriesProfilePhoto article={canonical} kind={kind} /> : null}
+        aside={
+          res.status === 'success' && kind !== 'team' ? (
+            <SeriesProfilePhoto article={canonical} kind={kind} />
+          ) : null
+        }
       >
         {kind === 'driver' && (
           <div className="profile-actions">
@@ -75,7 +79,7 @@ function Profile({ season, article, kind }: { season: string; article: string; k
       )}
       {kind !== 'circuit' && <SeasonStanding season={season} articles={[article, canonical]} kind={kind} />}
       {kind === 'team' && res.status === 'success' && (
-        <TeamCars season={season} articles={[article, canonical]} teamArticle={canonical} />
+        <TeamCars season={season} articles={[article, canonical]} />
       )}
       <DataState state={res}>
         {(profile) => (
@@ -139,23 +143,12 @@ function SeasonStanding({
 }
 
 /** Models the team entered this season, from the entry list. */
-function TeamCars({
-  season,
-  articles,
-  teamArticle,
-}: {
-  season: string;
-  articles: string[];
-  teamArticle: string;
-}) {
+function TeamCars({ season, articles }: { season: string; articles: string[] }) {
   const entries = useImsaParticipants(season);
   if (entries.status !== 'success') return null;
-  const cars = [
-    ...new Set(
-      entries.data
-        .filter((crew) => crew.team?.article && articles.includes(crew.team.article) && crew.car)
-        .map((crew) => crew.car),
-    ),
-  ];
-  return <SeriesTeamCars season={season} cars={cars} teamArticle={teamArticle} />;
+  const cars = new Map<string, string | null>();
+  for (const crew of entries.data)
+    if (crew.team?.article && articles.includes(crew.team.article) && crew.car && !cars.has(crew.car))
+      cars.set(crew.car, crew.carArticle);
+  return <SeriesTeamCars season={season} cars={[...cars].map(([model, article]) => ({ model, article }))} />;
 }

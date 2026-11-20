@@ -9,12 +9,14 @@ import {
   imsaRaceStatus,
   lastImsaRace,
   nextImsaRace,
+  raceCountry,
   seasonClasses,
   type ImsaSeasonData,
 } from '../domain/season';
 import { useImsaSeason } from '../hooks/data';
 import {
   ClassTag,
+  CountryFlag,
   IMSA_EMPTY,
   ImsaGuard,
   ImsaName,
@@ -106,7 +108,10 @@ function NextRace({ data, now }: { data: ImsaSeasonData; now: Date }) {
           <Link className="hero__name" to={`/imsa/${data.id}/race/${next.round}`}>
             {next.name}
           </Link>
-          <p className="hero__place">{next.circuit?.name ?? 'Трасса не указана'}</p>
+          <p className="hero__place">
+            <CountryFlag country={raceCountry(next.location)} />
+            {next.circuit?.name ?? 'Трасса не указана'}
+          </p>
           <p className="hero__date">
             Дата: {next.dateText || '—'} · {next.length || 'длительность не указана'} · классы:{' '}
             {next.classes || '—'}

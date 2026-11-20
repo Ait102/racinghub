@@ -187,3 +187,66 @@ export function flagUrl(value: string | null | undefined, kind: 'nationality' | 
   const code = (kind === 'nationality' ? NATIONALITY : COUNTRY)[value];
   return code ? (FLAGS[code] ?? null) : null;
 }
+
+// --- Any country, by its English name (flags of Wikipedia tables) ---
+
+// Every flag of the set, loaded only when shown (each SVG is its own small file).
+const ALL_FLAGS = import.meta.glob<string>('/node_modules/flag-icons/flags/4x3/*.svg', {
+  eager: true,
+  query: '?no-inline',
+  import: 'default',
+});
+
+const fold = (s: string) =>
+  s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/\([^)]*\)/g, '')
+    .replace(/^the\s+/i, '')
+    .replace(/[^a-z0-9]/gi, '')
+    .toLowerCase();
+
+// Names Wikipedia writes differently from the standard English region names.
+const ALIASES: Record<string, string> = {
+  england: 'gb-eng',
+  scotland: 'gb-sct',
+  wales: 'gb-wls',
+  northernireland: 'gb-nir',
+  greatbritain: 'gb',
+  hongkong: 'hk',
+  macau: 'mo',
+  czechrepublic: 'cz',
+  republicofireland: 'ie',
+  ivorycoast: 'ci',
+  chinesetaipei: 'tw',
+  taiwan: 'tw',
+  southkorea: 'kr',
+  russia: 'ru',
+  unitedstatesofamerica: 'us',
+};
+
+let byName: Map<string, string> | null = null;
+function names(): Map<string, string> {
+  if (byName) return byName;
+  byName = new Map(Object.entries(ALIASES));
+  const display =
+    typeof Intl.DisplayNames === 'function' ? new Intl.DisplayNames(['en'], { type: 'region' }) : null;
+  for (const path of Object.keys(ALL_FLAGS)) {
+    const code = /\/([a-z-]+)\.svg$/.exec(path)?.[1];
+    if (!code || code.includes('-')) continue;
+    try {
+      const name = display?.of(code.toUpperCase());
+      if (name && !byName.has(fold(name))) byName.set(fold(name), code);
+    } catch {
+      /* not a region code */
+    }
+  }
+  return byName;
+}
+
+/** Local flag for a country name as Wikipedia writes it ("United Kingdom", "Netherlands"); null if unknown. */
+export function countryFlagUrl(country: string | null | undefined): string | null {
+  if (!country) return null;
+  const code = names().get(fold(country));
+  return code ? (ALL_FLAGS[`/node_modules/flag-icons/flags/4x3/${code}.svg`] ?? null) : null;
+}

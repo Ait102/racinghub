@@ -137,7 +137,8 @@ for (const width of [1280, 375]) {
         // Their rows are covered by parser/E2E checks; capture the profile's first screen.
         fullPage:
           !/\/(wec|dtm|imsa)\/[^/]+\/(driver|team|circuit)\//.test(route) &&
-          !/\/imsa\/[^/]+\/teams$/.test(route) &&
+          // Long IMSA pages (all crews; race with every session) stall full-page capture: first screen.
+          !/\/imsa\/[^/]+\/(teams$|race\/)/.test(route) &&
           !(width === 1280 && route === './#/fe/2025-26/chart'),
         animations: 'disabled',
         // Native <select> text is anti-aliased differently on each run; the chosen values are checked by E2E.

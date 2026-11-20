@@ -6,9 +6,15 @@ import { PageHeader } from '../../../components/PageHeader';
 import { ScheduleMoment } from '../../../components/WeekendSchedule';
 import { useNow } from '../../../hooks/useNow';
 import { imsaRaceStart } from '../data/schedule';
-import { IMSA_STATUS_LABELS, imsaRaceStatus, nextImsaRace, type ImsaStatus } from '../domain/season';
+import {
+  IMSA_STATUS_LABELS,
+  imsaRaceStatus,
+  nextImsaRace,
+  raceCountry,
+  type ImsaStatus,
+} from '../domain/season';
 import { useImsaSeason } from '../hooks/data';
-import { ClassTag, IMSA_EMPTY, ImsaGuard, ImsaSourceNote, ImsaStatusBadge } from './common';
+import { ClassTag, CountryFlag, IMSA_EMPTY, ImsaGuard, ImsaSourceNote, ImsaStatusBadge } from './common';
 
 const ORDER: ImsaStatus[] = ['completed', 'live', 'upcoming', 'awaiting', 'unknown'];
 
@@ -68,7 +74,10 @@ function Calendar({ season }: { season: string }) {
                         </span>
                       </span>
                       <span className="race-card__name">{race.name}</span>
-                      <span className="race-card__place">{race.circuit?.name ?? 'Трасса не указана'}</span>
+                      <span className="race-card__place">
+                        <CountryFlag country={raceCountry(race.location)} />
+                        {race.circuit?.name ?? 'Трасса не указана'}
+                      </span>
                       <span className="race-card__date">
                         {imsaRaceStart(season, race.round) ? (
                           <ScheduleMoment start={imsaRaceStart(season, race.round)!} />

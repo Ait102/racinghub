@@ -152,3 +152,12 @@
   padding: 10px 0;
   border-bottom: 1px solid var(--border);
 }
+
+.wiki-cars__item {
+  min-width: 0;
+}
+
+/* In the grid a photo fills its own column, not the header size. */
+.wiki-cars__item .photo--wide {
+  width: 100%;
+}

@@ -15,6 +15,7 @@ vi.mock('../hooks/data', () => ({
   useFeSeason: vi.fn(),
   // Emblems read the entry list; these page tests do not need it.
   useFeTeamPowertrains: () => new Map(),
+  useFeParticipants: () => ({ status: 'loading' }),
 }));
 
 const named = (name: string) => ({ name, article: name, flag: null });

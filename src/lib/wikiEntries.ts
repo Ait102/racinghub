@@ -8,6 +8,8 @@ export interface EntryRow {
   manufacturer: string;
   /** Chassis or car model as the table names it. */
   car: string;
+  /** Wikipedia article of the car model, when the cell links one. */
+  carArticle: string | null;
   engine: string;
   number: string;
   driver: Named;
@@ -26,6 +28,7 @@ export interface Crew {
   team: Named | null;
   manufacturer: string;
   car: string;
+  carArticle: string | null;
   engine: string;
   drivers: Array<{ driver: Named; rounds: string; status: string }>;
 }
@@ -74,6 +77,7 @@ export function entryRows(tables: WikiTable[]): EntryRow[] {
         team: cellNamed(row[team]),
         manufacturer: text(at(row, maker)),
         car: text(at(row, car)),
+        carArticle: at(row, car)?.links[0]?.title ?? null,
         engine: text(at(row, engine)),
         number: text(row[number]),
         driver: who,
@@ -101,6 +105,7 @@ export function groupCrews(rows: EntryRow[], clsOf: (row: EntryRow) => string | 
         team: row.team,
         manufacturer: row.manufacturer,
         car: row.car,
+        carArticle: row.carArticle,
         engine: row.engine,
         drivers: [],
       };

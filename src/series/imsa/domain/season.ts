@@ -273,3 +273,14 @@ export function daysUntilImsa(race: ImsaRace, now: Date): number | null {
     (Date.UTC(y, m - 1, d) - Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())) / 86_400_000,
   );
 }
+
+const PROVINCES = /\b(Ontario|Quebec|Québec|British Columbia|Alberta|Manitoba|Nova Scotia)\s*$/i;
+const STATES =
+  /\b(Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New Hampshire|New Jersey|New Mexico|New York|North Carolina|North Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode Island|South Carolina|South Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West Virginia|Wisconsin|Wyoming)\s*$/i;
+
+/** Country of a race from its location ("Daytona Beach, Florida", "Bowmanville, Ontario"); null if unclear. */
+export function raceCountry(location: string): string | null {
+  if (PROVINCES.test(location)) return 'Canada';
+  if (STATES.test(location)) return 'United States';
+  return null;
+}

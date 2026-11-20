@@ -6,12 +6,12 @@ import { PageHeader } from '../../../components/PageHeader';
 import { SortableTable, type Column } from '../../../components/SortableTable';
 import { StandingsCharts } from '../../../components/StandingsCharts';
 import { PointsWithBar, posClass, SearchBox } from '../../../components/ui';
-import type { StandingKind, StandingRow, StandingTable } from '../../../lib/wikiStandings';
+import type { Named, StandingKind, StandingRow, StandingTable } from '../../../lib/wikiStandings';
 import { NameFlag, WikiSourceNote } from '../components/bits';
 import { seasonLabel } from '../data/seasons';
 import { feStandingProgress } from '../data/standingProgress';
 import type { FeRound, FeSeasonData } from '../domain/types';
-import { useFeSeason } from '../hooks/data';
+import { useFeParticipants, useFeSeason } from '../hooks/data';
 import { FeGuard } from './common';
 
 // The championship pages follow Formula 1: "Пилоты" is the drivers' standings, "Команды" the teams'
@@ -82,6 +82,13 @@ function TablePicker({
 
 function Championship({ season, drivers }: { season: string; drivers: boolean }) {
   const res = useFeSeason(season);
+  // Teams of each driver from the entry list (the standings table has no team column), as in F1.
+  const entries = useFeParticipants(drivers ? season : null, true);
+  const teamsOf = (who: Named) =>
+    entries.status === 'success'
+      ? (entries.data.find((p) => (p.who.article && p.who.article === who.article) || p.who.name === who.name)
+          ?.partners ?? [])
+      : [];
   const [params] = useSearchParams();
   const [query, setQuery] = useState('');
   return (
@@ -134,7 +141,7 @@ function Championship({ season, drivers }: { season: string; drivers: boolean })
                 <p className="muted">Ничего не найдено.</p>
               ) : (
                 <SortableTable
-                  columns={summaryColumns(current)}
+                  columns={summaryColumns(current, drivers ? teamsOf : null)}
                   rows={rows}
                   rowKey={(row) => `${row.posText}|${row.name.name}`}
                   caption={`${current.title} — итог`}
@@ -152,7 +159,10 @@ function Championship({ season, drivers }: { season: string; drivers: boolean })
 }
 
 /** The table at the top of the page, as Formula 1 shows it: place, name, team, points with a bar. */
-function summaryColumns(table: StandingTable): Column<StandingRow>[] {
+function summaryColumns(
+  table: StandingTable,
+  teamsOf: ((who: Named) => Named[]) | null,
+): Column<StandingRow>[] {
   const leader = table.rows[0]?.pointsValue ?? null;
   const kind = table.kind === 'drivers' ? 'driver' : table.kind === 'teams' ? 'team' : 'external';
   return [
@@ -170,6 +180,27 @@ function summaryColumns(table: StandingTable): Column<StandingRow>[] {
       render: (row) => <NameFlag who={row.name} kind={kind} emblem={table.kind !== 'drivers'} />,
       sortValue: (row) => row.name.name,
     },
+    ...(teamsOf
+      ? [
+          {
+            key: 'team',
+            header: 'Команда',
+            optional: true,
+            render: (row: StandingRow) => {
+              const teams = teamsOf(row.name);
+              return teams.length ? (
+                <span className="wiki-list">
+                  {teams.map((t) => (
+                    <NameFlag key={t.article ?? t.name} who={t} kind="team" emblem />
+                  ))}
+                </span>
+              ) : (
+                '—'
+              );
+            },
+          },
+        ]
+      : []),
     ...(table.extraHeader
       ? [
           {

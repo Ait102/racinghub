@@ -249,3 +249,12 @@ test('FE drivers and teams pages read like Formula 1: summary, search, race-by-r
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Командный зачёт');
   await expect(page.locator('main')).toContainText('Jaguar TCS Racing');
 });
+
+test('FE race page adds free practice from the official classifications', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/fe/2025-26/race/9');
+  const sessions = page.getByRole('region', { name: 'Результаты сессий' });
+  await expect(sessions.getByRole('button', { name: 'Свободная практика 1' })).toBeVisible();
+  await expect(sessions.locator('tbody tr').first()).toContainText('Nyck de Vries');
+  await expect(sessions.locator('tbody tr').first()).toContainText('1:27.050');
+});

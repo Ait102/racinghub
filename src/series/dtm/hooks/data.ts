@@ -1,5 +1,6 @@
 import { useResource } from '../../../hooks/useResource';
 import type { SeriesProfileKind } from '../../../lib/wikiProfile';
+import { dtmOfficial } from '../api/official';
 import { dtmWikipedia } from '../api/wikipedia';
 
 export function useDtmSeason(id: string | null) {
@@ -38,4 +39,8 @@ export function useDtmTeamCars(season: string): (team: { name: string; article: 
               .filter(Boolean),
           ),
         ];
+}
+
+export function useDtmSessions(season: string) {
+  return useResource(`dtm:sessions:${season}`, (force) => dtmOfficial.getSessions(season, { force }));
 }

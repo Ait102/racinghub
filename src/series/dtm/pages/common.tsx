@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { articleUrl } from '../../../api/wikipedia';
 import { Emblem } from '../../../components/Emblem';
 import { teamEmblem } from '../../../data/emblems';
+import { countryFlagUrl } from '../../../lib/flags';
 import { validArticle } from '../../../lib/wikiArticle';
 import type { Named, ResultCell } from '../../../lib/wikiStandings';
 import { dtm } from '../data/seasons';
@@ -115,3 +116,20 @@ export const DTM_EMPTY = (unavailable: boolean | undefined) =>
   unavailable
     ? 'Статья сезона ещё не опубликована в Википедии.'
     : 'У источника пока нет календаря этого сезона.';
+
+/** Small flag of a country (local flag set); nothing when the country is unknown. */
+export function CountryFlag({ country }: { country: string | null | undefined }) {
+  const src = countryFlagUrl(country);
+  if (!src) return null;
+  return (
+    <img
+      className="flag"
+      src={src}
+      alt=""
+      title={country ?? undefined}
+      width={20}
+      height={14}
+      loading="lazy"
+    />
+  );
+}

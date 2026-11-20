@@ -66,7 +66,7 @@ export function CircuitLayoutPanel({
   }, [shape]);
 
   const era = eraLabel(shape);
-  const label = `Схема трассы${name ? ` ${name}` : ''}: ${shape.turns} поворотов, длина ${shape.lengthKm} км`;
+  const label = `Схема трассы${name ? ` ${name}` : ''}: ${shape.turns !== undefined ? `${shape.turns} поворотов, ` : ''}длина ${shape.lengthKm} км`;
 
   return (
     <article className={`card circuit-panel${className ? ` ${className}` : ''}`}>
@@ -87,11 +87,13 @@ export function CircuitLayoutPanel({
           {children}
           <div className="stats">
             <Stat label="Длина" value={`${shape.lengthKm} км`} />
-            <Stat label="Поворотов" value={shape.turns} />
-            <Stat
-              label="Направление"
-              value={shape.direction === 'clockwise' ? 'По часовой' : 'Против часовой'}
-            />
+            {shape.turns !== undefined && <Stat label="Поворотов" value={shape.turns} />}
+            {shape.direction && (
+              <Stat
+                label="Направление"
+                value={shape.direction === 'clockwise' ? 'По часовой' : 'Против часовой'}
+              />
+            )}
           </div>
           <p className="muted small">
             Схема:{' '}

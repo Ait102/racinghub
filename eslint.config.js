@@ -13,6 +13,9 @@ export default tseslint.config(
       'src/data/circuits/shapes',
       'src/series/wec/data/circuit-shapes.generated.ts',
       'src/data/circuits/atlas.generated.ts',
+      'src/data/circuits/commons.generated.ts',
+      'src/series/imsa/data/sessions',
+      'src/series/fe/data/sessions',
     ],
   },
   {

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { articleUrl } from '../../../api/wikipedia';
 import { DataState, ErrorBox, Loading, MetaLine } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
+import { SessionResults, type SessionData } from '../../../components/SessionResults';
 import { SortableTable, type Column } from '../../../components/SortableTable';
 import { WeekendSchedule } from '../../../components/WeekendSchedule';
 import { useNow } from '../../../hooks/useNow';
@@ -12,6 +13,7 @@ import { FeStatusBadge, NameFlag, WikiFlagImg, WikiSourceNote } from '../compone
 import { FeCircuitPanel } from '../components/FeCircuitPanel';
 import { feWeekendSchedule } from '../data/schedule';
 import { seasonLabel } from '../data/seasons';
+import { loadFePractice } from '../data/sessions';
 import type { FeQualifyingTable, FeRaceEntry } from '../domain/race';
 import { roundStatus } from '../domain/status';
 import type { FeRound } from '../domain/types';
@@ -110,6 +112,7 @@ function RaceView({ season }: { season: string }) {
             : 'У источника пока нет статьи об этой гонке.'}
         </p>
       )}
+      <FePractice season={season} round={r.round} />
       <WikiSourceNote />
     </section>
   );
@@ -259,5 +262,38 @@ function Qualifying({ tables }: { tables: FeQualifyingTable[] }) {
         </section>
       ))}
     </div>
+  );
+}
+
+/** Free practice from the official FIA Formula E classifications (race and qualifying are above). */
+function FePractice({ season, round }: { season: string; round: number }) {
+  const key = `${season}:${round}`;
+  const [loaded, setLoaded] = useState<{ key: string; list: SessionData[] } | null>(null);
+  useEffect(() => {
+    let alive = true;
+    loadFePractice(season, round).then(
+      (list) => alive && setLoaded({ key, list }),
+      () => alive && setLoaded({ key, list: [] }),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [season, round, key]);
+  const list = loaded?.key === key ? loaded.list : [];
+  if (!list.length) return null;
+  return (
+    <SessionResults
+      sessions={list}
+      initial={list[0].key}
+      source={
+        <>
+          Свободные практики — официальные классификации FIA Formula E (
+          <a href="https://results.formulae.fia.com/results" target="_blank" rel="noreferrer">
+            results.formulae.fia.com
+          </a>
+          ), как их публикует хронометраж.
+        </>
+      }
+    />
   );
 }

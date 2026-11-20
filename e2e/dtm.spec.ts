@@ -64,10 +64,16 @@ test('DTM entry list, profiles of a driver, a team and a circuit, comparison', a
   await expect(page.locator('.stats').last()).toContainText('4.326 km');
 });
 
-test('DTM explains why there is no cumulative points chart; sources list the makes', async ({ page }) => {
+test('DTM points after each race as in F1, checked against the season total; sources list the makes', async ({
+  page,
+}) => {
   await mockApi(page);
   await page.goto('./#/dtm/2026/standings');
-  await expect(page.locator('main')).toContainText('Графика накопленных очков нет');
+  await expect(page.getByRole('heading', { name: 'Очки после каждого этапа' })).toBeVisible();
+  await page.getByText('Таблица очков по этапам и источники').click();
+  const points = page.getByRole('table', { name: 'Очки после каждого этапа' });
+  await expect(points.locator('tbody tr').first()).toContainText('Thomas Preining');
+  await expect(points.locator('tbody tr').first()).toContainText('225');
   await page.goto('./#/dtm/2026/about');
   await expect(page.locator('.wiki-source-emblems')).toContainText('Opel');
 });
@@ -87,4 +93,17 @@ test('DTM timetable of both races and the circuit map; the header search finds c
   const option = page.getByRole('option').filter({ hasText: 'DTM' }).filter({ hasText: 'трасса' });
   await option.first().click();
   await expect(page).toHaveURL(/#\/dtm\/2026\/circuit\//);
+});
+
+test('DTM race page shows every session of the event with official results', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('./#/dtm/2026/race/2');
+  const sessions = page.getByRole('region', { name: 'Результаты сессий' });
+  // Race 2 of the event is open first.
+  await expect(sessions.getByRole('button', { name: 'Гонка 2' })).toHaveAttribute('aria-pressed', 'true');
+  await sessions.getByRole('button', { name: 'Гонка 1' }).click();
+  await expect(sessions.locator('tbody tr').first()).toContainText('Thomas Preining');
+  await expect(sessions.locator('tbody tr').first()).toContainText('1:28.899');
+  await sessions.getByRole('button', { name: 'Свободная практика 1' }).click();
+  await expect(sessions.locator('tbody tr')).toHaveCount(5);
 });

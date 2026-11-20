@@ -188,15 +188,13 @@ function Cell({
   return <span className={cell.tone ? `wiki-result wiki-result--${cell.tone}` : undefined}>{pieces}</span>;
 }
 
-/** The season's cars of a team: a photo from the team's own article whose caption names that model. */
+/** The season's cars of a team: the photo of each model's own article (the car itself, not a guess). */
 export function SeriesTeamCars({
   season,
   cars,
-  teamArticle,
 }: {
   season: string;
-  cars: string[];
-  teamArticle: string;
+  cars: Array<{ model: string; article: string | null }>;
 }) {
   if (cars.length === 0) return null;
   return (
@@ -205,26 +203,31 @@ export function SeriesTeamCars({
         Машины сезона {season}
       </h2>
       <p className="muted small">
-        Модель — из заявки сезона. Фото — из статьи о команде, только с этой моделью в подписи.
+        Модель — из заявки сезона. Фото — из статьи о самой модели, поэтому машина может быть в цветах другой
+        команды.
       </p>
       <div className="wiki-cars__grid">
-        {cars.map((model) => (
-          <CarPhoto key={model} model={model} teamArticle={teamArticle} />
+        {cars.map((car) => (
+          <CarPhoto key={car.model} {...car} />
         ))}
       </div>
     </section>
   );
 }
 
-function CarPhoto({ model, teamArticle }: { model: string; teamArticle: string }) {
-  const state = usePhoto(`car:${teamArticle}:${model}`, () =>
-    getArticlePhoto(teamArticle, { width: 900, photosOnly: true, model }),
+function CarPhoto({ model, article }: { model: string; article: string | null }) {
+  // A model article can be broader than the entered car ("Lamborghini Huracán" for the GT3 Evo 2):
+  // then only a photo whose caption names the variant is taken, not the article's road car.
+  const words = (t: string): string[] => t.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
+  const broader = !!article && words(model).some((w) => /\p{L}/u.test(w) && !words(article).includes(w));
+  const state = usePhoto(article ? `car:${article}:${broader ? model : ''}` : null, () =>
+    getArticlePhoto(article!, { width: 900, photosOnly: true, ...(broader ? { model } : {}) }),
   );
   return (
     <div className="wiki-cars__item">
       <h3 className="wiki-cars__name">{model}</h3>
-      <PhotoFigure state={state} alt={model} shape="wide" />
-      {state.status === 'done' && !state.photo && (
+      {article && <PhotoFigure state={state} alt={model} shape="wide" />}
+      {(!article || (state.status === 'done' && !state.photo)) && (
         <p className="muted">У источника нет подтверждённого свободного фото этой модели.</p>
       )}
     </div>

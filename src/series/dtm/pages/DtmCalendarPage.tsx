@@ -8,7 +8,15 @@ import { useNow } from '../../../hooks/useNow';
 import { dtmRaceStart } from '../data/schedule';
 import { DTM_STATUS_LABELS, dtmRaceStatus, nextDtmRace, type DtmStatus } from '../domain/season';
 import { useDtmSeason } from '../hooks/data';
-import { DTM_EMPTY, DtmGuard, DtmName, DtmSourceNote, DtmStatusBadge, raceLabel } from './common';
+import {
+  CountryFlag,
+  DTM_EMPTY,
+  DtmGuard,
+  DtmName,
+  DtmSourceNote,
+  DtmStatusBadge,
+  raceLabel,
+} from './common';
 
 const ORDER: DtmStatus[] = ['completed', 'live', 'upcoming', 'awaiting', 'cancelled', 'unknown'];
 
@@ -68,6 +76,10 @@ function Calendar({ season }: { season: string }) {
                         </span>
                       </span>
                       <span className="race-card__name">{race.circuit?.name ?? 'Трасса не указана'}</span>
+                      <span className="race-card__place">
+                        <CountryFlag country={race.circuit?.flag?.country} />
+                        {race.circuit?.flag?.country ?? ''}
+                      </span>
                       <span className="race-card__date">
                         {dtmRaceStart(season, race) ? (
                           <ScheduleMoment start={dtmRaceStart(season, race)!} />

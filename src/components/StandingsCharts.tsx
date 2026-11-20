@@ -36,7 +36,7 @@ export function StandingsCharts({
   progress,
 }: {
   table: StandingTable;
-  seriesId: 'wec' | 'fe' | 'imsa';
+  seriesId: 'wec' | 'fe' | 'imsa' | 'dtm';
   progress: ChampionshipProgress | null;
 }) {
   const [top, setTop] = useState<(typeof TOP)[number]>(5);

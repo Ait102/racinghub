@@ -596,6 +596,20 @@ export async function mockApi(
   const calls: string[] = [];
   await page.clock.setFixedTime(NOW);
   await mockWikimedia(page, opts.wecFail ?? (() => false), opts.localFlags ?? false);
+  // Official DTM results: a real, trimmed response (round 1 of 2026); other seasons have none.
+  await page.route('https://api.dtm.com/**', (route: Route) => {
+    const url = new URL(route.request().url());
+    const body =
+      url.searchParams.get('query') === 'wigeResults' && url.searchParams.get('startDate')?.startsWith('2026')
+        ? readFileSync(DTM_FIXTURES + 'official-results-2026-r1.json', 'utf8')
+        : JSON.stringify({ wigeResultses: [] });
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body,
+    });
+  });
   await page.route('https://api.jolpi.ca/ergast/f1/**', async (route: Route) => {
     const url = new URL(route.request().url());
     const path = url.pathname.replace('/ergast/f1', '');

@@ -2,6 +2,8 @@
 // Tables use rowspan/colspan, flags, links and background colors; this module turns
 // them into a grid where a spanned cell simply repeats, so callers can read by column.
 
+import { countryFlagUrl } from './flags';
+
 export interface WikiLink {
   /** Article title, e.g. "Sébastien Buemi". */
   title: string;
@@ -88,7 +90,8 @@ function flagOf(el: Element): WikiFlag | null {
     img.getAttribute('alt') ||
     el.querySelector('a')?.getAttribute('title') ||
     decodeURIComponent(/Flag_of_(?:the_)?([^./]+)/.exec(src)?.[1] ?? '').replace(/_/g, ' ');
-  return country ? { country, src: absolute(src) } : null;
+  // A local copy of the flag: the site does not depend on Wikimedia's image servers for flags.
+  return country ? { country, src: countryFlagUrl(country) ?? absolute(src) } : null;
 }
 
 function isFlag(el: Element): boolean {

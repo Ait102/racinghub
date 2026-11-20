@@ -7,10 +7,10 @@ export interface CircuitLayout {
   eras: [number, number][];
   /** Lap length in kilometres. */
   lengthKm: number;
-  /** Number of turns. */
-  turns: number;
-  /** Drive direction around the lap. */
-  direction: 'clockwise' | 'anticlockwise';
+  /** Number of turns; absent when the source does not give it. */
+  turns?: number;
+  /** Drive direction around the lap; absent when the source does not give it. */
+  direction?: 'clockwise' | 'anticlockwise';
   /** SVG path in a 500 × 500 viewBox. */
   d: string;
   /** Attribution for outlines outside the default F1DB collection. */

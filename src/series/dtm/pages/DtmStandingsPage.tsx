@@ -2,8 +2,9 @@ import { Link, useSearchParams } from 'react-router-dom';
 
 import { DataState } from '../../../components/DataState';
 import { PageHeader } from '../../../components/PageHeader';
-import { PlacesSection } from '../../../components/PlacesSection';
+import { StandingsCharts } from '../../../components/StandingsCharts';
 import type { StandingKind, StandingTable } from '../../../lib/wikiStandings';
+import { dtmStandingProgress } from '../data/standingProgress';
 import { raceColumn, type DtmSeasonData } from '../domain/season';
 import { useDtmSeason, useDtmTeamCars } from '../hooks/data';
 import { DTM_EMPTY, DtmGuard, DtmName, DtmResult, DtmSourceNote } from './common';
@@ -83,10 +84,15 @@ function Standings({ season }: { season: string }) {
                       </span>
                     ))}
                   </p>
-                  <PlacesSection key={`${season}:${current.id}`} table={current} seriesId="dtm" />
+                  <StandingsCharts
+                    key={`${season}:${current.id}`}
+                    table={current}
+                    seriesId="dtm"
+                    progress={dtmStandingProgress(season, current)}
+                  />
                   <p className="muted small">
-                    Графика накопленных очков нет: DTM публикует очки за каждую гонку и итог сезона, но не
-                    итог после каждого этапа, а складывать очки сайт не будет (
+                    DTM публикует очки за каждую гонку и итог сезона; линия на графике — сумма этих очков, она
+                    показывается, только если сходится с официальным итогом (
                     <Link to={`/dtm/${season}/about`}>источники</Link>).
                   </p>
                 </>

@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { articleUrl } from '../../../api/wikipedia';
 import { Emblem } from '../../../components/Emblem';
 import { teamEmblem } from '../../../data/emblems';
+import { countryFlagUrl } from '../../../lib/flags';
 import { validArticle } from '../../../lib/wikiArticle';
 import type { Named, ResultCell, StandingRow } from '../../../lib/wikiStandings';
 import { imsa } from '../data/seasons';
@@ -106,8 +107,18 @@ export function ImsaStatusBadge({ status }: { status: ImsaStatus }) {
 
 /** Class code as a small tag, e.g. "GTD Pro". */
 export function ClassTag({ cls }: { cls: string }) {
+  // Boxed mark in the class colour, like IMSA's class signs (GTD Pro on two lines).
+  const slug = cls.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const lines = /^gtd-pro$/.test(slug) ? ['GTD', 'PRO'] : [cls.toUpperCase()];
   return (
-    <span className={`imsa-class imsa-class--${cls.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>{cls}</span>
+    <span className={`imsa-class imsa-class--${slug}`} title={cls}>
+      {lines.map((line) => (
+        <span key={line} aria-hidden="true">
+          {line}
+        </span>
+      ))}
+      <span className="visually-hidden">{cls}</span>
+    </span>
   );
 }
 
@@ -137,3 +148,20 @@ export const IMSA_EMPTY = (unavailable: boolean | undefined) =>
   unavailable
     ? 'Статья сезона ещё не опубликована в Википедии.'
     : 'У источника пока нет календаря этого сезона.';
+
+/** Small flag of a country (local flag set); nothing when the country is unknown. */
+export function CountryFlag({ country }: { country: string | null | undefined }) {
+  const src = countryFlagUrl(country);
+  if (!src) return null;
+  return (
+    <img
+      className="flag"
+      src={src}
+      alt=""
+      title={country ?? undefined}
+      width={20}
+      height={14}
+      loading="lazy"
+    />
+  );
+}

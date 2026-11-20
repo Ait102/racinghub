@@ -15,3 +15,7 @@ src/series/imsa/data/standingProgress.generated.ts
 src/series/dtm/data/schedule.generated.ts
 src/series/imsa/data/schedule.generated.ts
 src/data/circuits/atlas.generated.ts
+src/series/dtm/data/standingProgress.generated.ts
+src/series/imsa/data/sessions
+src/series/fe/data/sessions
+src/data/circuits/commons.generated.ts

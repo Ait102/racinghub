@@ -38,10 +38,9 @@ describe('wikitable', () => {
     const [t] = wikiTables(doc);
     const team = t.rows[0][1];
     expect(team.links).toEqual([{ title: 'Toyota Racing', text: 'Toyota Racing' }]);
-    expect(team.flags[0]).toEqual({
-      country: 'Japan',
-      src: 'https://upload.wikimedia.org/flag_Japan.svg.png',
-    });
+    // Known countries use the local flag set, not Wikimedia's image server.
+    expect(team.flags[0]?.country).toBe('Japan');
+    expect(team.flags[0]?.src).toMatch(/jp\.svg/);
     expect(team.bold).toBe(true);
     expect(t.rows[0][3].bg).toBe('#ffffbf');
     expect(t.rows[2][3].bg).toBe('#dfffdf');
@@ -67,4 +66,11 @@ describe('wikitable', () => {
     ).querySelector('p')!;
     expect(cleanText(el)).toBe('Le Mans');
   });
+});
+
+it('keeps the source image for a country the local set does not know', async () => {
+  const { countryFlagUrl } = await import('./flags');
+  expect(countryFlagUrl('United Kingdom')).toMatch(/gb\.svg/);
+  expect(countryFlagUrl('England')).toMatch(/gb-eng\.svg/);
+  expect(countryFlagUrl('Rhodesia')).toBeNull();
 });
